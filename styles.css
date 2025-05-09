@@ -11,11 +11,11 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 3em;
+  gap: 1.5em;
 }
 
 .container {
-  width: 100%;
+  width: 90%;
   max-width: 1200px;
   padding: 2rem;
   background-color: #1a1a1f;

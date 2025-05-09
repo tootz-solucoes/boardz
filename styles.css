@@ -8,16 +8,25 @@ body {
   /* font-family: 'Inter', sans-serif, 'Courier New', monospace; */
   font-family: 'IBM Plex Mono', monospace;
   display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content {
+  margin: auto;
+  padding: 1em;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 3em;
+  width: 100%;
+  gap: 1.5em;
 }
 
 .container {
-  width: 100%;
-  max-width: 1200px;
-  padding: 2rem;
+  width: 93%;
+  max-width: 1000px;
+  padding: 1.5rem;
   background-color: #1a1a1f;
   border-radius: 16px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
@@ -27,12 +36,14 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 h1,
 h2 {
   color: #b388ff;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
 }
 
 button {

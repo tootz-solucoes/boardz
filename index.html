@@ -7,16 +7,16 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
-  <script src="updateWeekDate.js"></script>
-  <script src="pulseBadges.js"></script>
-  <script src="playSoundEffect.js"></script>
+  <script src="scripts/updateWeekDate.js"></script>
+  <script src="scripts/pulseBadges.js"></script>
+  <script src="scripts/playSoundEffect.js"></script>
 </head>
 
 <body>
   <div class="content">
     <div class="container">
       <header>
-        <h1>📋 Quadro de Demandas - Semana</h1>
+        <h1>📋 Quadro de Demandas</h1>
         <button id="toggleEditBtn" onclick="toggleEdit()" class="lock-toggle" title="Alternar edição">
           <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#b388ff"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -91,41 +91,68 @@
       </div>
     </div>
 
-    <div class="container">
-      <header>
-        <h2>⏰ Lembretes</h2>
-      </header>
+    <div class="row">
+      <div class="col col-50">
+        <header>
+          <h2>⏰ Lembretes da Semana</h2>
+        </header>
+        <div id="reminders" class="reminders">
+          <span id="sweet-day"></span>
+          <!-- JS will inject here -->
+        </div>
+      </div>
 
-      <div id="reminders" class="reminders">
-        <span id="sweet-day"></span>
-        <!-- JS will inject here -->
+      <div class="col col-20">
+        <header>
+          <h2>🔊 Efeitos</h2>
+        </header>
+        <div style="display: flex; flex-direction: column; gap: 0.5em;">
+          <button onclick="playSoundById('sound-l')" class="btn">Faz o 🇱</button>
+          <audio id="sound-l" src="assets/sound.mp3" preload="auto"></audio>
+
+          <button onclick="playSoundById('sound-end')" class="btn">Acabou 🔚</button>
+          <audio id="sound-end" src="assets/end.ogg" preload="auto"></audio>
+        </div>
+      </div>
+
+      <div class="col col-30">
+        <header>
+          <h2>🎲 Bettz.</h2>
+        </header>
+        <div>
+          <button class="btn" onclick="bettz()">Escolher sortudo</button>
+          <br />
+          <br />
+          <span id="bet-result" style="margin-top: 2em"></span>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    let isEditable = true;
+    let isEditable = true
 
     function toggleEdit() {
-      isEditable = !isEditable;
-      const cells = document.querySelectorAll('#quadroTabela th, #quadroTabela td');
-      const icon = document.getElementById("lockIcon");
+      isEditable = !isEditable
+      const cells = document.querySelectorAll('#quadroTabela th, #quadroTabela td')
+      const icon = document.getElementById("lockIcon")
 
       cells.forEach(cell => {
-        cell.contentEditable = isEditable ? "true" : "false";
-        cell.classList.toggle("editavel", isEditable);
-      });
+        cell.contentEditable = isEditable ? "true" : "false"
+        cell.classList.toggle("editavel", isEditable)
+      })
 
       // Atualiza os caminhos do SVG (ícone do cadeado)
       icon.innerHTML = isEditable
         ? `<path d="M12 1a5 5 0 0 1 5 5v2" />
           <rect x="5" y="9" width="14" height="12" rx="2" ry="2" />`
         : `<path d="M17 11H7V7a5 5 0 0 1 10 0v4z" />
-          <rect x="5" y="11" width="14" height="10" rx="2" ry="2" />`;
+          <rect x="5" y="11" width="14" height="10" rx="2" ry="2" />`
     }
   </script>
-  <script src="sweetDay.js"></script>
-  <script src="canonicalReminders.js"></script>
+  <script src="scripts/sweetDay.js"></script>
+  <script src="scripts/canonicalReminders.js"></script>
+  <script src="scripts/bettz.js"></script>
 </body>
 
 </html>

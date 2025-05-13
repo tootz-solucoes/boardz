@@ -12,22 +12,21 @@ fetch(url)
       rowDate.setHours(0, 0, 0, 0);
 
       const endOfWeek = new Date(rowDate);
-      endOfWeek.setDate(rowDate.getDate() + 6);
+      endOfWeek.setDate(rowDate.getDate() + 7);
 
       return rowDate <= today && today <= endOfWeek;
     });
 
     const sweetDayBadge = document.getElementById("sweet-day");
+    sweetDayBadge.className = "badge";
 
     if (current && sweetDayBadge) {
       const names = current["Pagantes"]
         .replace('&', 'e');
 
-      // Apply pulse animation only if it's Tuesday and within the time range
-      sweetDayBadge.className = "badge";
       sweetDayBadge.innerHTML = '<b>🧁Terça do Brigadeiro:</b> ' + names.trim();
     } else {
-      sweetDayBadge.textContent = "Sem dupla registrada para esta semana.";
+      sweetDayBadge.innerHTML = "<b>🧁Terça do Brigadeiro:</b>: Sem info";
     }
   })
   .catch(err => {

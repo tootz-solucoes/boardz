@@ -10,6 +10,7 @@
   <script src="scripts/updateWeekDate.js"></script>
   <script src="scripts/pulseBadges.js"></script>
   <script src="scripts/playSoundEffect.js"></script>
+  <script src="scripts/keysListener.js"></script>
 </head>
 
 <body>
@@ -92,7 +93,7 @@
     </div>
 
     <div class="row">
-      <div class="col col-50">
+      <div class="col col-fill">
         <header>
           <h2>⏰ Lembretes da Semana</h2>
         </header>
@@ -102,7 +103,7 @@
         </div>
       </div>
 
-      <div class="col col-20">
+      <div class="col col-25">
         <header>
           <h2>🔊 Efeitos</h2>
         </header>
@@ -115,17 +116,20 @@
         </div>
       </div>
 
-      <div class="col col-30">
+      <div class="col col-25">
         <header>
           <h2>🎲 Bettz.</h2>
         </header>
         <div>
-          <button class="btn" onclick="bettz()">Escolher sortudo</button>
-          <br />
-          <br />
-          <span id="bet-result" style="margin-top: 2em"></span>
+          <button class="btn" id="btn-bettz" onclick="bettz()" style="margin-bottom: 0.5em;">Escolher sortudo</button>
+
+          <!-- Slot Machine container -->
+          <div id="slot-container" class="slot-container">
+            <div id="slot-text" class="slot-text">--</div>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 

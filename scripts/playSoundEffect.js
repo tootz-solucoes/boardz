@@ -1,6 +1,7 @@
 function playSoundById(audioId) {
   const audioElement = document.getElementById(audioId);
   if (audioElement) {
+    audioElement.pause(); // Garante que reinicia corretamente
     audioElement.currentTime = 0;
     audioElement.play().catch((err) => {
       console.warn("Falha ao tocar o som:", err);

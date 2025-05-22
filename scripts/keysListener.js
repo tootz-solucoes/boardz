@@ -3,10 +3,10 @@ function setupKeySoundListener() {
     if (event.repeat) return;
 
     switch (event.key) {
-      case "1":
+      case "ChannelUp":
         playSoundById("sound-l");
         break;
-      case "2":
+      case "ChannelDown":
         playSoundById("sound-end");
         break;
       case "3":

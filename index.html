@@ -76,15 +76,6 @@
         </div>
       </div>
 
-      <div class="col col-25">
-        <header>
-          <h2>⌨️ teclaz.</h2>
-        </header>
-        <div id="key-pressed-display" class="key-pressed-display">
-          Pressione uma tecla...
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -108,16 +99,6 @@
         : `<path d="M17 11H7V7a5 5 0 0 1 10 0v4z" />
           <rect x="5" y="11" width="14" height="10" rx="2" ry="2" />`
     }
-  </script>
-
-  <!-- debug -->
-  <script>
-    document.addEventListener("keydown", function (event) {
-      const display = document.getElementById("key-pressed-display");
-      if (display) {
-        display.textContent = `Você pressionou: ${event.key}`;
-      }
-    });
   </script>
 
   <script src="scripts/demandz.js"></script>

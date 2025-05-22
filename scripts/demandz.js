@@ -1,38 +1,35 @@
-const sheetId = "1Ou52m0GMMBFj39TI7_4p1A3alDXOcqtWRWdWH7IV5tU";
-const url = `https://opensheet.elk.sh/${sheetId}/1`;
+const demandsSheetId = "1Ou52m0GMMBFj39TI7_4p1A3alDXOcqtWRWdWH7IV5tU";
+const damandsSheetUrl = `https://opensheet.elk.sh/${demandsSheetId}/1`;
 
-fetch(url)
+fetch(damandsSheetUrl)
   .then(res => res.json())
   .then(data => {
-    // Monta a tabela
-    const demandzContainer = document.getElementById("demandz");
-    if (!demandzContainer) return;
+    const tableBody = document.querySelector("#quadroTabela tbody");
+    if (!tableBody) return;
 
-    console.log(data)
-    // Cabeçalhos (ajuste conforme as colunas da sua planilha)
-    const headers = Object.keys(data[0] || {});
-    let tableHTML = '<table class="demandz-table"><thead><tr>';
-    headers.forEach(h => {
-      tableHTML += `<th>${h}</th>`;
-    });
-    tableHTML += '</tr></thead><tbody>';
+    // Limpa o conteúdo atual do tbody
+    tableBody.innerHTML = "";
 
-    // Linhas
+    // Cabeçalhos fixos conforme os nomes no thead
+    const headers = ["DEV", "SEGUNDA", "TERÇA", "QUARTA", "QUINTA", "SEXTA"];
+
+    // Preenche tbody com as linhas da planilha
     data.forEach(row => {
-      tableHTML += '<tr>';
-      headers.forEach(h => {
-        tableHTML += `<td>${row[h] || ""}</td>`;
-      });
-      tableHTML += '</tr>';
-    });
-    tableHTML += '</tbody></table>';
+      const tr = document.createElement("tr");
 
-    demandzContainer.innerHTML = tableHTML;
+      headers.forEach(header => {
+        const td = document.createElement("td");
+        td.textContent = row[header] || "";
+        tr.appendChild(td);
+      });
+
+      tableBody.appendChild(tr);
+    });
   })
   .catch(err => {
     console.error("Erro ao buscar dados:", err);
-    const demandzContainer = document.getElementById("demandz");
-    if (demandzContainer) {
-      demandzContainer.textContent = "Erro ao carregar tabela.";
+    const tableBody = document.querySelector("#quadroTabela tbody");
+    if (tableBody) {
+      tableBody.innerHTML = '<tr><td colspan="6">Erro ao carregar dados.</td></tr>';
     }
   });

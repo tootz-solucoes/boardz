@@ -1,7 +1,7 @@
-const sheetId = "1UBZcGXJJDd2FJTZ0AA-m-IM8iQ6YIFmdGAl7AvnPAT4";
-const url = `https://opensheet.elk.sh/${sheetId}/1`;
+const sweetDaySheetId = "1UBZcGXJJDd2FJTZ0AA-m-IM8iQ6YIFmdGAl7AvnPAT4";
+const seetDaySheetUrl = `https://opensheet.elk.sh/${sweetDaySheetId}/1`;
 
-fetch(url)
+fetch(seetDaySheetUrl)
   .then(res => res.json())
   .then(data => {
     const today = new Date();

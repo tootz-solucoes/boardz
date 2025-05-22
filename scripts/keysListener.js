@@ -9,7 +9,7 @@ function setupKeySoundListener() {
       case "ChannelDown":
         playSoundById("sound-end");
         break;
-      case "3":
+      case "Unidentified":
         const bettzBtn = document.getElementById("btn-bettz");
         if (bettzBtn) {
           bettzBtn.click();

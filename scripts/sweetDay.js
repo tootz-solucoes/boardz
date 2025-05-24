@@ -2,11 +2,11 @@ const sweetDaySheetId = "1UBZcGXJJDd2FJTZ0AA-m-IM8iQ6YIFmdGAl7AvnPAT4";
 const seetDaySheetUrl = `https://opensheet.elk.sh/${sweetDaySheetId}/1`;
 
 fetch(seetDaySheetUrl)
-  .then(res => res.json())
-  .then(data => {
+  .then((res) => res.json())
+  .then((data) => {
     const today = new Date();
 
-    const current = data.find(row => {
+    const current = data.find((row) => {
       const rowDate = new Date(row["Data"]);
       rowDate.setDate(rowDate.getDate() - 2);
       rowDate.setHours(0, 0, 0, 0);
@@ -21,15 +21,15 @@ fetch(seetDaySheetUrl)
     sweetDayBadge.className = "badge";
 
     if (current && sweetDayBadge) {
-      const names = current["Pagantes"]
-        .replace('&', 'e');
+      const names = current["Pagantes"].replace("&", "e");
 
-      sweetDayBadge.innerHTML = '<b>🧁Terça do Brigadeiro:</b> ' + names.trim();
+      sweetDayBadge.innerHTML = "<b>🧁Terça do Brigadeiro:</b> " + names.trim();
     } else {
       sweetDayBadge.innerHTML = "<b>🧁Terça do Brigadeiro:</b>: Sem info";
     }
   })
-  .catch(err => {
+  .catch((err) => {
     console.error("Erro ao buscar dados:", err);
-    document.getElementById("sweet-day").textContent = "Erro ao carregar dupla.";
+    document.getElementById("sweet-day").textContent =
+      "Erro ao carregar dupla.";
   });

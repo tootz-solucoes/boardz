@@ -4,7 +4,7 @@ function createBadge(html, id) {
   badge.className = "badge";
   badge.innerHTML = html;
   if (id) {
-    badge.id = id
+    badge.id = id;
   }
   container.appendChild(badge);
 }

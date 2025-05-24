@@ -1,5 +1,13 @@
 function bettz() {
-  let names = ["Milton", "Eliaquim", "Douglas", "Wendell", "Adelino", "Davi", "Luan"];
+  let names = [
+    "Milton",
+    "Eliaquim",
+    "Douglas",
+    "Wendell",
+    "Adelino",
+    "Davi",
+    "Luan",
+  ];
   const emojis = ["🍀", "🔥", "🎯", "💥", "⚡️", "🌀", "🌟"];
   const slotText = document.getElementById("slot-text");
 

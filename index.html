@@ -1,110 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
-<head>
-  <meta charset="UTF-8">
-  <title>Quadro de Demandas</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
-  <script src="scripts/updateWeekDate.js"></script>
-  <script src="scripts/pulseBadges.js"></script>
-  <script src="scripts/playSoundEffect.js"></script>
-  <script src="scripts/keysListener.js"></script>
-</head>
-
-<body>
-  <div class="content">
-    <div class="container">
-      <header>
-        <h1>📋 planejamento semanal</h1>
-      </header>
-      <div class="tabela-wrapper">
-        <table id="quadroTabela">
-          <thead>
-            <tr>
-              <th contenteditable="true">DEV</th>
-              <th contenteditable="true">SEGUNDA</th>
-              <th contenteditable="true">TERÇA</th>
-              <th contenteditable="true">QUARTA</th>
-              <th contenteditable="true">QUINTA</th>
-              <th contenteditable="true">SEXTA</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- JS will inject here  -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col col-fill">
-        <header>
-          <h2>⏰ lembrettz. </h2>
-        </header>
-        <div id="reminders" class="reminders">
-          <span id="sweet-day"></span>
-          <!-- JS will inject here -->
-        </div>
-      </div>
-
-      <div class="col col-25">
-        <header>
-          <h2>🔊 efeittz. </h2>
-        </header>
-        <div style="display: flex; flex-direction: column; gap: 0.5em;">
-          <button onclick="playSoundById('sound-l')" class="btn">Faz o 🇱</button>
-          <audio id="sound-l" src="assets/sound.mp3" preload="auto"></audio>
-
-          <button onclick="playSoundById('sound-end')" class="btn">Acabou 🔚</button>
-          <audio id="sound-end" src="assets/end.ogg" preload="auto"></audio>
-        </div>
-      </div>
-
-      <div class="col col-25">
-        <header>
-          <h2>🎲 bettz.</h2>
-        </header>
-        <div>
-          <button class="btn" id="btn-bettz" onclick="bettz()" style="margin-bottom: 0.5em;">Escolher sortudo</button>
-
-          <!-- Slot Machine container -->
-          <div id="slot-container" class="slot-container">
-            <div id="slot-text" class="slot-text">--</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    let isEditable = true
-
-    function toggleEdit() {
-      isEditable = !isEditable
-      const cells = document.querySelectorAll('#quadroTabela th, #quadroTabela td')
-      const icon = document.getElementById("lockIcon")
-
-      cells.forEach(cell => {
-        cell.contentEditable = isEditable ? "true" : "false"
-        cell.classList.toggle("editavel", isEditable)
-      })
-
-      // Atualiza os caminhos do SVG (ícone do cadeado)
-      icon.innerHTML = isEditable
-        ? `<path d="M12 1a5 5 0 0 1 5 5v2" />
-          <rect x="5" y="9" width="14" height="12" rx="2" ry="2" />`
-        : `<path d="M17 11H7V7a5 5 0 0 1 10 0v4z" />
-          <rect x="5" y="11" width="14" height="10" rx="2" ry="2" />`
-    }
-  </script>
-
-  <script src="scripts/demandz.js"></script>
-  <script src="scripts/sweetDay.js"></script>
-  <script src="scripts/canonicalReminders.js"></script>
-  <script src="scripts/bettz.js"></script>
-</body>
-
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boardzz.</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

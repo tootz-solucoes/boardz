@@ -77,8 +77,8 @@ h1,
 h2 {
   color: #b388ff;
   text-shadow: 0 0 5px rgba(200, 166, 255, 0.4);
-  margin-bottom: 0.5em;
-  margin-top: 0.5em;
+  margin-bottom: 0.25em;
+  margin-top: 0.125em;
 }
 
 button {

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import slotSound from "/assets/slot-machine.mp3";
+import winSound from "/assets/win.wav";
 
 const NAMES = [
   "Milton",
@@ -10,8 +12,8 @@ const NAMES = [
   "Luan",
 ];
 const EMOJIS = ["🍀", "🔥", "🎯", "💥", "⚡️", "🌀", "🌟"];
-const SPIN_SOUND_URL = "/assets/slot-machine.mp3";
-const WIN_SOUND_URL = "/assets/win.wav";
+const SPIN_SOUND_URL = slotSound;
+const WIN_SOUND_URL = winSound;
 
 function shuffle(array) {
   const a = [...array];

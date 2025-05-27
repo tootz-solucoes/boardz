@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import doTheLSound from "/assets/sound.mp3";
-import endSound from "/assets/end.wav";
+import endSound from "/assets/end.ogg";
 
 export default function Efeittz() {
   const soundLRef = useRef(null);

@@ -13,7 +13,7 @@ function updateBadgesPulse() {
   fridayEnd.setHours(16, 30, 0, 0);
 
   const isTuesday = now.getDay() === 2; // Tuesday
-  const isFriday = now.getDay() === 5;  // Friday
+  const isFriday = now.getDay() === 5; // Friday
 
   const sweetDayBadge = document.getElementById("sweet-day");
   const coringaBadge = document.getElementById("coringa");

@@ -1,4 +1,6 @@
 import React, { useRef } from "react";
+import doTheLSound from "/assets/sound.mp3";
+import endSound from "/assets/end.ogg";
 
 export default function Efeittz() {
   const soundLRef = useRef(null);
@@ -27,7 +29,7 @@ export default function Efeittz() {
         <audio
           id="sound-l"
           ref={soundLRef}
-          src="/assets/sound.mp3"
+          src={doTheLSound}
           preload="auto"
         ></audio>
 
@@ -37,7 +39,7 @@ export default function Efeittz() {
         <audio
           id="sound-end"
           ref={soundEndRef}
-          src="/assets/end.ogg"
+          src={endSound}
           preload="auto"
         ></audio>
       </div>

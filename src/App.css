@@ -23,6 +23,8 @@ body {
   align-items: center;
   gap: 1.2em;
   box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .container {

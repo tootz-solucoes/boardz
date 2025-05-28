@@ -7,6 +7,7 @@ body {
   /* font-family: 'Inter', sans-serif, 'Courier New', monospace; */
   margin: 0;
   font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,7 +16,7 @@ body {
 
 .content {
   padding: 1em;
-  max-width: 2000px;
+  max-width: 1500px;
   /* Limita a largura máxima da .content */
   width: 100%;
   display: flex;
@@ -204,6 +205,7 @@ th.editavel:focus {
 }
 
 @keyframes pulse {
+
   0%,
   20%,
   100% {
@@ -272,6 +274,7 @@ th.editavel:focus {
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -282,12 +285,10 @@ th.editavel:focus {
   min-width: 50px;
   height: 18px;
   border-radius: 4px;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.25) 25%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.25) 75%
-  );
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0.25) 25%,
+      rgba(0, 0, 0, 0.4) 50%,
+      rgba(0, 0, 0, 0.25) 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.2s infinite linear;
 }
@@ -295,13 +296,16 @@ th.editavel:focus {
 .slot-final {
   animation: slotPop 0.5s cubic-bezier(0.22, 1.45, 0.45, 1.08);
 }
+
 @keyframes slotPop {
   0% {
     transform: scale(1) rotate(-2deg);
   }
+
   80% {
     transform: scale(1.18) rotate(1.5deg);
   }
+
   100% {
     transform: scale(1) rotate(0);
   }

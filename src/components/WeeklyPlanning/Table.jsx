@@ -8,7 +8,7 @@ export default function WeeklyPlanningTable({ rows, loading, error }) {
       <table id="quadroTabela">
         <thead>
           <tr>
-            {headers.map((header, idx) => (
+            {headers.map((header) => (
               <th key={header} style={{ minWidth: 80 }}>
                 {header}
               </th>

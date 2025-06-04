@@ -76,7 +76,9 @@ export default function Betz() {
       try {
         spinSoundRef.current.currentTime = 0;
         spinSoundRef.current.play();
-      } catch {}
+      } catch {
+        /* empty */
+      }
       if (currentRoll < rolls.length - 1) {
         setTimeout(spinStep, delays[currentRoll]);
         currentRoll++;
@@ -85,13 +87,17 @@ export default function Betz() {
         try {
           spinSoundRef.current.pause();
           spinSoundRef.current.currentTime = 0;
-        } catch {}
+        } catch {
+          /* empty */
+        }
 
         // Toca som de vitória
         try {
           winSoundRef.current.currentTime = 0;
           winSoundRef.current.play();
-        } catch {}
+        } catch {
+          /* empty */
+        }
 
         setSpinning(false);
 

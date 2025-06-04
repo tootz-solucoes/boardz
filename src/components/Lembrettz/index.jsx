@@ -1,8 +1,11 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import LembrettzBadge from "./Badge";
 
 const SWEET_DAY_SHEET_ID = "1UBZcGXJJDd2FJTZ0AA-m-IM8iQ6YIFmdGAl7AvnPAT4";
 const SWEET_DAY_SHEET_URL = `https://opensheet.elk.sh/${SWEET_DAY_SHEET_ID}/1`;
+
+const NOTICES_SHEET_ID = "1F4rjJy6nPtKq2_L_placeholder";
+const NOTICES_SHEET_URL = `https://opensheet.elk.sh/${NOTICES_SHEET_ID}/1`;
 
 function getStartOfWeek(date) {
   const d = new Date(date);
@@ -75,9 +78,34 @@ function useSweetDay(now) {
   return sweetDay;
 }
 
+function useExtraNotices() {
+  const [notices, setNotices] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(NOTICES_SHEET_URL)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        setNotices(
+          data
+            .map((row) => row.Badge || row.badge || row["Badge"] || row[0])
+            .filter(Boolean)
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setNotices([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return notices;
+}
+
 export default function Lembrettz() {
   const now = useNow(60000);
   const sweetDay = useSweetDay(now);
+  const extraNotices = useExtraNotices();
 
   const isTuesday = now.getDay() === 2;
   const isFriday = now.getDay() === 5;
@@ -139,6 +167,10 @@ export default function Lembrettz() {
             <b>Sexta:</b> Happy Hour🎉
           </LembrettzBadge>
         )}
+
+        {extraNotices.map((notice, idx) => (
+          <LembrettzBadge key={`extra-${idx}`}>{notice}</LembrettzBadge>
+        ))}
       </div>
     </div>
   );

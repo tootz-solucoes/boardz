@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import slotSound from "/assets/slot-machine.mp3";
 import winSound from "/assets/win.wav";
 
-const NAMES = [
+const BASE_NAMES = [
   "Milton",
   "Eliaquim",
   "Douglas",
@@ -11,9 +11,23 @@ const NAMES = [
   "Davi",
   "Luan",
 ];
+const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];
+const GAMEMIND_NAMES = ["Joao", "Nathanael", "Mateus"];
 const EMOJIS = ["🍀", "🔥", "🎯", "💥", "⚡️", "🌀", "🌟"];
 const SPIN_SOUND_URL = slotSound;
 const WIN_SOUND_URL = winSound;
+
+if (typeof window !== "undefined") {
+  if (window.CAN_GIRLS === undefined) window.CAN_GIRLS = false;
+  if (window.CAN_GAMEMIND === undefined) window.CAN_GAMEMIND = false;
+}
+
+function getNames() {
+  let names = [...BASE_NAMES];
+  if (window.CAN_GIRLS) names = names.concat(GIRL_NAMES);
+  if (window.CAN_GAMEMIND) names = names.concat(GAMEMIND_NAMES);
+  return names;
+}
 
 function shuffle(array) {
   const a = [...array];
@@ -26,12 +40,39 @@ function shuffle(array) {
 
 export default function Betz() {
   const [spinning, setSpinning] = useState(false);
-  const [shuffledNames, setShuffledNames] = useState(() => shuffle(NAMES));
+  const [names, setNames] = useState(() => getNames());
+  const [shuffledNames, setShuffledNames] = useState(() => shuffle(names));
   const [winner, setWinner] = useState(null);
 
   const scrollListRef = useRef(null);
   const spinSoundRef = useRef(null);
   const winSoundRef = useRef(null);
+
+  const updateNames = () => setNames(getNames());
+
+  function toggleGirls() {
+    window.CAN_GIRLS = !window.CAN_GIRLS;
+    updateNames();
+  }
+
+  function toggleGamemind() {
+    window.CAN_GAMEMIND = !window.CAN_GAMEMIND;
+    updateNames();
+  }
+
+  useEffect(() => {
+    const handleToggle = () => updateNames();
+    document.addEventListener("toggleGirls", handleToggle);
+    document.addEventListener("toggleGamemind", handleToggle);
+    return () => {
+      document.removeEventListener("toggleGirls", handleToggle);
+      document.removeEventListener("toggleGamemind", handleToggle);
+    };
+  }, []);
+
+  useEffect(() => {
+    setShuffledNames(shuffle(names));
+  }, [names]);
 
   useEffect(() => {
     spinSoundRef.current = new Audio(SPIN_SOUND_URL);
@@ -48,7 +89,7 @@ export default function Betz() {
     setSpinning(true);
     setWinner(null);
 
-    const newShuffle = shuffle(NAMES);
+    const newShuffle = shuffle(names);
     setShuffledNames(newShuffle);
 
     try {
@@ -101,6 +142,14 @@ export default function Betz() {
     <div className="widget">
       <header>
         <h2 style={{ color: "#b388ff", marginBottom: 8 }}>🎲 bettz.</h2>
+        <div style={{ display: "flex", gap: "0.5em" }}>
+          <button onClick={toggleGirls} className="btn">
+            {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
+          </button>
+          <button onClick={toggleGamemind} className="btn">
+            {window.CAN_GAMEMIND ? "GameMind ON" : "GameMind OFF"}
+          </button>
+        </div>
       </header>
 
       <div
@@ -161,6 +210,7 @@ export default function Betz() {
       </div>
 
       <button
+        id="btn-bettz"
         onClick={startSpin}
         disabled={spinning}
         style={{

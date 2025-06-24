@@ -9,6 +9,14 @@ function setupKeySoundListener() {
       case "ChannelDown":
         playSoundById("sound-end");
         break;
+      case "1":
+        window.CAN_GIRLS = !window.CAN_GIRLS;
+        document.dispatchEvent(new Event("toggleGirls"));
+        break;
+      case "2":
+        window.CAN_GAMEMIND = !window.CAN_GAMEMIND;
+        document.dispatchEvent(new Event("toggleGamemind"));
+        break;
       case "Unidentified":
         const bettzBtn = document.getElementById("btn-bettz");
         if (bettzBtn) {

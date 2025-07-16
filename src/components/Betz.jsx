@@ -8,7 +8,6 @@ const BASE_NAMES = [
   "Douglas",
   "Wendell",
   "Adelino",
-  "Davi",
   "Luan",
 ];
 const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];

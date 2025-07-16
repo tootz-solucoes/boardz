@@ -23,9 +23,10 @@ fetch(seetDaySheetUrl)
     if (current && sweetDayBadge) {
       const names = current["Pagantes"].replace("&", "e");
 
-      sweetDayBadge.innerHTML = "<b>🧁Terça do Brigadeiro:</b> " + names.trim();
+      sweetDayBadge.innerHTML =
+        "<b>🧁Quarta do Brigadeiro:</b> " + names.trim();
     } else {
-      sweetDayBadge.innerHTML = "<b>🧁Terça do Brigadeiro:</b>: Sem info";
+      sweetDayBadge.innerHTML = "<b>🧁Quarta do Brigadeiro:</b>: Sem info";
     }
   })
   .catch((err) => {

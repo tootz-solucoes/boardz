@@ -111,7 +111,7 @@ export default function Lembrettz() {
       </header>
       <div className="reminders">
         <LembrettzBadge pulse={tuesdayPulse}>
-          <b>🧁Terça do Brigadeiro:</b>{" "}
+          <b>🧁Quarta do Brigadeiro:</b>{" "}
           {sweetDay.error ? (
             <span style={{ color: "red" }}>{sweetDay.error}</span>
           ) : (

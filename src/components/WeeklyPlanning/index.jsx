@@ -11,7 +11,6 @@ const DEVS = [
   "Douglas",
   "Wendell",
   "Adelino",
-  "Davi",
   "Luan",
 ];
 

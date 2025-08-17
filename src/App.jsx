@@ -2,7 +2,7 @@ import "./App.css";
 
 import WeeklyPlanning from "./components/WeeklyPlanning";
 import Lembrettz from "./components/Lembrettz";
-import Efeittz from "./components/Efeittz";
+import { ClockWidget } from "./components/ClockWidget";
 import Betz from "./components/Betz";
 
 function App() {
@@ -18,7 +18,7 @@ function App() {
           <Lembrettz />
         </div>
         <div className="col col-25">
-          <Efeittz />
+          <ClockWidget />
         </div>
         <div className="col col-25">
           <Betz />

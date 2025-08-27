@@ -9,6 +9,7 @@ const BASE_NAMES = [
   "Wendell",
   "Adelino",
   "Luan",
+  "Vinícius"
 ];
 const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];
 const GAMEMIND_NAMES = ["Joao", "Nathanael", "Mateus"];

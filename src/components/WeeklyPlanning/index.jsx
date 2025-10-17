@@ -42,8 +42,11 @@ export default function WeeklyPlanning() {
 
   return (
     <div className="widget">
-      <header style={{ display: "flex", alignItems: "center", gap: "0.5em" }}>
-        <h1>📋 planejamento semanal</h1>
+      <header>
+        <div>
+          <h1>🎃 planejamento sombrio</h1>
+          <span className="widget-subtitle">status direto da masmorra dev</span>
+        </div>
       </header>
       <WeeklyPlanningTable rows={rows} loading={loading} error={error} />
     </div>

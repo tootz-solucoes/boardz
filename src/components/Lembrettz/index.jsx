@@ -107,11 +107,14 @@ export default function Lembrettz() {
   return (
     <div className="widget">
       <header>
-        <h2>⏰ lembrettz.</h2>
+        <div>
+          <h2>🕯️ lembrettz assombrados</h2>
+          <span className="widget-subtitle">recados para sobreviver à semana</span>
+        </div>
       </header>
       <div className="reminders">
         <LembrettzBadge pulse={tuesdayPulse}>
-          <b>🧁Quarta do Brigadeiro:</b>{" "}
+          <b>🧁 Quarta do Brigadeiro:</b>{" "}
           {sweetDay.error ? (
             <span style={{ color: "red" }}>{sweetDay.error}</span>
           ) : (
@@ -122,21 +125,21 @@ export default function Lembrettz() {
         {/* Só mostra nas sextas */}
         {isFriday && (
           <LembrettzBadge pulse={fridayPulse}>
-            <b>Sexta:</b> Coringagem🃏
+            <b>🃏 Sexta:</b> Coringagem Sombria
           </LembrettzBadge>
         )}
 
         {/* Só mostra na primeira semana do mês */}
         {isFirstWeek && (
           <LembrettzBadge>
-            <b>Sexta da Véia</b>👵🏻
+            <b>👵🏻 Sexta da Véia</b>
           </LembrettzBadge>
         )}
 
         {/* Só mostra na semana do último friday */}
         {isLastFridayWeek && (
           <LembrettzBadge>
-            <b>Sexta:</b> Happy Hour🎉
+            <b>🎉 Sexta:</b> Happy Hour do Além
           </LembrettzBadge>
         )}
       </div>

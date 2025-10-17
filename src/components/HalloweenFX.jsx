@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export default function HalloweenFX() {
   const [showScare, setShowScare] = useState(false);
+  const [performanceMode, setPerformanceMode] = useState(false);
   const reduceMotionRef = useRef(false);
   const showTimeoutRef = useRef(null);
   const hideTimeoutRef = useRef(null);
@@ -90,49 +91,91 @@ export default function HalloweenFX() {
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
 
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const slowUpdateQuery =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(update: slow)")
+        : { matches: false };
+    const coarsePointerQuery =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(pointer: coarse)")
+        : { matches: false };
 
-    const updatePreference = (event) => {
-      reduceMotionRef.current = event.matches;
-      if (event.matches) {
+    const evaluatePerformanceMode = () => {
+      const prefersReducedMotion = reduceMotionQuery.matches;
+      reduceMotionRef.current = prefersReducedMotion;
+
+      if (prefersReducedMotion) {
         clearTimers();
         setShowScare(false);
-      } else {
-        // scheduleNextScare();
       }
+
+      const lowRam =
+        typeof navigator !== "undefined" && navigator.deviceMemory
+          ? navigator.deviceMemory <= 2
+          : false;
+      const lowCpu =
+        typeof navigator !== "undefined" && navigator.hardwareConcurrency
+          ? navigator.hardwareConcurrency <= 4
+          : false;
+
+      const shouldUsePerformanceMode =
+        prefersReducedMotion ||
+        slowUpdateQuery.matches ||
+        (coarsePointerQuery.matches && (lowRam || lowCpu));
+
+      setPerformanceMode(shouldUsePerformanceMode);
     };
 
-    reduceMotionRef.current = query.matches;
+    evaluatePerformanceMode();
 
-    if (query.addEventListener) {
-      query.addEventListener("change", updatePreference);
-    } else if (query.addListener) {
-      query.addListener(updatePreference);
-    }
+    const subscribe = (query, handler) => {
+      if (!query || typeof query.addEventListener !== "function") {
+        if (query && typeof query.addListener === "function") {
+          query.addListener(handler);
+        }
+        return () => {
+          if (query && typeof query.removeListener === "function") {
+            query.removeListener(handler);
+          }
+        };
+      }
 
-    // if (!reduceMotionRef.current) {
-    //   scheduleNextScare(getRandomBetween(15000, 30000));
-    // }
+      query.addEventListener("change", handler);
+      return () => query.removeEventListener("change", handler);
+    };
+
+    const unsubscribes = [
+      subscribe(reduceMotionQuery, evaluatePerformanceMode),
+      subscribe(slowUpdateQuery, evaluatePerformanceMode),
+      subscribe(coarsePointerQuery, evaluatePerformanceMode),
+    ];
 
     return () => {
-      if (query.removeEventListener) {
-        query.removeEventListener("change", updatePreference);
-      } else if (query.removeListener) {
-        query.removeListener(updatePreference);
-      }
+      unsubscribes.forEach((unsubscribe) => {
+        if (typeof unsubscribe === "function") unsubscribe();
+      });
       clearTimers();
       stopAudio();
     };
   }, [clearTimers, stopAudio]);
 
   useEffect(() => {
-    // if (!showScare) {
-    //   if (hasMountedRef.current && !reduceMotionRef.current) {
-    //     scheduleNextScare();
-    //   }
-    //   hasMountedRef.current = true;
-    //   return undefined;
-    // }
+    if (typeof document === "undefined") return undefined;
+
+    if (performanceMode) {
+      document.documentElement.setAttribute("data-low-fx", "");
+    } else {
+      document.documentElement.removeAttribute("data-low-fx");
+    }
+
+    return () => {
+      document.documentElement.removeAttribute("data-low-fx");
+    };
+  }, [performanceMode]);
+
+  useEffect(() => {
+    if (!showScare) return undefined;
 
     playScream();
 
@@ -145,19 +188,28 @@ export default function HalloweenFX() {
     };
   }, [playScream, showScare]);
 
+  const shouldAnimate = !performanceMode && !reduceMotionRef.current;
+
   return (
-    <div className="halloween-overlay" aria-hidden="true">
-      <div className="halloween-fog" />
+    <div
+      className={`halloween-overlay${performanceMode ? " halloween-overlay--low" : ""}`}
+      aria-hidden="true"
+    >
+      <div
+        className="halloween-fog"
+        data-animate={shouldAnimate ? "true" : "false"}
+      />
       {decorations.map((item, index) => (
         <span
           key={item.id}
           className={`floating-token ${item.id}`}
           style={{
             top: item.top,
-            animationDuration: `${item.duration}s`,
-            animationDelay: `${index * 3}s`,
+            animationDuration: shouldAnimate ? `${item.duration}s` : undefined,
+            animationDelay: shouldAnimate ? `${index * 3}s` : undefined,
             left: `${10 + index * 18}%`,
           }}
+          data-animate={shouldAnimate ? "true" : "false"}
         >
           {item.emoji}
         </span>

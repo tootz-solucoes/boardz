@@ -9,11 +9,11 @@ const BASE_NAMES = [
   "Wendell",
   "Adelino",
   "Luan",
-  "Vinícius"
+  "Vinícius",
 ];
 const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];
 const GAMEMIND_NAMES = ["Joao", "Nathanael", "Mateus"];
-const EMOJIS = ["🍀", "🔥", "🎯", "💥", "⚡️", "🌀", "🌟"];
+const EMOJIS = ["🦇", "🕯️", "🎃", "👻", "🕷️", "☠️", "🧙"];
 const SPIN_SOUND_URL = slotSound;
 const WIN_SOUND_URL = winSound;
 
@@ -96,7 +96,7 @@ export default function Betz() {
       spinSoundRef.current.loop = true;
       spinSoundRef.current.currentTime = 0;
       spinSoundRef.current.play();
-    } catch { }
+    } catch {}
 
     // Tempo aleatório entre 6 e 9 segundos
     const totalSpinTime = 6 + Math.random() * 3;
@@ -112,7 +112,7 @@ export default function Betz() {
       try {
         spinSoundRef.current.pause();
         spinSoundRef.current.currentTime = 0;
-      } catch { }
+      } catch {}
 
       const chosenWinner = newShuffle[0];
       setWinner(chosenWinner);
@@ -130,7 +130,7 @@ export default function Betz() {
       try {
         winSoundRef.current.currentTime = 0;
         winSoundRef.current.play();
-      } catch { }
+      } catch {}
 
       setSpinning(false);
     }, totalSpinTime * 1000);
@@ -141,14 +141,9 @@ export default function Betz() {
   return (
     <div className="widget">
       <header>
-        <h2 style={{ color: "#b388ff", marginBottom: 8 }}>🎲 bettz.</h2>
-        <div style={{ display: "flex", gap: "0.5em" }}>
-          <button onClick={toggleGirls} className="btn">
-            {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
-          </button>
-          <button onClick={toggleGamemind} className="btn">
-            {window.CAN_GAMEMIND ? "GameMind ON" : "GameMind OFF"}
-          </button>
+        <div>
+          <h2>🎰 roleta macabra</h2>
+          <span className="widget-subtitle">quem encara o desafio?</span>
         </div>
       </header>
 
@@ -158,12 +153,13 @@ export default function Betz() {
           height: 42,
           overflow: "hidden",
           borderRadius: 14,
-          border: "1.5px solid #b388ff44",
-          boxShadow: "0 0 0 1.5px #b388ffcc, 0 3px 18px #20185c60",
+          border: "1.5px solid rgba(249, 115, 22, 0.45)",
+          boxShadow:
+            "0 0 0 1.5px rgba(249, 115, 22, 0.65), 0 12px 32px rgba(8, 3, 18, 0.65)",
           position: "relative",
           marginBottom: 16,
-          backgroundColor: "#1F1F23",
-          color: "#eee",
+          backgroundColor: "rgba(16, 6, 28, 0.88)",
+          color: "#fff3e8",
           fontWeight: 500,
           fontSize: "1.2em",
           letterSpacing: ".04em",
@@ -193,11 +189,13 @@ export default function Betz() {
                   justifyContent: "center",
                   fontWeight: isWinner ? 800 : 500,
                   fontSize: isWinner ? "1.4em" : "1.2em",
-                  color: isWinner ? "#b388ff" : "#eee",
+                  color: isWinner ? "#f97316" : "#fff3e8",
                   textShadow: isWinner
-                    ? "0 3px 18px #b388ff44, 0 1px 1px #fff2"
-                    : "0 1px 1px #23213680",
-                  filter: isWinner ? "drop-shadow(0 0 8px #b388ff99)" : "none",
+                    ? "0 3px 18px rgba(249, 115, 22, 0.45), 0 1px 1px #fff2"
+                    : "0 1px 1px rgba(35, 21, 54, 0.5)",
+                  filter: isWinner
+                    ? "drop-shadow(0 0 12px rgba(249, 115, 22, 0.55))"
+                    : "none",
                   transition: "all 0.3s ease",
                 }}
               >
@@ -209,30 +207,29 @@ export default function Betz() {
         </div>
       </div>
 
+      <div className="widget-controls">
+        <button
+          onClick={toggleGirls}
+          className={`btn ${window.CAN_GIRLS ? "btn-active" : ""}`}
+          style={{ flexGrow: 1 }}
+        >
+          {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
+        </button>
+        <button
+          onClick={toggleGamemind}
+          className={`btn ${window.CAN_GAMEMIND ? "btn-active" : ""}`}
+          style={{ flexGrow: 1 }}
+        >
+          {window.CAN_GAMEMIND ? "GM ON" : "GM OFF"}
+        </button>
+      </div>
       <button
         id="btn-bettz"
         onClick={startSpin}
         disabled={spinning}
-        style={{
-          width: "100%",
-          opacity: spinning ? 0.7 : 1,
-          pointerEvents: spinning ? "none" : "auto",
-          background: spinning
-            ? "linear-gradient(90deg, #b388ff88 0%, #b388ff44 100%)"
-            : "linear-gradient(90deg, #b388ff 0%, #5b21b6 100%)",
-          color: "#fff",
-          fontWeight: 800,
-          fontSize: "1.08rem",
-          border: "none",
-          borderRadius: 10,
-          boxShadow: "0 2px 8px #18102266",
-          padding: "12px 0",
-          letterSpacing: ".04em",
-          transition: "all .13s",
-          cursor: spinning ? "not-allowed" : "pointer",
-        }}
+        className={`btn btn-cta spin-button ${spinning ? "is-spinning" : ""}`}
       >
-        {spinning ? "Girando..." : "Girar a roleta!"}
+        {spinning ? "Conjurando..." : "Invocar destino"}
       </button>
 
       <style>{`

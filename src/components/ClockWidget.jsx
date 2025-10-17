@@ -49,54 +49,20 @@ export function ClockWidget() {
 
   const { date, time } = formatDateTime(currentDateTime);
   const weekday = formatWeekday(currentDateTime);
+  const spookyWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
 
   return (
     <div className="widget">
       <header>
-        <h2>🕐 {weekday}</h2>
+        <div>
+          <h2>🕒 relógio encantado</h2>
+          <span className="widget-subtitle">{spookyWeekday}</span>
+        </div>
       </header>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "1rem",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: "600",
-            color: "#e5d7ff",
-            letterSpacing: "0.5px",
-          }}
-        >
-          {date}
-        </div>
-
-        <div
-          style={{
-            fontSize: "1.8rem",
-            fontWeight: "600",
-            color: "#fff",
-            fontFamily: "monospace",
-            letterSpacing: "2px",
-            textShadow: "0 0 10px rgba(255, 255, 255, 0.3)",
-          }}
-        >
-          {time}
-        </div>
-
-        <div
-          style={{
-            fontSize: "0.7rem",
-            color: "#888",
-            marginTop: "0.5rem",
-          }}
-        >
-          UTC-3
-        </div>
+      <div className="clock-face">
+        <div className="clock-date">{date}</div>
+        <div className="clock-time">{time}</div>
+        <div className="clock-zone">UTC-3 • Recife</div>
       </div>
     </div>
   );

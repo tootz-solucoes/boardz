@@ -1,25 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const SPOOKY_MESSAGES = [
-  "👻 BOO!",
-  "☠️ Peguei você!",
-  "🎃 Happy Haunting!",
-  "🩸 Traga doces... se quiser viver!",
-  "🕷️ Cuidado com as teias!",
-];
-
-function getRandomBetween(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 export default function HalloweenFX() {
   const [showScare, setShowScare] = useState(false);
-  const [scareMessage, setScareMessage] = useState(SPOOKY_MESSAGES[0]);
   const reduceMotionRef = useRef(false);
   const showTimeoutRef = useRef(null);
   const hideTimeoutRef = useRef(null);
   const audioContextRef = useRef(null);
-  const hasMountedRef = useRef(false);
 
   const decorations = useMemo(
     () => [
@@ -37,26 +23,26 @@ export default function HalloweenFX() {
     if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
   }, []);
 
-  const scheduleNextScare = useCallback(
-    (customDelay) => {
-      if (typeof window === "undefined") return;
+  // const scheduleNextScare = useCallback(
+  //   (customDelay) => {
+  //     if (typeof window === "undefined") return;
 
-      clearTimers();
+  //     clearTimers();
 
-      const [min, max] = reduceMotionRef.current
-        ? [180000, 300000]
-        : [60000, 120000];
-      const delay = customDelay ?? getRandomBetween(min, max);
+  //     const [min, max] = reduceMotionRef.current
+  //       ? [180000, 300000]
+  //       : [60000, 120000];
+  //     const delay = customDelay ?? getRandomBetween(min, max);
 
-      showTimeoutRef.current = window.setTimeout(() => {
-        const message =
-          SPOOKY_MESSAGES[getRandomBetween(0, SPOOKY_MESSAGES.length - 1)];
-        setScareMessage(message);
-        setShowScare(true);
-      }, delay);
-    },
-    [clearTimers]
-  );
+  //     showTimeoutRef.current = window.setTimeout(() => {
+  //       const message =
+  //         SPOOKY_MESSAGES[getRandomBetween(0, SPOOKY_MESSAGES.length - 1)];
+  //       setScareMessage(message);
+  //       setShowScare(true);
+  //     }, delay);
+  //   },
+  //   [clearTimers]
+  // );
 
   const stopAudio = useCallback(() => {
     if (audioContextRef.current) {
@@ -112,7 +98,7 @@ export default function HalloweenFX() {
         clearTimers();
         setShowScare(false);
       } else {
-        scheduleNextScare();
+        // scheduleNextScare();
       }
     };
 
@@ -124,9 +110,9 @@ export default function HalloweenFX() {
       query.addListener(updatePreference);
     }
 
-    if (!reduceMotionRef.current) {
-      scheduleNextScare(getRandomBetween(15000, 30000));
-    }
+    // if (!reduceMotionRef.current) {
+    //   scheduleNextScare(getRandomBetween(15000, 30000));
+    // }
 
     return () => {
       if (query.removeEventListener) {
@@ -137,16 +123,16 @@ export default function HalloweenFX() {
       clearTimers();
       stopAudio();
     };
-  }, [clearTimers, scheduleNextScare, stopAudio]);
+  }, [clearTimers, stopAudio]);
 
   useEffect(() => {
-    if (!showScare) {
-      if (hasMountedRef.current && !reduceMotionRef.current) {
-        scheduleNextScare();
-      }
-      hasMountedRef.current = true;
-      return undefined;
-    }
+    // if (!showScare) {
+    //   if (hasMountedRef.current && !reduceMotionRef.current) {
+    //     scheduleNextScare();
+    //   }
+    //   hasMountedRef.current = true;
+    //   return undefined;
+    // }
 
     playScream();
 
@@ -157,7 +143,7 @@ export default function HalloweenFX() {
     return () => {
       if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
     };
-  }, [playScream, scheduleNextScare, showScare]);
+  }, [playScream, showScare]);
 
   return (
     <div className="halloween-overlay" aria-hidden="true">
@@ -178,12 +164,6 @@ export default function HalloweenFX() {
       ))}
       <span className="candle candle-left" />
       <span className="candle candle-right" />
-      {showScare && (
-        <div className="jump-scare" role="img" aria-label="Susto de halloween">
-          <div className="jump-scare-glow" />
-          <div className="jump-scare-face">{scareMessage}</div>
-        </div>
-      )}
     </div>
   );
 }

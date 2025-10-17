@@ -9,7 +9,7 @@ import HalloweenFX from "./components/HalloweenFX";
 function App() {
   return (
     <div className="app-shell">
-      <HalloweenFX />
+      {/* <HalloweenFX /> */}
       <div className="content">
         <div className="row">
           <div className="col col-fill">

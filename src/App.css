@@ -123,8 +123,8 @@ body::after {
   min-width: 260px;
 }
 
-.col-25 {
-  flex: 0 0 25%;
+.col-30 {
+  flex: 0 0 32%;
 }
 
 .col-fill {
@@ -181,7 +181,7 @@ body::after {
 }
 
 .widget h2 {
-  font-size: 1.45rem;
+  font-size: 1.125rem;
 }
 
 .widget h1 {
@@ -225,7 +225,7 @@ table {
 
 th,
 td {
-  padding: 0.85rem 0.45rem;
+  padding: 0.65rem 0.45rem;
   text-align: center;
   border: 1px solid rgba(58, 20, 88, 0.55);
   transition: background 0.3s ease, color 0.3s ease;
@@ -422,11 +422,12 @@ td span {
 
 .widget-controls {
   display: flex;
-  gap: 0.6rem;
+  gap: 2rem;
   flex-wrap: wrap;
   justify-content: flex-end;
   position: relative;
   z-index: 1;
+  margin-bottom: 1rem;
 }
 
 .lock-toggle {
@@ -746,7 +747,7 @@ td span {
 }
 
 @media (max-width: 1200px) {
-  .col-25 {
+  .col-30 {
     flex: 1 1 320px;
   }
 }

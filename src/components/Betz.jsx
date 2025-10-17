@@ -9,7 +9,7 @@ const BASE_NAMES = [
   "Wendell",
   "Adelino",
   "Luan",
-  "Vinícius"
+  "Vinícius",
 ];
 const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];
 const GAMEMIND_NAMES = ["Joao", "Nathanael", "Mateus"];
@@ -96,7 +96,7 @@ export default function Betz() {
       spinSoundRef.current.loop = true;
       spinSoundRef.current.currentTime = 0;
       spinSoundRef.current.play();
-    } catch { }
+    } catch {}
 
     // Tempo aleatório entre 6 e 9 segundos
     const totalSpinTime = 6 + Math.random() * 3;
@@ -112,7 +112,7 @@ export default function Betz() {
       try {
         spinSoundRef.current.pause();
         spinSoundRef.current.currentTime = 0;
-      } catch { }
+      } catch {}
 
       const chosenWinner = newShuffle[0];
       setWinner(chosenWinner);
@@ -130,7 +130,7 @@ export default function Betz() {
       try {
         winSoundRef.current.currentTime = 0;
         winSoundRef.current.play();
-      } catch { }
+      } catch {}
 
       setSpinning(false);
     }, totalSpinTime * 1000);
@@ -145,40 +145,26 @@ export default function Betz() {
           <h2>🎰 roleta macabra</h2>
           <span className="widget-subtitle">quem encara o desafio?</span>
         </div>
-        <div className="widget-controls">
-          <button
-            onClick={toggleGirls}
-            className={`btn ${window.CAN_GIRLS ? "btn-active" : ""}`}
-          >
-            {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
-          </button>
-          <button
-            onClick={toggleGamemind}
-            className={`btn ${window.CAN_GAMEMIND ? "btn-active" : ""}`}
-          >
-            {window.CAN_GAMEMIND ? "GameMind ON" : "GameMind OFF"}
-          </button>
-        </div>
       </header>
 
-        <div
-          className="scroll-container"
-          style={{
-            height: 42,
-            overflow: "hidden",
-            borderRadius: 14,
-            border: "1.5px solid rgba(249, 115, 22, 0.45)",
-            boxShadow:
-              "0 0 0 1.5px rgba(249, 115, 22, 0.65), 0 12px 32px rgba(8, 3, 18, 0.65)",
-            position: "relative",
-            marginBottom: 16,
-            backgroundColor: "rgba(16, 6, 28, 0.88)",
-            color: "#fff3e8",
-            fontWeight: 500,
-            fontSize: "1.2em",
-            letterSpacing: ".04em",
-            userSelect: "none",
-          }}
+      <div
+        className="scroll-container"
+        style={{
+          height: 42,
+          overflow: "hidden",
+          borderRadius: 14,
+          border: "1.5px solid rgba(249, 115, 22, 0.45)",
+          boxShadow:
+            "0 0 0 1.5px rgba(249, 115, 22, 0.65), 0 12px 32px rgba(8, 3, 18, 0.65)",
+          position: "relative",
+          marginBottom: 16,
+          backgroundColor: "rgba(16, 6, 28, 0.88)",
+          color: "#fff3e8",
+          fontWeight: 500,
+          fontSize: "1.2em",
+          letterSpacing: ".04em",
+          userSelect: "none",
+        }}
       >
         <div
           ref={scrollListRef}
@@ -221,6 +207,22 @@ export default function Betz() {
         </div>
       </div>
 
+      <div className="widget-controls">
+        <button
+          onClick={toggleGirls}
+          className={`btn ${window.CAN_GIRLS ? "btn-active" : ""}`}
+          style={{ flexGrow: 1 }}
+        >
+          {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
+        </button>
+        <button
+          onClick={toggleGamemind}
+          className={`btn ${window.CAN_GAMEMIND ? "btn-active" : ""}`}
+          style={{ flexGrow: 1 }}
+        >
+          {window.CAN_GAMEMIND ? "GM ON" : "GM OFF"}
+        </button>
+      </div>
       <button
         id="btn-bettz"
         onClick={startSpin}

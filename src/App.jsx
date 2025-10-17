@@ -17,13 +17,13 @@ function App() {
           </div>
         </div>
         <div className="row">
-          <div className="col col-fill">
+          <div className="col col-30">
             <Lembrettz />
           </div>
-          <div className="col col-25">
+          <div className="col col-30">
             <ClockWidget />
           </div>
-          <div className="col col-25">
+          <div className="col col-30">
             <Betz />
           </div>
         </div>

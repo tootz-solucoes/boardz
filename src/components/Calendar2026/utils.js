@@ -154,15 +154,17 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
   let sprintEndDates = {};
 
   const normalizedEnd = normalizeDate(endDate);
+  const sprint10End = normalizeDate(new Date(2026, 9, 12));
   const sprint11End = normalizeDate(new Date(2026, 10, 13));
   const sprint12Start = normalizeDate(new Date(2026, 10, 16));
 
   while (currentDate <= normalizedEnd && currentSprint <= 12) {
     const dateKey = normalizeDate(currentDate).getTime();
+    const isWithinSprint10 = currentSprint === 10 && currentDate <= sprint10End;
     const isWithinSprint11 = currentSprint === 11 && currentDate <= sprint11End;
     const isWithinSprint12 = currentSprint === 12 && currentDate >= sprint12Start;
 
-    if (currentSprint in sprintStartDates || (currentSprint <= 10) || isWithinSprint11 || isWithinSprint12) {
+    if (currentSprint in sprintStartDates || (currentSprint < 10) || isWithinSprint10 || isWithinSprint11 || isWithinSprint12) {
       if (currentSprint in sprintStartDates) {
         calendarDaysInCurrentSprint++;
       }
@@ -174,7 +176,7 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
         calendarDaysInCurrentSprint = 1;
       }
 
-      if (currentSprint <= 10) {
+      if (currentSprint < 10) {
         daysInCurrentSprint++;
         sprints.push({
           date: new Date(currentDate),
@@ -188,6 +190,30 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
         if (daysInCurrentSprint >= workingDaysPerSprint) {
           sprintEndDates[currentSprint] = new Date(currentDate);
           currentSprint++;
+          daysInCurrentSprint = 0;
+          calendarDaysInCurrentSprint = 0;
+        }
+      } else if (currentSprint === 10) {
+        if (currentDate <= sprint10End) {
+          daysInCurrentSprint++;
+          sprints.push({
+            date: new Date(currentDate),
+            sprint: currentSprint,
+            day: daysInCurrentSprint,
+          });
+          sprintMap.set(dateKey, currentSprint);
+          sprintDayMap.set(dateKey, daysInCurrentSprint);
+          sprintCalendarDayMap.set(dateKey, calendarDaysInCurrentSprint);
+        }
+
+        if (currentDate >= sprint10End) {
+          let lastWorkingDay = new Date(currentDate);
+          while (!isWorkingDay(lastWorkingDay, 2026) && lastWorkingDay >= new Date(2026, 9, 1)) {
+            lastWorkingDay = new Date(lastWorkingDay);
+            lastWorkingDay.setDate(lastWorkingDay.getDate() - 1);
+          }
+          sprintEndDates[currentSprint] = lastWorkingDay;
+          currentSprint = 11;
           daysInCurrentSprint = 0;
           calendarDaysInCurrentSprint = 0;
         }
@@ -301,39 +327,42 @@ export function balanceSprintCalendarDays(sprintStartDates, sprintEndDates) {
 
   for (let i = 0; i < sprintNums.length; i++) {
     const sprintNum = sprintNums[i];
-    const nextSprintNum = sprintNums[i + 1];
-
     const workingStart = normalizeDate(sprintStartDates[sprintNum]);
     const workingEnd = normalizeDate(sprintEndDates[sprintNum]);
+    const prevSprintNum = sprintNums[i - 1];
+    const nextSprintNum = sprintNums[i + 1];
 
     let calendarStart = new Date(workingStart);
     let calendarEnd = new Date(workingEnd);
 
-    if (nextSprintNum) {
-      const nextWorkingStart = normalizeDate(sprintStartDates[nextSprintNum]);
-      const gap = (nextWorkingStart.getTime() - workingEnd.getTime()) / (1000 * 60 * 60 * 24);
-
-      const currentCalendarDays = Math.ceil((workingEnd.getTime() - workingStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-      if (gap > 1) {
-        const daysToExtend = Math.floor(gap / 2);
-        calendarEnd = new Date(workingEnd);
-        calendarEnd.setDate(calendarEnd.getDate() + daysToExtend);
-      }
-
-      if (i > 0) {
-        const prevSprintNum = sprintNums[i - 1];
+    if (sprintNum === 10) {
+      calendarEnd = normalizeDate(new Date(2026, 9, 12));
+    } else if (sprintNum === 11) {
+      const sprint10End = normalizeDate(new Date(2026, 9, 12));
+      calendarStart = new Date(sprint10End);
+      calendarStart.setDate(calendarStart.getDate() + 1);
+      calendarStart = normalizeDate(calendarStart);
+      calendarEnd = normalizeDate(new Date(2026, 10, 13));
+    } else if (sprintNum === 12) {
+      calendarStart = normalizeDate(new Date(2026, 10, 14));
+    } else {
+      if (prevSprintNum) {
         const prevWorkingEnd = normalizeDate(sprintEndDates[prevSprintNum]);
-        const prevGap = (workingStart.getTime() - prevWorkingEnd.getTime()) / (1000 * 60 * 60 * 24);
-
-        if (prevGap > 1) {
+        const prevGap = Math.round((workingStart.getTime() - prevWorkingEnd.getTime()) / (1000 * 60 * 60 * 24)) - 1;
+        if (prevGap > 0) {
           const daysToShift = Math.floor(prevGap / 2);
-          calendarStart = new Date(workingStart);
           calendarStart.setDate(calendarStart.getDate() - daysToShift);
         }
       }
-    } else {
-      calendarEnd = new Date(workingEnd);
+
+      if (nextSprintNum && nextSprintNum !== 11 && nextSprintNum !== 12) {
+        const nextWorkingStart = normalizeDate(sprintStartDates[nextSprintNum]);
+        const gap = Math.round((nextWorkingStart.getTime() - workingEnd.getTime()) / (1000 * 60 * 60 * 24)) - 1;
+        if (gap > 0) {
+          const daysToExtend = Math.ceil(gap / 2);
+          calendarEnd.setDate(calendarEnd.getDate() + daysToExtend);
+        }
+      }
     }
 
     balanced[sprintNum] = {
@@ -342,6 +371,35 @@ export function balanceSprintCalendarDays(sprintStartDates, sprintEndDates) {
       workingStart: workingStart,
       workingEnd: workingEnd,
     };
+  }
+
+  for (let i = 0; i < sprintNums.length - 1; i++) {
+    const sprintNum = sprintNums[i];
+    const nextSprintNum = sprintNums[i + 1];
+
+    if ((sprintNum === 10 && nextSprintNum === 11) || (sprintNum === 11 && nextSprintNum === 12)) {
+      continue;
+    }
+
+    const currentEnd = balanced[sprintNum].calendarEnd;
+    const nextStart = balanced[nextSprintNum].calendarStart;
+
+    if (nextStart.getTime() !== currentEnd.getTime() + 86400000) {
+      const gap = Math.round((nextStart.getTime() - currentEnd.getTime()) / (1000 * 60 * 60 * 24)) - 1;
+      if (gap > 0) {
+        balanced[sprintNum].calendarEnd = new Date(currentEnd);
+        balanced[sprintNum].calendarEnd.setDate(balanced[sprintNum].calendarEnd.getDate() + Math.floor(gap / 2));
+        balanced[sprintNum].calendarEnd = normalizeDate(balanced[sprintNum].calendarEnd);
+
+        balanced[nextSprintNum].calendarStart = new Date(balanced[sprintNum].calendarEnd);
+        balanced[nextSprintNum].calendarStart.setDate(balanced[nextSprintNum].calendarStart.getDate() + 1);
+        balanced[nextSprintNum].calendarStart = normalizeDate(balanced[nextSprintNum].calendarStart);
+      } else if (gap < 0) {
+        balanced[nextSprintNum].calendarStart = new Date(currentEnd);
+        balanced[nextSprintNum].calendarStart.setDate(balanced[nextSprintNum].calendarStart.getDate() + 1);
+        balanced[nextSprintNum].calendarStart = normalizeDate(balanced[nextSprintNum].calendarStart);
+      }
+    }
   }
 
   return balanced;

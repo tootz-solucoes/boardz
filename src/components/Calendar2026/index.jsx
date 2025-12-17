@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  allocateSprints,
-  getSprintForDate,
-  getSprintDayNumber,
   isWeekend,
   isHoliday,
   isOptionalDay,
@@ -12,12 +9,11 @@ import {
   getSprintColor,
   getSprintColorLight,
   normalizeDate,
-  getSprintDetails,
+  isWorkingDay,
+  getWeekDayName,
   formatDate,
-  balanceSprintCalendarDays,
-  getSprintForCalendarDate,
-  getCalendarDayNumber,
 } from "./utils";
+import { sprintsData } from "./sprintsData";
 import "./Calendar2026.css";
 
 const MONTH_NAMES = [
@@ -46,21 +42,84 @@ function getFirstDayOfMonth(year, month) {
 }
 
 function Calendar2026() {
-  const [tooltip, setTooltip] = useState({ show: false, text: "", x: 0, y: 0, position: "top" });
+  const [tooltip, setTooltip] = useState({
+    show: false,
+    text: "",
+    x: 0,
+    y: 0,
+    position: "top",
+  });
 
-  const { sprints, sprintMap, sprintDayMap, sprintCalendarDayMap, sprintStartDates, sprintEndDates } = useMemo(() => {
-    const startDate = new Date(2026, 0, 7);
-    const endDate = new Date(2026, 11, 18);
-    return allocateSprints(startDate, endDate, 19);
+  const sprintPeriods = useMemo(() => {
+    return sprintsData.map((sprint) => ({
+      sprint: sprint.sprint,
+      calendarStart: normalizeDate(
+        new Date(
+          sprint.calendarStart.year,
+          sprint.calendarStart.month,
+          sprint.calendarStart.day
+        )
+      ),
+      calendarEnd: normalizeDate(
+        new Date(
+          sprint.calendarEnd.year,
+          sprint.calendarEnd.month,
+          sprint.calendarEnd.day
+        )
+      ),
+    }));
   }, []);
 
-  const balancedPeriods = useMemo(() => {
-    return balanceSprintCalendarDays(sprintStartDates, sprintEndDates);
-  }, [sprintStartDates, sprintEndDates]);
+  const sprintMap = useMemo(() => {
+    const map = new Map();
+    sprintPeriods.forEach((period) => {
+      const currentDate = new Date(period.calendarStart);
+      const endDate = new Date(period.calendarEnd);
+      endDate.setHours(23, 59, 59, 999);
 
-  const sprintDetails = useMemo(() => {
-    return getSprintDetails(sprints, sprintStartDates, sprintEndDates);
-  }, [sprints, sprintStartDates, sprintEndDates]);
+      while (currentDate <= endDate) {
+        const dateKey = normalizeDate(new Date(currentDate)).getTime();
+        map.set(dateKey, period.sprint);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+    return map;
+  }, [sprintPeriods]);
+
+  const sprintWorkingDaysMap = useMemo(() => {
+    const map = new Map();
+    sprintPeriods.forEach((period) => {
+      const currentDate = new Date(period.calendarStart);
+      const endDate = new Date(period.calendarEnd);
+      endDate.setHours(23, 59, 59, 999);
+      let workingDayCount = 0;
+      let calendarDayCount = 0;
+
+      while (currentDate <= endDate) {
+        const normalized = normalizeDate(new Date(currentDate));
+        const dateKey = normalized.getTime();
+        calendarDayCount++;
+
+        if (isWorkingDay(normalized, 2026)) {
+          workingDayCount++;
+          map.set(dateKey, {
+            sprint: period.sprint,
+            workingDay: workingDayCount,
+            calendarDay: calendarDayCount,
+          });
+        } else {
+          map.set(dateKey, {
+            sprint: period.sprint,
+            workingDay: null,
+            calendarDay: calendarDayCount,
+          });
+        }
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+    return map;
+  }, [sprintPeriods]);
 
   const months = useMemo(() => {
     return Array.from({ length: 12 }, (_, monthIndex) => {
@@ -86,11 +145,18 @@ function Calendar2026() {
     });
   }, []);
 
-  function isSprintBoundary(date) {
-    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
-    if (!calendarSprintNumber) return false;
+  function getSprintForDate(date) {
+    const dateKey = normalizeDate(date).getTime();
+    return sprintMap.get(dateKey) || null;
+  }
 
-    const period = balancedPeriods[calendarSprintNumber];
+  function isSprintBoundary(date) {
+    const sprintNumber = getSprintForDate(date);
+    if (!sprintNumber) return false;
+
+    const period = sprintPeriods.find((p) => p.sprint === sprintNumber);
+    if (!period) return false;
+
     const normalizedDateValue = normalizeDate(date).getTime();
     const startTime = period.calendarStart.getTime();
     const endTime = period.calendarEnd.getTime();
@@ -98,7 +164,7 @@ function Calendar2026() {
     return normalizedDateValue === startTime || normalizedDateValue === endTime;
   }
 
-  function getDayClassName(date, sprintNumber) {
+  function getDayClassName(date) {
     const classes = ["calendar-day"];
 
     if (!date) {
@@ -106,7 +172,7 @@ function Calendar2026() {
       return classes.join(" ");
     }
 
-    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
+    const sprintNumber = getSprintForDate(date);
     const isBoundary = isSprintBoundary(date);
 
     if (isBoundary) {
@@ -126,52 +192,31 @@ function Calendar2026() {
       classes.push("calendar-day-optional");
     }
 
-    if (sprintNumber) {
+    if (sprintNumber && isWorkingDay(date, 2026)) {
       classes.push("calendar-day-sprint");
-    }
-
-    if (calendarSprintNumber && !sprintNumber) {
-      classes.push("calendar-day-sprint-period");
     }
 
     return classes.join(" ");
   }
 
-  function getDayBorderStyle(date, sprintNumber) {
-    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
+  function getDayBorderStyle(date) {
+    const sprintNumber = getSprintForDate(date);
+    if (!sprintNumber) return {};
+
+    const isWeekendDay = isWeekend(date);
+    const isHolidayDay = isHoliday(date, 2026);
+    const isOptionalDayDay = isOptionalDay(date, 2026);
+    const isNonWorkingDay = isWeekendDay || isHolidayDay || isOptionalDayDay;
     const isBoundary = isSprintBoundary(date);
 
-    if (isBoundary && calendarSprintNumber) {
-      return {
-        borderWidth: '3px',
-        borderColor: getSprintColor(calendarSprintNumber),
-        borderStyle: 'solid',
-      };
-    }
+    const borderStyle = isNonWorkingDay ? "dashed" : "solid";
+    const borderWidth = isBoundary ? "3px" : "2px";
 
-    if (calendarSprintNumber && !sprintNumber) {
-      const period = balancedPeriods[calendarSprintNumber];
-      const normalizedDateValue = normalizeDate(date).getTime();
-      const startTime = period.calendarStart.getTime();
-      const endTime = period.calendarEnd.getTime();
-
-      if (normalizedDateValue === startTime || normalizedDateValue === endTime) {
-        return {
-          borderWidth: '3px',
-          borderColor: getSprintColor(calendarSprintNumber),
-          borderStyle: 'dashed',
-        };
-      }
-
-      return {
-        borderWidth: '2px',
-        borderColor: getSprintColor(calendarSprintNumber),
-        borderStyle: 'dashed',
-        opacity: 0.6,
-      };
-    }
-
-    return {};
+    return {
+      borderWidth,
+      borderColor: getSprintColor(sprintNumber),
+      borderStyle,
+    };
   }
 
   function getDayStyle(date, sprintNumber) {
@@ -179,8 +224,6 @@ function Calendar2026() {
 
     return {
       backgroundColor: getSprintColorLight(sprintNumber),
-      borderColor: getSprintColor(sprintNumber),
-      borderWidth: '2px',
     };
   }
 
@@ -193,7 +236,8 @@ function Calendar2026() {
     const spaceAbove = rect.top;
     const spaceBelow = window.innerHeight - rect.bottom;
 
-    const showAbove = spaceAbove >= tooltipHeight + 10 || spaceAbove > spaceBelow;
+    const showAbove =
+      spaceAbove >= tooltipHeight + 10 || spaceAbove > spaceBelow;
 
     setTooltip({
       show: true,
@@ -210,47 +254,78 @@ function Calendar2026() {
 
   function getDayTooltip(date) {
     const parts = [];
+    const normalized = normalizeDate(date);
+    const dateKey = normalized.getTime();
+    const sprintInfo = sprintWorkingDaysMap.get(dateKey);
 
-    const sprintNumber = getSprintForDate(date, sprintMap);
-    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
+    if (sprintInfo) {
+      const { sprint, workingDay, calendarDay } = sprintInfo;
 
-    if (sprintNumber) {
-      const sprintDay = getSprintDayNumber(date, sprintDayMap);
-      const calendarDay = getCalendarDayNumber(date, balancedPeriods, sprintNumber);
-      if (sprintDay) {
-        if (calendarDay && calendarDay !== sprintDay) {
-          parts.push(`Sprint ${sprintNumber}: ${calendarDay}º dia corrido / ${sprintDay}º dia útil`);
+      if (workingDay !== null) {
+        if (workingDay === 1) {
+          parts.push(
+            `Sprint ${sprint}: ${calendarDay}º dia corrido / ${workingDay}º dia útil (primeiro dia útil)`
+          );
         } else {
-          parts.push(`Sprint ${sprintNumber}: ${sprintDay}º dia útil`);
+          parts.push(
+            `Sprint ${sprint}: ${calendarDay}º dia corrido / ${workingDay}º dia útil`
+          );
         }
+      } else {
+        parts.push(
+          `Sprint ${sprint}: ${calendarDay}º dia corrido (período corrido)`
+        );
       }
-    } else if (calendarSprintNumber) {
-      const calendarDay = getCalendarDayNumber(date, balancedPeriods, calendarSprintNumber);
-      if (calendarDay) {
-        parts.push(`Sprint ${calendarSprintNumber}: ${calendarDay}º dia corrido (período corrido)`);
+
+      const holidayName = getHolidayName(date, 2026);
+      if (holidayName) {
+        const holidayType = getHolidayType(date, 2026);
+        const typeLabel =
+          holidayType === "national"
+            ? "Feriado Nacional"
+            : holidayType === "state"
+            ? "Feriado Estadual (RN)"
+            : holidayType === "municipal"
+            ? "Feriado Municipal (Natal)"
+            : "Feriado";
+        parts.push(`${holidayName} (${typeLabel})`);
       }
-    }
 
-    const holidayName = getHolidayName(date, 2026);
-    if (holidayName) {
-      const holidayType = getHolidayType(date, 2026);
-      const typeLabel = holidayType === 'national' ? 'Feriado Nacional' :
-                       holidayType === 'state' ? 'Feriado Estadual (RN)' :
-                       holidayType === 'municipal' ? 'Feriado Municipal (Natal)' : 'Feriado';
-      parts.push(`${holidayName} (${typeLabel})`);
-    }
+      const optionalName = getOptionalDayName(date, 2026);
+      if (optionalName) {
+        parts.push(`${optionalName} (Ponto Facultativo)`);
+      }
 
-    const optionalName = getOptionalDayName(date, 2026);
-    if (optionalName) {
-      parts.push(`${optionalName} (Ponto Facultativo)`);
-    }
+      if (isWeekend(date)) {
+        parts.push("Final de semana");
+      }
+    } else {
+      if (isHoliday(date, 2026)) {
+        const holidayName = getHolidayName(date, 2026);
+        const holidayType = getHolidayType(date, 2026);
+        const typeLabel =
+          holidayType === "national"
+            ? "Feriado Nacional"
+            : holidayType === "state"
+            ? "Feriado Estadual (RN)"
+            : holidayType === "municipal"
+            ? "Feriado Municipal (Natal)"
+            : "Feriado";
+        parts.push(`${holidayName} (${typeLabel})`);
+      }
 
-    if (isWeekend(date)) {
-      parts.push("Final de semana");
-    }
+      const optionalName = getOptionalDayName(date, 2026);
+      if (optionalName) {
+        parts.push(`${optionalName} (Ponto Facultativo)`);
+      }
 
-    if (parts.length === 0) {
-      return "Dia útil (fora do período de sprints)";
+      if (isWeekend(date)) {
+        parts.push("Final de semana");
+      }
+
+      if (parts.length === 0) {
+        return "Dia útil (fora do período de sprints)";
+      }
     }
 
     return parts.join(" - ");
@@ -311,15 +386,18 @@ function Calendar2026() {
                     );
                   }
 
-                  const sprintNumber = getSprintForDate(date, sprintMap);
+                  const sprintNumber = getSprintForDate(date);
                   const normalizedDate = normalizeDate(date);
-                  const borderStyle = getDayBorderStyle(date, sprintNumber);
-                  const combinedStyle = { ...getDayStyle(date, sprintNumber), ...borderStyle };
+                  const borderStyle = getDayBorderStyle(date);
+                  const combinedStyle = {
+                    ...getDayStyle(date),
+                    ...borderStyle,
+                  };
 
                   return (
                     <div
                       key={normalizedDate.getTime()}
-                      className={getDayClassName(date, sprintNumber)}
+                      className={getDayClassName(date)}
                       style={combinedStyle}
                       onMouseEnter={(e) => handleDayMouseEnter(e, date)}
                       onMouseLeave={handleDayMouseLeave}
@@ -341,61 +419,108 @@ function Calendar2026() {
         ))}
       </div>
 
-      <div className="calendar-sprint-details">
-        <h3 className="sprint-details-title">📊 Detalhamento das Sprints</h3>
-        <div className="sprint-details-table-wrapper">
-          <table className="sprint-details-table">
-            <thead>
-              <tr>
-                <th>Sprint</th>
-                <th>Início</th>
-                <th>Dia da Semana</th>
-                <th>Término</th>
-                <th>Dia da Semana</th>
-                <th>Dias Úteis</th>
-                <th>Dias Corridos</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sprintDetails.map((detail) => (
-                <tr key={detail.sprint}>
-                  <td className="sprint-number-cell">
-                    <span
-                      className="sprint-number-badge"
-                      style={{ backgroundColor: getSprintColor(detail.sprint) }}
-                    >
-                      {detail.sprint}
-                    </span>
-                  </td>
-                  <td>
-                    {formatDate(detail.startDate)}
-                    {detail.startDate.getTime() !== detail.workingStartDate.getTime() && (
-                      <span style={{ fontSize: '0.8em', color: '#999', display: 'block' }}>
-                        (útil: {formatDate(detail.workingStartDate)})
-                      </span>
-                    )}
-                  </td>
-                  <td>{detail.startWeekDay}</td>
-                  <td>
-                    {formatDate(detail.endDate)}
-                    {detail.endDate.getTime() !== detail.workingEndDate.getTime() && (
-                      <span style={{ fontSize: '0.8em', color: '#999', display: 'block' }}>
-                        (útil: {formatDate(detail.workingEndDate)})
-                      </span>
-                    )}
-                  </td>
-                  <td>{detail.endWeekDay}</td>
-                  <td className="days-cell">{detail.workingDays}</td>
-                  <td className="days-cell">{detail.calendarDays}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+       <div className="calendar-sprint-details">
+         <h3 className="sprint-details-title">📊 Detalhamento das Sprints</h3>
+         <div className="sprint-details-table-wrapper">
+           <table className="sprint-details-table">
+             <thead>
+               <tr>
+                 <th>Sprint</th>
+                 <th>Início</th>
+                 <th>Dia da Semana</th>
+                 <th>Término</th>
+                 <th>Dia da Semana</th>
+                 <th>Dias Úteis</th>
+                 <th>Dias Corridos</th>
+               </tr>
+             </thead>
+             <tbody>
+               {sprintPeriods.map((period) => {
+                 const workingDaysData = Array.from(
+                   sprintWorkingDaysMap.entries()
+                 )
+                   .filter(
+                     ([, info]) =>
+                       info.sprint === period.sprint && info.workingDay !== null
+                   )
+                   .sort(([a], [b]) => a - b);
+
+                 const workingDays = workingDaysData.length;
+                 const workingStartDate =
+                   workingDaysData.length > 0
+                     ? new Date(workingDaysData[0][0])
+                     : period.calendarStart;
+                 const workingEndDate =
+                   workingDaysData.length > 0
+                     ? new Date(workingDaysData[workingDaysData.length - 1][0])
+                     : period.calendarEnd;
+
+                 const calendarStart = new Date(period.calendarStart);
+                 const calendarEnd = new Date(period.calendarEnd);
+                 calendarEnd.setHours(23, 59, 59, 999);
+
+                 let calendarDays = 0;
+                 const currentDate = new Date(calendarStart);
+                 while (currentDate <= calendarEnd) {
+                   calendarDays++;
+                   currentDate.setDate(currentDate.getDate() + 1);
+                 }
+
+                 return (
+                   <tr key={period.sprint}>
+                     <td className="sprint-number-cell">
+                       <span
+                         className="sprint-number-badge"
+                         style={{
+                           backgroundColor: getSprintColor(period.sprint),
+                         }}
+                       >
+                         {period.sprint}
+                       </span>
+                     </td>
+                     <td>
+                       {formatDate(period.calendarStart)}
+                       {period.calendarStart.getTime() !==
+                         workingStartDate.getTime() && (
+                         <span
+                           style={{
+                             fontSize: "0.8em",
+                             color: "#999",
+                             display: "block",
+                           }}
+                         >
+                           (útil: {formatDate(workingStartDate)})
+                         </span>
+                       )}
+                     </td>
+                     <td>{getWeekDayName(period.calendarStart)}</td>
+                     <td>
+                       {formatDate(period.calendarEnd)}
+                       {period.calendarEnd.getTime() !==
+                         workingEndDate.getTime() && (
+                         <span
+                           style={{
+                             fontSize: "0.8em",
+                             color: "#999",
+                             display: "block",
+                           }}
+                         >
+                           (útil: {formatDate(workingEndDate)})
+                         </span>
+                       )}
+                     </td>
+                     <td>{getWeekDayName(period.calendarEnd)}</td>
+                     <td className="days-cell">{workingDays}</td>
+                     <td className="days-cell">{calendarDays}</td>
+                   </tr>
+                 );
+               })}
+             </tbody>
+           </table>
+         </div>
+       </div>
     </div>
   );
 }
 
 export default Calendar2026;
-

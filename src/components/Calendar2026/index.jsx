@@ -14,6 +14,9 @@ import {
   normalizeDate,
   getSprintDetails,
   formatDate,
+  balanceSprintCalendarDays,
+  getSprintForCalendarDate,
+  getCalendarDayNumber,
 } from "./utils";
 import "./Calendar2026.css";
 
@@ -45,15 +48,19 @@ function getFirstDayOfMonth(year, month) {
 function Calendar2026() {
   const [tooltip, setTooltip] = useState({ show: false, text: "", x: 0, y: 0, position: "top" });
 
-  const { sprints, sprintMap, sprintDayMap } = useMemo(() => {
+  const { sprints, sprintMap, sprintDayMap, sprintCalendarDayMap, sprintStartDates, sprintEndDates } = useMemo(() => {
     const startDate = new Date(2026, 0, 7);
     const endDate = new Date(2026, 11, 18);
     return allocateSprints(startDate, endDate, 19);
   }, []);
 
+  const balancedPeriods = useMemo(() => {
+    return balanceSprintCalendarDays(sprintStartDates, sprintEndDates);
+  }, [sprintStartDates, sprintEndDates]);
+
   const sprintDetails = useMemo(() => {
-    return getSprintDetails(sprints);
-  }, [sprints]);
+    return getSprintDetails(sprints, sprintStartDates, sprintEndDates);
+  }, [sprints, sprintStartDates, sprintEndDates]);
 
   const months = useMemo(() => {
     return Array.from({ length: 12 }, (_, monthIndex) => {
@@ -79,12 +86,31 @@ function Calendar2026() {
     });
   }, []);
 
+  function isSprintBoundary(date) {
+    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
+    if (!calendarSprintNumber) return false;
+
+    const period = balancedPeriods[calendarSprintNumber];
+    const normalizedDateValue = normalizeDate(date).getTime();
+    const startTime = period.calendarStart.getTime();
+    const endTime = period.calendarEnd.getTime();
+
+    return normalizedDateValue === startTime || normalizedDateValue === endTime;
+  }
+
   function getDayClassName(date, sprintNumber) {
     const classes = ["calendar-day"];
 
     if (!date) {
       classes.push("calendar-day-empty");
       return classes.join(" ");
+    }
+
+    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
+    const isBoundary = isSprintBoundary(date);
+
+    if (isBoundary) {
+      classes.push("calendar-day-sprint-boundary");
     }
 
     if (isWeekend(date)) {
@@ -104,7 +130,48 @@ function Calendar2026() {
       classes.push("calendar-day-sprint");
     }
 
+    if (calendarSprintNumber && !sprintNumber) {
+      classes.push("calendar-day-sprint-period");
+    }
+
     return classes.join(" ");
+  }
+
+  function getDayBorderStyle(date, sprintNumber) {
+    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
+    const isBoundary = isSprintBoundary(date);
+
+    if (isBoundary && calendarSprintNumber) {
+      return {
+        borderWidth: '3px',
+        borderColor: getSprintColor(calendarSprintNumber),
+        borderStyle: 'solid',
+      };
+    }
+
+    if (calendarSprintNumber && !sprintNumber) {
+      const period = balancedPeriods[calendarSprintNumber];
+      const normalizedDateValue = normalizeDate(date).getTime();
+      const startTime = period.calendarStart.getTime();
+      const endTime = period.calendarEnd.getTime();
+
+      if (normalizedDateValue === startTime || normalizedDateValue === endTime) {
+        return {
+          borderWidth: '3px',
+          borderColor: getSprintColor(calendarSprintNumber),
+          borderStyle: 'dashed',
+        };
+      }
+
+      return {
+        borderWidth: '2px',
+        borderColor: getSprintColor(calendarSprintNumber),
+        borderStyle: 'dashed',
+        opacity: 0.6,
+      };
+    }
+
+    return {};
   }
 
   function getDayStyle(date, sprintNumber) {
@@ -145,10 +212,22 @@ function Calendar2026() {
     const parts = [];
 
     const sprintNumber = getSprintForDate(date, sprintMap);
+    const calendarSprintNumber = getSprintForCalendarDate(date, balancedPeriods);
+
     if (sprintNumber) {
       const sprintDay = getSprintDayNumber(date, sprintDayMap);
+      const calendarDay = getCalendarDayNumber(date, balancedPeriods, sprintNumber);
       if (sprintDay) {
-        parts.push(`${sprintDay}º dia da Sprint ${sprintNumber}`);
+        if (calendarDay && calendarDay !== sprintDay) {
+          parts.push(`Sprint ${sprintNumber}: ${calendarDay}º dia corrido / ${sprintDay}º dia útil`);
+        } else {
+          parts.push(`Sprint ${sprintNumber}: ${sprintDay}º dia útil`);
+        }
+      }
+    } else if (calendarSprintNumber) {
+      const calendarDay = getCalendarDayNumber(date, balancedPeriods, calendarSprintNumber);
+      if (calendarDay) {
+        parts.push(`Sprint ${calendarSprintNumber}: ${calendarDay}º dia corrido (período corrido)`);
       }
     }
 
@@ -234,12 +313,14 @@ function Calendar2026() {
 
                   const sprintNumber = getSprintForDate(date, sprintMap);
                   const normalizedDate = normalizeDate(date);
+                  const borderStyle = getDayBorderStyle(date, sprintNumber);
+                  const combinedStyle = { ...getDayStyle(date, sprintNumber), ...borderStyle };
 
                   return (
                     <div
                       key={normalizedDate.getTime()}
                       className={getDayClassName(date, sprintNumber)}
-                      style={getDayStyle(date, sprintNumber)}
+                      style={combinedStyle}
                       onMouseEnter={(e) => handleDayMouseEnter(e, date)}
                       onMouseLeave={handleDayMouseLeave}
                     >
@@ -286,9 +367,23 @@ function Calendar2026() {
                       {detail.sprint}
                     </span>
                   </td>
-                  <td>{formatDate(detail.startDate)}</td>
+                  <td>
+                    {formatDate(detail.startDate)}
+                    {detail.startDate.getTime() !== detail.workingStartDate.getTime() && (
+                      <span style={{ fontSize: '0.8em', color: '#999', display: 'block' }}>
+                        (útil: {formatDate(detail.workingStartDate)})
+                      </span>
+                    )}
+                  </td>
                   <td>{detail.startWeekDay}</td>
-                  <td>{formatDate(detail.endDate)}</td>
+                  <td>
+                    {formatDate(detail.endDate)}
+                    {detail.endDate.getTime() !== detail.workingEndDate.getTime() && (
+                      <span style={{ fontSize: '0.8em', color: '#999', display: 'block' }}>
+                        (útil: {formatDate(detail.workingEndDate)})
+                      </span>
+                    )}
+                  </td>
                   <td>{detail.endWeekDay}</td>
                   <td className="days-cell">{detail.workingDays}</td>
                   <td className="days-cell">{detail.calendarDays}</td>

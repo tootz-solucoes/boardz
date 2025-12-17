@@ -215,6 +215,17 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 2px currentColor;
 }
 
+.calendar-day-sprint-boundary {
+  border-width: 3px !important;
+  font-weight: 700;
+}
+
+.calendar-day-sprint-period {
+  border-width: 2px;
+  border-style: dashed;
+  opacity: 0.6;
+}
+
 .calendar-day-number {
   font-size: 1rem;
   color: #fff;

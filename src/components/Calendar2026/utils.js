@@ -145,9 +145,13 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
   const sprints = [];
   const sprintMap = new Map();
   const sprintDayMap = new Map();
+  const sprintCalendarDayMap = new Map();
   let currentDate = normalizeDate(new Date(startDate));
   let currentSprint = 1;
   let daysInCurrentSprint = 0;
+  let calendarDaysInCurrentSprint = 0;
+  let sprintStartDates = {};
+  let sprintEndDates = {};
 
   const normalizedEnd = normalizeDate(endDate);
   const sprint11End = normalizeDate(new Date(2026, 10, 13));
@@ -155,8 +159,21 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
 
   while (currentDate <= normalizedEnd && currentSprint <= 12) {
     const dateKey = normalizeDate(currentDate).getTime();
+    const isWithinSprint11 = currentSprint === 11 && currentDate <= sprint11End;
+    const isWithinSprint12 = currentSprint === 12 && currentDate >= sprint12Start;
+
+    if (currentSprint in sprintStartDates || (currentSprint <= 10) || isWithinSprint11 || isWithinSprint12) {
+      if (currentSprint in sprintStartDates) {
+        calendarDaysInCurrentSprint++;
+      }
+    }
 
     if (isWorkingDay(currentDate, 2026)) {
+      if (!sprintStartDates[currentSprint]) {
+        sprintStartDates[currentSprint] = new Date(currentDate);
+        calendarDaysInCurrentSprint = 1;
+      }
+
       if (currentSprint <= 10) {
         daysInCurrentSprint++;
         sprints.push({
@@ -166,10 +183,13 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
         });
         sprintMap.set(dateKey, currentSprint);
         sprintDayMap.set(dateKey, daysInCurrentSprint);
+        sprintCalendarDayMap.set(dateKey, calendarDaysInCurrentSprint);
 
         if (daysInCurrentSprint >= workingDaysPerSprint) {
+          sprintEndDates[currentSprint] = new Date(currentDate);
           currentSprint++;
           daysInCurrentSprint = 0;
+          calendarDaysInCurrentSprint = 0;
         }
       } else if (currentSprint === 11) {
         if (currentDate <= sprint11End) {
@@ -181,11 +201,14 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
           });
           sprintMap.set(dateKey, currentSprint);
           sprintDayMap.set(dateKey, daysInCurrentSprint);
+          sprintCalendarDayMap.set(dateKey, calendarDaysInCurrentSprint);
         }
 
         if (currentDate >= sprint11End) {
+          sprintEndDates[currentSprint] = new Date(currentDate);
           currentSprint = 12;
           daysInCurrentSprint = 0;
+          calendarDaysInCurrentSprint = 0;
         }
       } else if (currentSprint === 12) {
         if (currentDate >= sprint12Start) {
@@ -197,6 +220,7 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
           });
           sprintMap.set(dateKey, currentSprint);
           sprintDayMap.set(dateKey, daysInCurrentSprint);
+          sprintCalendarDayMap.set(dateKey, calendarDaysInCurrentSprint);
         }
       }
     }
@@ -206,7 +230,11 @@ export function allocateSprints(startDate, endDate, workingDaysPerSprint) {
     currentDate = normalizeDate(nextDate);
   }
 
-  return { sprints, sprintMap, sprintDayMap };
+  if (!sprintEndDates[12]) {
+    sprintEndDates[12] = normalizedEnd;
+  }
+
+  return { sprints, sprintMap, sprintDayMap, sprintCalendarDayMap, sprintStartDates, sprintEndDates };
 }
 
 export function getSprintDayNumber(date, sprintDayMap) {
@@ -267,9 +295,62 @@ export function formatDate(date) {
   return `${day}/${month}/${date.getFullYear()}`;
 }
 
-export function getSprintDetails(sprints) {
+export function balanceSprintCalendarDays(sprintStartDates, sprintEndDates) {
+  const balanced = {};
+  const sprintNums = Object.keys(sprintStartDates).map(Number).sort((a, b) => a - b);
+
+  for (let i = 0; i < sprintNums.length; i++) {
+    const sprintNum = sprintNums[i];
+    const nextSprintNum = sprintNums[i + 1];
+
+    const workingStart = normalizeDate(sprintStartDates[sprintNum]);
+    const workingEnd = normalizeDate(sprintEndDates[sprintNum]);
+
+    let calendarStart = new Date(workingStart);
+    let calendarEnd = new Date(workingEnd);
+
+    if (nextSprintNum) {
+      const nextWorkingStart = normalizeDate(sprintStartDates[nextSprintNum]);
+      const gap = (nextWorkingStart.getTime() - workingEnd.getTime()) / (1000 * 60 * 60 * 24);
+
+      const currentCalendarDays = Math.ceil((workingEnd.getTime() - workingStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+      if (gap > 1) {
+        const daysToExtend = Math.floor(gap / 2);
+        calendarEnd = new Date(workingEnd);
+        calendarEnd.setDate(calendarEnd.getDate() + daysToExtend);
+      }
+
+      if (i > 0) {
+        const prevSprintNum = sprintNums[i - 1];
+        const prevWorkingEnd = normalizeDate(sprintEndDates[prevSprintNum]);
+        const prevGap = (workingStart.getTime() - prevWorkingEnd.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (prevGap > 1) {
+          const daysToShift = Math.floor(prevGap / 2);
+          calendarStart = new Date(workingStart);
+          calendarStart.setDate(calendarStart.getDate() - daysToShift);
+        }
+      }
+    } else {
+      calendarEnd = new Date(workingEnd);
+    }
+
+    balanced[sprintNum] = {
+      calendarStart: normalizeDate(calendarStart),
+      calendarEnd: normalizeDate(calendarEnd),
+      workingStart: workingStart,
+      workingEnd: workingEnd,
+    };
+  }
+
+  return balanced;
+}
+
+export function getSprintDetails(sprints, sprintStartDates, sprintEndDates) {
   const details = [];
   const sprintGroups = {};
+  const balanced = balanceSprintCalendarDays(sprintStartDates, sprintEndDates);
 
   sprints.forEach(sprint => {
     if (!sprintGroups[sprint.sprint]) {
@@ -279,36 +360,74 @@ export function getSprintDetails(sprints) {
   });
 
   Object.keys(sprintGroups).sort((a, b) => Number(a) - Number(b)).forEach(sprintNum => {
+    const num = Number(sprintNum);
     const dates = sprintGroups[sprintNum].sort((a, b) => a.getTime() - b.getTime());
-    const firstWorkingDay = new Date(dates[0]);
-    const lastWorkingDay = new Date(dates[dates.length - 1]);
     const workingDays = dates.length;
 
-    const startDate = new Date(firstWorkingDay);
-    startDate.setHours(0, 0, 0, 0);
-
-    const endDate = new Date(lastWorkingDay);
-    endDate.setHours(23, 59, 59, 999);
+    const balancedPeriod = balanced[num];
+    const calendarStart = balancedPeriod.calendarStart;
+    const calendarEnd = balancedPeriod.calendarEnd;
 
     let calendarDays = 0;
-    const currentDate = new Date(startDate);
+    const currentDate = new Date(calendarStart);
+    const endDateNorm = new Date(calendarEnd);
 
-    while (currentDate <= endDate) {
+    while (currentDate <= endDateNorm) {
       calendarDays++;
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
     details.push({
-      sprint: Number(sprintNum),
-      startDate: new Date(firstWorkingDay),
-      endDate: new Date(lastWorkingDay),
-      startWeekDay: getWeekDayName(firstWorkingDay),
-      endWeekDay: getWeekDayName(lastWorkingDay),
+      sprint: num,
+      startDate: new Date(calendarStart),
+      endDate: new Date(calendarEnd),
+      workingStartDate: new Date(balancedPeriod.workingStart),
+      workingEndDate: new Date(balancedPeriod.workingEnd),
+      startWeekDay: getWeekDayName(calendarStart),
+      endWeekDay: getWeekDayName(calendarEnd),
       workingDays,
       calendarDays,
     });
   });
 
   return details;
+}
+
+export function getSprintForCalendarDate(date, balancedPeriods) {
+  const dateKey = normalizeDate(date).getTime();
+
+  for (const [sprintNum, period] of Object.entries(balancedPeriods)) {
+    const startTime = period.calendarStart.getTime();
+    const endTime = period.calendarEnd.getTime();
+
+    if (dateKey >= startTime && dateKey <= endTime) {
+      return Number(sprintNum);
+    }
+  }
+
+  return null;
+}
+
+export function getCalendarDayNumber(date, balancedPeriods, sprintNumber) {
+  if (!sprintNumber) return null;
+
+  const period = balancedPeriods[sprintNumber];
+  if (!period) return null;
+
+  const dateKey = normalizeDate(date).getTime();
+  const startTime = period.calendarStart.getTime();
+  const endTime = period.calendarEnd.getTime();
+
+  if (dateKey < startTime || dateKey > endTime) return null;
+
+  let dayCount = 0;
+  const currentDate = new Date(period.calendarStart);
+
+  while (currentDate <= date) {
+    dayCount++;
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dayCount;
 }
 

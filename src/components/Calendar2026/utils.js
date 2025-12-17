@@ -67,7 +67,6 @@ function getOptionalDays(year) {
     { date: carnivalTuesday, type: 'optional', name: 'Terça-feira de Carnaval' },
     { date: ashWednesday, type: 'optional', name: 'Quarta-feira de Cinzas' },
     { date: corpusChristi, type: 'optional', name: 'Corpus Christi' },
-    { date: new Date(year, 9, 28), type: 'optional', name: 'Dia do Servidor Público' },
     { date: new Date(year, 11, 24), type: 'optional', name: 'Véspera de Natal' },
     { date: new Date(year, 11, 31), type: 'optional', name: 'Véspera de Ano Novo' },
   ];

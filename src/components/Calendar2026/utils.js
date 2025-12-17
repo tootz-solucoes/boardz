@@ -280,27 +280,30 @@ export function getSprintDetails(sprints) {
 
   Object.keys(sprintGroups).sort((a, b) => Number(a) - Number(b)).forEach(sprintNum => {
     const dates = sprintGroups[sprintNum].sort((a, b) => a.getTime() - b.getTime());
-    const startDate = new Date(dates[0]);
-    const endDate = new Date(dates[dates.length - 1]);
+    const firstWorkingDay = new Date(dates[0]);
+    const lastWorkingDay = new Date(dates[dates.length - 1]);
     const workingDays = dates.length;
+
+    const startDate = new Date(firstWorkingDay);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(lastWorkingDay);
+    endDate.setHours(23, 59, 59, 999);
 
     let calendarDays = 0;
     const currentDate = new Date(startDate);
-    currentDate.setHours(0, 0, 0, 0);
-    const endDateNormalized = new Date(endDate);
-    endDateNormalized.setHours(23, 59, 59, 999);
 
-    while (currentDate <= endDateNormalized) {
+    while (currentDate <= endDate) {
       calendarDays++;
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
     details.push({
       sprint: Number(sprintNum),
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      startWeekDay: getWeekDayName(startDate),
-      endWeekDay: getWeekDayName(endDate),
+      startDate: new Date(firstWorkingDay),
+      endDate: new Date(lastWorkingDay),
+      startWeekDay: getWeekDayName(firstWorkingDay),
+      endWeekDay: getWeekDayName(lastWorkingDay),
       workingDays,
       calendarDays,
     });

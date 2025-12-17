@@ -7,7 +7,7 @@ import CalendarPage from "./pages/CalendarPage";
 function App() {
   return (
     <>
-      {/* <nav style={{ padding: "1rem", textAlign: "center" }}>
+      <nav style={{ padding: "1rem", textAlign: "center" }}>
         <Link
           to="/"
           style={{
@@ -28,7 +28,7 @@ function App() {
         >
           Calendário 2026
         </Link>
-      </nav> */}
+      </nav>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/calendario" element={<CalendarPage />} />

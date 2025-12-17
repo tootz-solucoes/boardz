@@ -310,3 +310,25 @@ th.editavel:focus {
     transform: scale(1) rotate(0);
   }
 }
+
+nav {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+nav a {
+  color: #b388ff;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+nav a:hover {
+  background-color: rgba(179, 136, 255, 0.1);
+  text-shadow: 0 0 5px rgba(200, 166, 255, 0.4);
+}

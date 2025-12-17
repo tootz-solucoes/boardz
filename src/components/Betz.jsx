@@ -9,7 +9,6 @@ const BASE_NAMES = [
   "Wendell",
   "Adelino",
   "Luan",
-  "Vinícius"
 ];
 const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];
 const GAMEMIND_NAMES = ["Joao", "Nathanael", "Mateus"];
@@ -96,7 +95,7 @@ export default function Betz() {
       spinSoundRef.current.loop = true;
       spinSoundRef.current.currentTime = 0;
       spinSoundRef.current.play();
-    } catch { }
+    } catch {}
 
     // Tempo aleatório entre 6 e 9 segundos
     const totalSpinTime = 6 + Math.random() * 3;
@@ -112,7 +111,7 @@ export default function Betz() {
       try {
         spinSoundRef.current.pause();
         spinSoundRef.current.currentTime = 0;
-      } catch { }
+      } catch {}
 
       const chosenWinner = newShuffle[0];
       setWinner(chosenWinner);
@@ -130,7 +129,7 @@ export default function Betz() {
       try {
         winSoundRef.current.currentTime = 0;
         winSoundRef.current.play();
-      } catch { }
+      } catch {}
 
       setSpinning(false);
     }, totalSpinTime * 1000);

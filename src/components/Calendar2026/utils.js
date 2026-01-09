@@ -30,6 +30,7 @@ function getFixedHolidays(year) {
     { date: new Date(year, 9, 12), type: 'national', name: 'Nossa Senhora Aparecida' },
     { date: new Date(year, 10, 2), type: 'national', name: 'Finados' },
     { date: new Date(year, 10, 15), type: 'national', name: 'Proclamação da República' },
+    { date: new Date(year, 10, 20), type: 'national', name: 'Dia da Consciência Negra' },
     { date: new Date(year, 11, 25), type: 'national', name: 'Natal' },
   ];
 }

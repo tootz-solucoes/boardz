@@ -46,6 +46,14 @@ function getMonthIndexFromName(monthName) {
   return MONTH_NAMES.findIndex(name => name === monthName);
 }
 
+// Converte string de data "YYYY-MM-DD" para Date object usando UTC-3 (Brasília)
+function parseDateUTC3(dateString) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  // Cria data no timezone local (assumindo que está em UTC-3)
+  // Usa month - 1 porque Date usa meses 0-indexed
+  return new Date(year, month - 1, day);
+}
+
 function CalendarGeral2026() {
   const [tooltip, setTooltip] = useState({
     show: false,
@@ -144,7 +152,7 @@ function CalendarGeral2026() {
     const map = new Map();
     confraternizacoes.forEach(conf => {
       if (conf.data) {
-        const date = normalizeDate(new Date(conf.data));
+        const date = normalizeDate(parseDateUTC3(conf.data));
         map.set(date.getTime(), conf);
       }
     });
@@ -482,7 +490,7 @@ function CalendarGeral2026() {
                           {conf.data ? (
                             <>
                               <span className="confraternizacao-date">
-                                {formatDate(new Date(conf.data))} ({conf.dia})
+                                {formatDate(parseDateUTC3(conf.data))} ({conf.dia})
                               </span>
                               <span className="confraternizacao-event">
                                 - {conf.evento}
@@ -624,7 +632,7 @@ function CalendarGeral2026() {
                 <tr key={index}>
                   <td>{conf.mes}</td>
                   <td>
-                    {conf.data ? formatDate(new Date(conf.data)) : "Data a definir"}
+                    {conf.data ? formatDate(parseDateUTC3(conf.data)) : "Data a definir"}
                   </td>
                   <td>{conf.dia || "-"}</td>
                   <td>{conf.evento}</td>

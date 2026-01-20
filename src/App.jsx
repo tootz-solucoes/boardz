@@ -3,6 +3,7 @@ import "./App.css";
 
 import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
+import CalendarGeralPage from "./pages/CalendarGeralPage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/calendario" element={<CalendarPage />} />
+        <Route path="/calendario-geral" element={<CalendarGeralPage />} />
       </Routes>
     </>
   );

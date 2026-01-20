@@ -385,6 +385,7 @@ function CalendarGeral2026() {
 
   // Ref para cada mês para scroll automático
   const monthRefs = useRef({});
+  const [showBackToCurrentMonth, setShowBackToCurrentMonth] = useState(false);
 
   // Obter mês atual (2026 ou ano atual se diferente)
   const today = useMemo(() => {
@@ -449,6 +450,49 @@ function CalendarGeral2026() {
       }, 100);
     }
   }, [currentMonthIndex, currentYear]);
+
+  // Detectar quando o usuário rola para fora do mês atual
+  useEffect(() => {
+    if (currentYear !== 2026) return;
+
+    const currentMonthElement = monthRefs.current[currentMonthIndex];
+    if (!currentMonthElement) return;
+
+    const handleScroll = () => {
+      const rect = currentMonthElement.getBoundingClientRect();
+      // Considera visível se o elemento está na viewport com uma margem
+      const isVisible = rect.top < window.innerHeight - 150 && rect.bottom > 150;
+      setShowBackToCurrentMonth(!isVisible);
+    };
+
+    // Usa requestAnimationFrame para melhor performance
+    let ticking = false;
+    const scrollHandler = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    handleScroll(); // Verifica inicialmente
+
+    return () => {
+      window.removeEventListener('scroll', scrollHandler);
+    };
+  }, [currentMonthIndex, currentYear]);
+
+  const scrollToCurrentMonth = () => {
+    if (monthRefs.current[currentMonthIndex]) {
+      monthRefs.current[currentMonthIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
 
   return (
     <div className="calendar-geral-2026">
@@ -754,6 +798,18 @@ function CalendarGeral2026() {
           </table>
         </div>
       </div>
+
+      {showBackToCurrentMonth && currentYear === 2026 && (
+        <button
+          className="back-to-current-month-btn"
+          onClick={scrollToCurrentMonth}
+          aria-label="Voltar para o mês atual"
+          title="Voltar para o mês atual"
+        >
+          <span className="back-to-current-month-icon">↑</span>
+          <span className="back-to-current-month-text">Mês Atual</span>
+        </button>
+      )}
     </div>
   );
 }

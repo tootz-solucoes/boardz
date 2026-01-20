@@ -11,7 +11,7 @@ const BASE_NAMES = [
   "Luan",
 ];
 const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];
-const GAMEMIND_NAMES = ["Joao", "Nathanael", "Mateus"];
+const GAMEMIND_NAMES = ["Nathanael", "Mateus"];
 const EMOJIS = ["🍀", "🔥", "🎯", "💥", "⚡️", "🌀", "🌟"];
 const SPIN_SOUND_URL = slotSound;
 const WIN_SOUND_URL = winSound;
@@ -146,7 +146,7 @@ export default function Betz() {
             {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
           </button>
           <button onClick={toggleGamemind} className="btn">
-            {window.CAN_GAMEMIND ? "GameMind ON" : "GameMind OFF"}
+            {window.CAN_GAMEMIND ? "GM ON" : "GM OFF"}
           </button>
         </div>
       </header>

@@ -264,6 +264,25 @@
   z-index: 5;
 }
 
+.calendar-day-today-badge {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #7c5acf 0%, #6b46c1 100%);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(124, 90, 207, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 6;
+  white-space: nowrap;
+}
+
 .calendar-month-confraternizacoes {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -305,6 +324,101 @@
 
 .confraternizacao-event {
   color: #e5d7ff;
+}
+
+.calendar-month-sprint-info {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid rgba(179, 136, 255, 0.3);
+}
+
+.sprint-info-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(135deg, #7c5acf 0%, #6b46c1 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(124, 90, 207, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sprint-info-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.sprint-info-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sprint-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.sprint-info-main {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.sprint-info-main strong {
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+}
+
+.sprint-info-days {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sprint-info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sprint-info-badge-urgent {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(255, 152, 0, 0.9) 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  animation: urgent-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes urgent-pulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(255, 193, 7, 0.6), 0 0 0 4px rgba(255, 193, 7, 0.1);
+  }
 }
 
 .calendar-sprint-details {
@@ -515,5 +629,37 @@
 
   .confraternizacao-item {
     font-size: 0.8rem;
+  }
+
+  .sprint-info-content {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .sprint-info-icon {
+    font-size: 1.5rem;
+  }
+
+  .sprint-info-row {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .sprint-info-main {
+    font-size: 1rem;
+  }
+
+  .sprint-info-main strong {
+    font-size: 1.1rem;
+  }
+
+  .sprint-info-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .calendar-day-today-badge {
+    font-size: 0.55rem;
+    padding: 1px 4px;
   }
 }

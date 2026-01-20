@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import {
   isWeekend,
   isHoliday,
@@ -383,6 +383,73 @@ function CalendarGeral2026() {
     return confraternizacoesPorMes.get(monthIndex) || [];
   }
 
+  // Ref para cada mês para scroll automático
+  const monthRefs = useRef({});
+
+  // Obter mês atual (2026 ou ano atual se diferente)
+  const today = useMemo(() => {
+    const now = new Date();
+    // Se estivermos em 2026, usa a data atual, senão usa 01/01/2026 como referência
+    const year = now.getFullYear();
+    if (year === 2026) {
+      return normalizeDate(now);
+    } else {
+      return normalizeDate(new Date(2026, 0, 1));
+    }
+  }, []);
+
+  const currentMonthIndex = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // Calcular sprint atual e dias restantes
+  const currentSprintInfo = useMemo(() => {
+    const todayKey = today.getTime();
+    const sprintNumber = sprintMap.get(todayKey);
+
+    if (!sprintNumber) {
+      // Verifica se hoje está dentro de algum período de sprint
+      const period = sprintPeriods.find(p => {
+        const start = p.calendarStart.getTime();
+        const end = p.calendarEnd.getTime();
+        return todayKey >= start && todayKey <= end;
+      });
+
+      if (period) {
+        const sprintNumber = period.sprint;
+        const endDate = new Date(period.calendarEnd);
+        endDate.setHours(23, 59, 59, 999);
+
+        const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+        return { sprint: sprintNumber, daysRemaining: Math.max(0, daysRemaining) };
+      }
+
+      return null;
+    }
+
+    const period = sprintPeriods.find(p => p.sprint === sprintNumber);
+    if (!period) return null;
+
+    const endDate = new Date(period.calendarEnd);
+    endDate.setHours(23, 59, 59, 999);
+
+    const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    return { sprint: sprintNumber, daysRemaining: Math.max(0, daysRemaining) };
+  }, [today, sprintMap, sprintPeriods]);
+
+  // Scroll para o mês atual ao carregar
+  useEffect(() => {
+    if (currentYear === 2026 && monthRefs.current[currentMonthIndex]) {
+      setTimeout(() => {
+        monthRefs.current[currentMonthIndex]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }, 100);
+    }
+  }, [currentMonthIndex, currentYear]);
+
   return (
     <div className="calendar-geral-2026">
       {tooltip.show && (
@@ -422,8 +489,18 @@ function CalendarGeral2026() {
       <div className="calendar-months">
         {months.map(({ monthIndex, monthName, days }) => {
           const confsDoMes = getConfraternizacoesDoMes(monthIndex);
+          const isCurrentMonth = currentYear === 2026 && monthIndex === currentMonthIndex;
+
           return (
-            <div key={monthIndex} className="calendar-month">
+            <div
+              key={monthIndex}
+              className="calendar-month"
+              ref={(el) => {
+                if (isCurrentMonth) {
+                  monthRefs.current[monthIndex] = el;
+                }
+              }}
+            >
               <h3 className="calendar-month-title">{monthName}</h3>
               <div className="calendar-grid">
                 <div className="calendar-weekdays">
@@ -453,6 +530,7 @@ function CalendarGeral2026() {
                     };
                     const confDateKey = normalizedDate.getTime();
                     const temConfraternizacao = confraternizacoesPorData.has(confDateKey);
+                    const isToday = normalizeDate(date).getTime() === today.getTime() && currentYear === 2026;
 
                     return (
                       <div
@@ -465,6 +543,11 @@ function CalendarGeral2026() {
                         <span className="calendar-day-number">
                           {date.getDate()}
                         </span>
+                        {isToday && (
+                          <span className="calendar-day-today-badge">
+                            HOJE
+                          </span>
+                        )}
                         {sprintNumber && (
                           <span className="calendar-day-sprint-label">
                             S{sprintNumber}
@@ -503,6 +586,35 @@ function CalendarGeral2026() {
                           )}
                         </div>
                       ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isCurrentMonth && currentSprintInfo && (
+                <div className="calendar-month-sprint-info">
+                  <div className="sprint-info-content">
+                    <div className="sprint-info-icon">⚡</div>
+                    <div className="sprint-info-text">
+                      <div className="sprint-info-row">
+                        <div className="sprint-info-main">
+                          <strong>Sprint {currentSprintInfo.sprint}</strong>
+                        </div>
+                        <div className="sprint-info-days">
+                          {currentSprintInfo.daysRemaining === 0 ? (
+                            <span className="sprint-info-badge sprint-info-badge-urgent">
+                              🏁 Sprint encerra hoje!
+                            </span>
+                          ) : currentSprintInfo.daysRemaining === 1 ? (
+                            <span className="sprint-info-badge sprint-info-badge-urgent">
+                              ⏰ Falta {currentSprintInfo.daysRemaining} dia para o término
+                            </span>
+                          ) : (
+                            <span className="sprint-info-badge">
+                              📅 Faltam {currentSprintInfo.daysRemaining} dias para o término
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

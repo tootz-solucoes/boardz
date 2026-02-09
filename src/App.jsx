@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 
 import HomePage from "./pages/HomePage";
@@ -33,7 +33,8 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/calendario" element={<CalendarPage />} />
-        <Route path="/calendario-geral" element={<CalendarGeralPage />} />
+        <Route path="/calendario-geral" element={<Navigate to="/calendario-colaboradores" replace />} />
+        <Route path="/calendario-colaboradores" element={<CalendarGeralPage />} />
       </Routes>
     </>
   );

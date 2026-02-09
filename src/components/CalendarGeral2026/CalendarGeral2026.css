@@ -100,6 +100,11 @@
   box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
 }
 
+.legend-color.aniversario {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
 .calendar-months {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -223,6 +228,20 @@
 .calendar-day-confraternizacao {
   border: 2px solid #ec4899 !important;
   box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
+}
+
+.calendar-day-aniversario {
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.35);
+}
+
+.calendar-day-aniversario-icon {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  font-size: 0.85rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+  z-index: 5;
 }
 
 .calendar-day-number {
@@ -573,6 +592,70 @@
   font-size: 0.9rem;
 }
 
+.calendar-aniversariantes-table {
+  margin-top: 3rem;
+  background: linear-gradient(135deg, #1e1e24 0%, #252529 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aniversariantes-table-title {
+  color: #b388ff;
+  text-shadow: 0 0 5px rgba(200, 166, 255, 0.4);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.aniversariantes-table-wrapper {
+  overflow-x: auto;
+}
+
+.aniversariantes-table-content {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: transparent;
+}
+
+.aniversariantes-table-content thead {
+  background: linear-gradient(145deg, #5e37a5, #3d2b5f);
+  color: #e5d7ff;
+  box-shadow: 0 0 20px rgba(12, 12, 12, 0.5);
+}
+
+.aniversariantes-table-content th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.aniversariantes-table-content tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.aniversariantes-table-content tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.aniversariantes-table-content tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.aniversariantes-table-content tbody tr:nth-child(even):hover {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.aniversariantes-table-content td {
+  padding: 1rem;
+  color: #e5d7ff;
+  font-size: 0.9rem;
+}
+
 .back-to-current-month-btn {
   position: fixed;
   bottom: 2rem;
@@ -692,6 +775,23 @@
   .confraternizacoes-table-content th,
   .confraternizacoes-table-content td {
     padding: 0.75rem 0.5rem;
+  }
+
+  .calendar-aniversariantes-table {
+    padding: 1.5rem 1rem;
+  }
+
+  .aniversariantes-table-content {
+    font-size: 0.85rem;
+  }
+
+  .aniversariantes-table-content th,
+  .aniversariantes-table-content td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .calendar-day-aniversario-icon {
+    font-size: 0.7rem;
   }
 
   .confraternizacao-item {

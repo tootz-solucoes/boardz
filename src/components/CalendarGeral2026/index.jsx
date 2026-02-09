@@ -15,6 +15,7 @@ import {
 } from "../Calendar2026/utils";
 import { sprintsData } from "../Calendar2026/sprintsData";
 import { confraternizacoes } from "./confraternizacoesData";
+import { aniversariantes } from "./aniversariantesData";
 import "./CalendarGeral2026.css";
 
 const MONTH_NAMES = [
@@ -159,6 +160,16 @@ function CalendarGeral2026() {
     return map;
   }, []);
 
+  const aniversariantesPorData = useMemo(() => {
+    const map = new Map();
+    aniversariantes.forEach((a) => {
+      const date = normalizeDate(parseDateUTC3(a.data));
+      if (!map.has(date.getTime())) map.set(date.getTime(), []);
+      map.get(date.getTime()).push(a.nome);
+    });
+    return map;
+  }, []);
+
   const months = useMemo(() => {
     return Array.from({ length: 12 }, (_, monthIndex) => {
       const year = 2026;
@@ -239,6 +250,11 @@ function CalendarGeral2026() {
       classes.push("calendar-day-confraternizacao");
     }
 
+    const aniversarioDateKey = normalizeDate(date).getTime();
+    if (aniversariantesPorData.has(aniversarioDateKey)) {
+      classes.push("calendar-day-aniversario");
+    }
+
     return classes.join(" ");
   }
 
@@ -304,6 +320,11 @@ function CalendarGeral2026() {
     const conf = confraternizacoesPorData.get(dateKey);
     if (conf) {
       parts.push(`🎉 ${conf.evento}`);
+    }
+
+    const anivNomes = aniversariantesPorData.get(dateKey);
+    if (anivNomes && anivNomes.length) {
+      parts.push(`🎂 Aniversário: ${anivNomes.join(", ")}`);
     }
 
     if (sprintInfo) {
@@ -528,6 +549,10 @@ function CalendarGeral2026() {
           <div className="legend-color confraternizacao"></div>
           <span>Confraternizações</span>
         </div>
+        <div className="legend-item">
+          <div className="legend-color aniversario"></div>
+          <span>Aniversariantes</span>
+        </div>
       </div>
 
       <div className="calendar-months">
@@ -574,6 +599,7 @@ function CalendarGeral2026() {
                     };
                     const confDateKey = normalizedDate.getTime();
                     const temConfraternizacao = confraternizacoesPorData.has(confDateKey);
+                    const temAniversario = aniversariantesPorData.has(normalizedDate.getTime());
                     const isToday = normalizeDate(date).getTime() === today.getTime() && currentYear === 2026;
 
                     return (
@@ -600,6 +626,11 @@ function CalendarGeral2026() {
                         {temConfraternizacao && (
                           <span className="calendar-day-confraternizacao-icon">
                             🎉
+                          </span>
+                        )}
+                        {temAniversario && (
+                          <span className="calendar-day-aniversario-icon" title="Aniversário">
+                            🎂
                           </span>
                         )}
                       </div>
@@ -794,6 +825,36 @@ function CalendarGeral2026() {
                   <td>{conf.evento}</td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="calendar-aniversariantes-table">
+        <h3 className="aniversariantes-table-title">🎂 Aniversariantes do Ano</h3>
+        <div className="aniversariantes-table-wrapper">
+          <table className="aniversariantes-table-content">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Dia da Semana</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...aniversariantes]
+                .map((a) => ({
+                  ...a,
+                  dateObj: parseDateUTC3(a.data),
+                }))
+                .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
+                .map((a, index) => (
+                  <tr key={index}>
+                    <td>{a.nome}</td>
+                    <td>{formatDate(a.dateObj)}</td>
+                    <td>{getWeekDayName(a.dateObj)}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

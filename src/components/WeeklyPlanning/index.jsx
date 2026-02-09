@@ -5,15 +5,14 @@ import WeeklyPlanningTable from "./Table";
 import { normalizeDate } from "../Calendar2026/utils";
 import { sprintsData } from "../Calendar2026/sprintsData";
 
-const WEEKLY_PLANNING_SHEET_ID = "1Ou52m0GMMBFj39TI7_4p1A3alDXOcqtWRWdWH7IV5tU";
+const WEEKLY_PLANNING_SHEET_ID = "19WHC3WpIL4ilNDWFX4HnBanAE6g80lAw1t5Kr7uKnrQ";
 const WEEKLY_PLANNING_SHEET_URL = `https://opensheet.elk.sh/${WEEKLY_PLANNING_SHEET_ID}/1`;
-const DEVS = [
-  "Milton",
-  "Eliaquim",
-  "Douglas",
-  "Wendell",
+const DEVS = [  
   "Adelino",
+  "Douglas",
+  "Eliaquim",
   "Luan",
+  "Wendell"
 ];
 
 export default function WeeklyPlanning() {

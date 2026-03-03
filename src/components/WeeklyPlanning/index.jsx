@@ -80,8 +80,9 @@ export default function WeeklyPlanning() {
       const endDate = new Date(period.calendarEnd);
       endDate.setHours(23, 59, 59, 999);
 
-      const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
+      // Não conta o dia atual: usa floor para dias restantes (ex: acaba amanhã = 1 dia)
+      const daysRemaining = Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      
       return { sprint: period.sprint, daysRemaining: Math.max(0, daysRemaining) };
     }
 
@@ -118,10 +119,10 @@ export default function WeeklyPlanning() {
               fontWeight: "600",
               color: sprintInfo.daysRemaining <= 1 ? "#ffc107" : "#e5d7ff"
             }}>
-              {sprintInfo.daysRemaining === 0
+              {sprintInfo.daysRemaining === 0 
                 ? "🏁 Encerra hoje"
                 : sprintInfo.daysRemaining === 1
-                ? `⏰ Faltam ${sprintInfo.daysRemaining} dia`
+                ? "⏰ Acaba amanhã"
                 : `📅 Faltam ${sprintInfo.daysRemaining} dias`
               }
             </span>

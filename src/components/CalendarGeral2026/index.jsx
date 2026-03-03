@@ -423,13 +423,13 @@ function CalendarGeral2026() {
   const currentMonthIndex = today.getMonth();
   const currentYear = today.getFullYear();
 
-  // Calcular sprint atual e dias restantes
+  // Calcular sprint atual, dias restantes, dia útil e dia corrido (para dashboard)
   const currentSprintInfo = useMemo(() => {
     const todayKey = today.getTime();
     const sprintNumber = sprintMap.get(todayKey);
+    const dayInfo = sprintWorkingDaysMap.get(todayKey);
 
     if (!sprintNumber) {
-      // Verifica se hoje está dentro de algum período de sprint
       const period = sprintPeriods.find(p => {
         const start = p.calendarStart.getTime();
         const end = p.calendarEnd.getTime();
@@ -437,15 +437,16 @@ function CalendarGeral2026() {
       });
 
       if (period) {
-        const sprintNumber = period.sprint;
         const endDate = new Date(period.calendarEnd);
         endDate.setHours(23, 59, 59, 999);
-
-        const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-        return { sprint: sprintNumber, daysRemaining: Math.max(0, daysRemaining) };
+        const daysRemaining = Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        return {
+          sprint: period.sprint,
+          daysRemaining: Math.max(0, daysRemaining),
+          workingDay: dayInfo?.workingDay ?? null,
+          calendarDay: dayInfo?.calendarDay ?? null,
+        };
       }
-
       return null;
     }
 
@@ -454,11 +455,61 @@ function CalendarGeral2026() {
 
     const endDate = new Date(period.calendarEnd);
     endDate.setHours(23, 59, 59, 999);
+    const daysRemaining = Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-    const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return {
+      sprint: sprintNumber,
+      daysRemaining: Math.max(0, daysRemaining),
+      workingDay: dayInfo?.workingDay ?? null,
+      calendarDay: dayInfo?.calendarDay ?? null,
+    };
+  }, [today, sprintMap, sprintPeriods, sprintWorkingDaysMap]);
 
-    return { sprint: sprintNumber, daysRemaining: Math.max(0, daysRemaining) };
-  }, [today, sprintMap, sprintPeriods]);
+  // Próximo aniversariante e aniversariantes de hoje (para dashboard)
+  const dashboardBirthday = useMemo(() => {
+    const refDate = currentYear === 2026 ? today : normalizeDate(new Date(2026, 0, 1));
+    const refTime = refDate.getTime();
+    const todayKey = normalizeDate(new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate())).getTime();
+
+    const todayNames = aniversariantes
+      .filter((a) => normalizeDate(parseDateUTC3(a.data)).getTime() === todayKey)
+      .map((a) => a.nome);
+
+    const withDates = aniversariantes
+      .map((a) => ({ ...a, date: parseDateUTC3(a.data), time: normalizeDate(parseDateUTC3(a.data)).getTime() }))
+      .filter((a) => a.time >= refTime)
+      .sort((a, b) => a.time - b.time);
+
+    const next = withDates[0] ?? null;
+    const nextDays = next ? Math.floor((next.time - refTime) / (1000 * 60 * 60 * 24)) : null;
+
+    return {
+      isToday: todayNames.length > 0,
+      todayNames,
+      next: next ? { nome: next.nome, data: next.date, daysUntil: nextDays } : null,
+    };
+  }, [today, currentYear]);
+
+  // Próximo happy hour no mês atual (para dashboard)
+  const dashboardHappyHour = useMemo(() => {
+    if (currentYear !== 2026) return null;
+    const monthConfs = confraternizacoes.filter(
+      (c) => getMonthIndexFromName(c.mes) === currentMonthIndex && c.data
+    );
+    const refTime = today.getTime();
+    let next = null;
+    for (const c of monthConfs) {
+      const d = parseDateUTC3(c.data);
+      const t = normalizeDate(d).getTime();
+      if (t >= refTime) {
+        const daysUntil = Math.floor((t - refTime) / (1000 * 60 * 60 * 24));
+        if (!next || daysUntil < next.daysUntil) {
+          next = { evento: c.evento, data: d, daysUntil };
+        }
+      }
+    }
+    return next;
+  }, [today, currentYear, currentMonthIndex]);
 
   // Scroll para o mês atual ao carregar
   useEffect(() => {
@@ -528,6 +579,87 @@ function CalendarGeral2026() {
           {tooltip.text}
         </div>
       )}
+
+      <div className="calendar-dashboard">
+        {currentSprintInfo && (
+          <div className="dashboard-widget dashboard-widget-sprint">
+            <div className="dashboard-widget-header">
+              <span className="dashboard-widget-icon">⚡</span>
+              <span className="dashboard-widget-title">Sprint atual</span>
+            </div>
+            <div className="dashboard-widget-body">
+              <div className="sprint-widget-main">
+                <strong>Sprint {currentSprintInfo.sprint}</strong>
+                {currentSprintInfo.workingDay != null && (
+                  <span className="sprint-widget-days">
+                    {currentSprintInfo.workingDay}º dia útil
+                    {currentSprintInfo.calendarDay != null && ` · ${currentSprintInfo.calendarDay}º dia corrido`}
+                  </span>
+                )}
+              </div>
+              <div className="sprint-widget-remaining">
+                {currentSprintInfo.daysRemaining === 0 ? (
+                  <span className="sprint-badge sprint-badge-urgent">🏁 Termina hoje</span>
+                ) : currentSprintInfo.daysRemaining === 1 ? (
+                  <span className="sprint-badge sprint-badge-urgent">⏰ Termina amanhã</span>
+                ) : (
+                  <span className="sprint-badge">📅 Faltam {currentSprintInfo.daysRemaining} dias</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className={`dashboard-widget dashboard-widget-birthday ${dashboardBirthday.isToday ? "dashboard-widget-birthday-today" : ""}`}>
+          <div className="dashboard-widget-header">
+            <span className="dashboard-widget-icon">🎂</span>
+            <span className="dashboard-widget-title">
+              {dashboardBirthday.isToday ? "Aniversariante de hoje" : "Próximo aniversário"}
+            </span>
+          </div>
+          <div className="dashboard-widget-body">
+            {dashboardBirthday.isToday ? (
+              <div className="birthday-widget-today">
+                {dashboardBirthday.todayNames.join(", ")}
+              </div>
+            ) : dashboardBirthday.next ? (
+              <div className="birthday-widget-next">
+                <strong>{dashboardBirthday.next.nome}</strong>
+                <span className="birthday-widget-date">
+                  {formatDate(dashboardBirthday.next.data)}
+                  {dashboardBirthday.next.daysUntil !== null && dashboardBirthday.next.daysUntil > 0 && (
+                    <> · em {dashboardBirthday.next.daysUntil} {dashboardBirthday.next.daysUntil === 1 ? "dia" : "dias"}</>
+                  )}
+                </span>
+              </div>
+            ) : (
+              <div className="birthday-widget-empty">Nenhum aniversário no período</div>
+            )}
+          </div>
+        </div>
+
+        {dashboardHappyHour && (
+          <div className="dashboard-widget dashboard-widget-happyhour">
+            <div className="dashboard-widget-header">
+              <span className="dashboard-widget-icon">🎉</span>
+              <span className="dashboard-widget-title">Happy hour</span>
+            </div>
+            <div className="dashboard-widget-body">
+              <div className="happyhour-widget-event">{dashboardHappyHour.evento}</div>
+              <div className="happyhour-widget-countdown">
+                {dashboardHappyHour.daysUntil === 0 ? (
+                  <span className="happyhour-badge happyhour-badge-today">É hoje!</span>
+                ) : dashboardHappyHour.daysUntil === 1 ? (
+                  <span className="happyhour-badge">Amanhã!</span>
+                ) : (
+                  <span className="happyhour-badge">Faltam {dashboardHappyHour.daysUntil} dias</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="calendar-legend">
         <div className="legend-item">
           <div className="legend-color weekend"></div>
@@ -681,7 +813,7 @@ function CalendarGeral2026() {
                             </span>
                           ) : currentSprintInfo.daysRemaining === 1 ? (
                             <span className="sprint-info-badge sprint-info-badge-urgent">
-                              ⏰ Falta {currentSprintInfo.daysRemaining} dia para o término
+                              ⏰ Acaba amanhã
                             </span>
                           ) : (
                             <span className="sprint-info-badge">

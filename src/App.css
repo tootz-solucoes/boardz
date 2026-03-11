@@ -7,7 +7,7 @@ body {
   /* font-family: 'Inter', sans-serif, 'Courier New', monospace; */
   margin: 0;
   font-family: "IBM Plex Mono", monospace;
-  font-size: 2rem;
+  font-size: 1.75rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,7 +16,7 @@ body {
 
 .content {
   padding: 1em;
-  max-width: 1500px;
+  max-width: 1800px;
   /* Limita a largura máxima da .content */
   width: 100%;
   display: flex;
@@ -26,6 +26,10 @@ body {
   box-sizing: border-box;
   margin-left: auto;
   margin-right: auto;
+}
+
+html.font-1rem .content {
+  max-width: 1500px;
 }
 
 .container {
@@ -68,12 +72,13 @@ body {
 }
 
 .row-widgets {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1.2rem;
 }
 
 .row-widgets .col {
-  flex: 1 1 320px;
-  min-width: 280px;
+  min-width: 0;
 }
 
 header {
@@ -186,6 +191,13 @@ th.editavel:focus {
   background: linear-gradient(145deg, #502f8d, #47326e);
   box-shadow: 0 0 10px rgba(98, 70, 142, 0.5);
   transition: transform 0.2s ease;
+}
+
+.badge-highlight-today {
+  background: linear-gradient(145deg, #fbbf24, #f59e0b);
+  border: 1px solid rgba(255, 200, 0, 0.8);
+  color: #5d0092;
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
 }
 
 .badge:hover {

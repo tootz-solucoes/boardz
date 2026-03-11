@@ -80,6 +80,7 @@ export default function Lembrettz() {
   const sweetDay = useSweetDay(now);
 
   const isTuesday = now.getDay() === 2;
+  const isWednesday = now.getDay() === 3;
   const isFriday = now.getDay() === 5;
 
   const tuesdayPulse =
@@ -110,8 +111,11 @@ export default function Lembrettz() {
         <h2>⏰ lembrettz.</h2>
       </header>
       <div className="reminders">
-        <LembrettzBadge pulse={tuesdayPulse}>
-          <b>🧁Quarta do Brigadeiro:</b>{" "}
+        <LembrettzBadge
+          pulse={tuesdayPulse}
+          className={isWednesday ? "badge-highlight-today" : ""}
+        >
+          <b>🧁Brigadeiro:</b>{" "}
           {sweetDay.error ? (
             <span style={{ color: "red" }}>{sweetDay.error}</span>
           ) : (
@@ -121,21 +125,24 @@ export default function Lembrettz() {
 
         {/* Só mostra nas sextas */}
         {isFriday && (
-          <LembrettzBadge pulse={fridayPulse}>
+          <LembrettzBadge
+            pulse={fridayPulse}
+            className="badge-highlight-today"
+          >
             <b>Sexta:</b> Coringagem🃏
           </LembrettzBadge>
         )}
 
         {/* Só mostra na primeira semana do mês */}
         {isFirstWeek && (
-          <LembrettzBadge>
+          <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
             <b>Sexta da Véia</b>👵🏻
           </LembrettzBadge>
         )}
 
         {/* Só mostra na semana do último friday */}
         {isLastFridayWeek && (
-          <LembrettzBadge>
+          <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
             <b>Sexta:</b> Happy Hour🎉
           </LembrettzBadge>
         )}

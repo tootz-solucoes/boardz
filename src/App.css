@@ -68,11 +68,12 @@ body {
 }
 
 .row-widgets {
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .row-widgets .col {
-  min-width: 0;
+  flex: 1 1 320px;
+  min-width: 280px;
 }
 
 header {

@@ -5,6 +5,7 @@ import winSound from "/assets/win.wav";
 const BASE_NAMES = [
   "Milton",
   "Eliaquim",
+  "Henrique",
   "Douglas",
   "Wendell",
   "Adelino",

@@ -6,6 +6,7 @@ export const aniversariantes = [
   { nome: "Douglas", data: "2026-01-14" },
   { nome: "Eliaquim", data: "2026-08-05" },
   { nome: "Felipe", data: "2026-12-07" },
+  { nome: "Henrique", data: "2026-02-12" },
   { nome: "Jessica", data: "2026-05-18" },
   { nome: "Juliana", data: "2026-04-08" },
   { nome: "Luan", data: "2026-01-22" },

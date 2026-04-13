@@ -2,6 +2,7 @@ function bettz() {
   let names = [
     "Milton",
     "Eliaquim",
+    "Henrique",
     "Douglas",
     "Wendell",
     "Adelino",

@@ -11,6 +11,7 @@ const DEVS = [
   "Adelino",
   "Douglas",
   "Eliaquim",
+  "Henrique",
   "Luan",
   "Wendell"
 ];

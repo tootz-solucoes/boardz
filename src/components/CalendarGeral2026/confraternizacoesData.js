@@ -12,10 +12,16 @@ export const confraternizacoes = [
     evento: "Happy hour"
   },
   {
+    mes: "Junho",
+    data: "2026-06-19",
+    dia: "Sexta-feira",
+    evento: "Jogo da Copa do Mundo no Seaway"
+  },
+  {
     mes: "Julho",
-    data: null,
-    dia: null,
-    evento: "Happy hour de São João do Seahub"
+    data: "2026-07-03",
+    dia: "Sexta-feira",
+    evento: "São Julhão"
   },
   {
     mes: "Outubro",

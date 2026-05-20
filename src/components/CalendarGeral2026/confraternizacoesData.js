@@ -21,7 +21,7 @@ export const confraternizacoes = [
     mes: "Julho",
     data: "2026-07-03",
     dia: "Sexta-feira",
-    evento: "São Julhão"
+    evento: "São Julhão Seaway"
   },
   {
     mes: "Outubro",

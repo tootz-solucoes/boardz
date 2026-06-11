@@ -11,9 +11,10 @@ import {
   LAG_THRESHOLD,
   PROJECTS,
 } from "../../config/clickupConfig";
+import { clickupApi } from "../../services/clickupApi";
 import "./SprintProgress.css";
 
-const CLICKUP_TOKEN = import.meta.env.VITE_CLICKUP_TOKEN;
+const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
 const FETCH_INTERVAL = 5 * 60 * 1000;
 
 function useNow(interval = 60000) {
@@ -106,48 +107,37 @@ function getFieldValue(task, fieldName) {
 }
 
 async function fetchCurrentSprintListId(sprintNumber) {
-  if (!CLICKUP_TOKEN || CLICKUP_TOKEN === "undefined") return null;
+  try {
+    const foldersData = await clickupApi.get(`/space/${CLICKUP_SPACE_ID}/folder`);
+    const folder = (foldersData.folders || []).find(
+      (f) => f.name?.trim() === CLICKUP_SPRINT_FOLDER_NAME,
+    );
+    if (!folder) return null;
 
-  // 1. Busca pastas do space e encontra a pasta do ano (ex: "2026")
-  const foldersRes = await fetch(
-    `https://api.clickup.com/api/v2/space/${CLICKUP_SPACE_ID}/folder`,
-    { headers: { Authorization: CLICKUP_TOKEN } },
-  );
-  if (!foldersRes.ok) return null;
-  const foldersData = await foldersRes.json();
-  const folder = (foldersData.folders || []).find(
-    (f) => f.name?.trim() === CLICKUP_SPRINT_FOLDER_NAME,
-  );
-  if (!folder) return null;
-
-  // 2. Busca listas dentro da pasta e encontra a da sprint atual
-  const listsRes = await fetch(
-    `https://api.clickup.com/api/v2/folder/${folder.id}/list`,
-    { headers: { Authorization: CLICKUP_TOKEN } },
-  );
-  if (!listsRes.ok) return null;
-  const listsData = await listsRes.json();
-  const lists = listsData.lists || [];
-  const target = `${SPRINT_LIST_NAME_PREFIX} ${sprintNumber}`.toLowerCase();
-  const match = lists.find((l) => l.name?.toLowerCase().startsWith(target));
-  return match?.id || null;
+    const listsData = await clickupApi.get(`/folder/${folder.id}/list`);
+    const lists = listsData.lists || [];
+    const target = `${SPRINT_LIST_NAME_PREFIX} ${sprintNumber}`.toLowerCase();
+    const match = lists.find((l) => l.name?.toLowerCase().startsWith(target));
+    return match?.id || null;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchSprintTasks(listId) {
-  if (!listId || !CLICKUP_TOKEN) return [];
+  if (!listId) return [];
   let allTasks = [];
   let page = 0;
   while (true) {
-    const res = await fetch(
-      `https://api.clickup.com/api/v2/list/${listId}/task?include_closed=true&page=${page}`,
-      { headers: { Authorization: CLICKUP_TOKEN } },
-    );
-    if (!res.ok) break;
-    const data = await res.json();
-    const tasks = data.tasks || [];
-    allTasks = [...allTasks, ...tasks];
-    if (tasks.length < 100) break;
-    page++;
+    try {
+      const data = await clickupApi.get(`/list/${listId}/task?include_closed=true&page=${page}`);
+      const tasks = data.tasks || [];
+      allTasks = [...allTasks, ...tasks];
+      if (tasks.length < 100) break;
+      page++;
+    } catch {
+      break;
+    }
   }
   return allTasks;
 }
@@ -205,8 +195,7 @@ export default function SprintProgress() {
   }, [now]);
 
   useEffect(() => {
-    if (!CLICKUP_TOKEN || CLICKUP_TOKEN === "PLACEHOLDER" || !currentSprint)
-      return;
+    if (!PROXY_URL || !currentSprint) return;
 
     let cancelled = false;
     async function load() {

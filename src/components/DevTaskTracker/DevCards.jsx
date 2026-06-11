@@ -6,9 +6,10 @@ import {
   STATUS_IN_PROGRESS,
   DEVELOPERS,
 } from "../../config/clickupConfig";
+import { clickupApi } from "../../services/clickupApi";
 import "./DevTaskTracker.css";
 
-const CLICKUP_TOKEN = import.meta.env.VITE_CLICKUP_TOKEN;
+const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
 const FETCH_INTERVAL = 30 * 60 * 1000;
 
 function getFieldValue(task, fieldName) {
@@ -32,25 +33,25 @@ function getFieldValue(task, fieldName) {
 }
 
 async function fetchMembers() {
-  if (!CLICKUP_TOKEN) return [];
-  const res = await fetch(`https://api.clickup.com/api/v2/team`, {
-    headers: { Authorization: CLICKUP_TOKEN },
-  });
-  if (!res.ok) return [];
-  const data = await res.json();
-  const team = (data.teams || []).find((t) => t.id === CLICKUP_TEAM_ID);
-  return team?.members || [];
+  try {
+    const data = await clickupApi.get("/team");
+    const team = (data.teams || []).find((t) => t.id === CLICKUP_TEAM_ID);
+    return team?.members || [];
+  } catch {
+    return [];
+  }
 }
 
 async function fetchInProgressTasks(userId, listId) {
-  if (!CLICKUP_TOKEN) return [];
-  const url = listId
-    ? `https://api.clickup.com/api/v2/list/${listId}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}&include_closed=true`
-    : `https://api.clickup.com/api/v2/team/${CLICKUP_TEAM_ID}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}`;
-  const res = await fetch(url, { headers: { Authorization: CLICKUP_TOKEN } });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.tasks || [];
+  try {
+    const path = listId
+      ? `/list/${listId}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}&include_closed=true`
+      : `/team/${CLICKUP_TEAM_ID}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}`;
+    const data = await clickupApi.get(path);
+    return data.tasks || [];
+  } catch {
+    return [];
+  }
 }
 
 function DevAvatar({ name, src }) {
@@ -82,7 +83,7 @@ export default function DevCards({ sprintListId }) {
   const [devs, setDevs] = useState(null);
 
   useEffect(() => {
-    if (!CLICKUP_TOKEN) {
+    if (!PROXY_URL) {
       setDevs(DEVELOPERS.map((d) => ({ name: d.name, avatar: null, task: null, extraTasks: 0 })));
       return;
     }

@@ -6,9 +6,10 @@ import {
   STATUS_IN_PROGRESS,
   DEVELOPERS,
 } from "../../config/clickupConfig";
+import { clickupApi } from "../../services/clickupApi";
 import "./DevTaskTracker.css";
 
-const CLICKUP_TOKEN = import.meta.env.VITE_CLICKUP_TOKEN;
+const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
 const FETCH_INTERVAL = 30 * 60 * 1000;
 
 function getFieldValue(task, fieldName) {
@@ -23,26 +24,24 @@ function getFieldValue(task, fieldName) {
 }
 
 async function fetchMembers() {
-  if (!CLICKUP_TOKEN) return [];
-  const res = await fetch(
-    `https://api.clickup.com/api/v2/team/${CLICKUP_TEAM_ID}/member`,
-    { headers: { Authorization: CLICKUP_TOKEN } }
-  );
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.members || [];
+  try {
+    const data = await clickupApi.get(`/team/${CLICKUP_TEAM_ID}/member`);
+    return data.members || [];
+  } catch {
+    return [];
+  }
 }
 
 async function fetchInProgressTask(userId) {
-  if (!CLICKUP_TOKEN) return null;
-  const res = await fetch(
-    `https://api.clickup.com/api/v2/team/${CLICKUP_TEAM_ID}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}`,
-    { headers: { Authorization: CLICKUP_TOKEN } }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  const tasks = data.tasks || [];
-  return tasks[0] || null;
+  try {
+    const data = await clickupApi.get(
+      `/team/${CLICKUP_TEAM_ID}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}`
+    );
+    const tasks = data.tasks || [];
+    return tasks[0] || null;
+  } catch {
+    return null;
+  }
 }
 
 // Mock data para fase 1 (layout)
@@ -104,7 +103,7 @@ export default function DevTaskTracker() {
   const [devs, setDevs] = useState(MOCK_DEV_DATA);
 
   useEffect(() => {
-    if (!CLICKUP_TOKEN || CLICKUP_TOKEN === "PLACEHOLDER") return;
+    if (!PROXY_URL) return;
 
     let cancelled = false;
     async function load() {

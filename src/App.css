@@ -1,31 +1,36 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap'); */
 
 body {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: #141414;
   color: #fff;
-  /* font-family: 'Inter', sans-serif, 'Courier New', monospace; */
   margin: 0;
   font-family: "IBM Plex Mono", monospace;
   font-size: 1.75rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
 }
 
 .content {
-  padding: 1em;
+  padding: 0.75em 1em;
   max-width: 1800px;
-  /* Limita a largura máxima da .content */
   width: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.2em;
+  gap: 0.75em;
   box-sizing: border-box;
   margin-left: auto;
   margin-right: auto;
+  overflow: hidden;
 }
 
 html.font-1rem .content {
@@ -75,6 +80,21 @@ html.font-1rem .content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 1.2rem;
+}
+
+.row-grow {
+  flex: 1;
+  min-height: 0;
+}
+
+.row-grow .col {
+  min-height: 0;
+}
+
+.row-grow .widget {
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .row-widgets .col {
@@ -198,6 +218,34 @@ th.editavel:focus {
   border: 1px solid rgba(255, 200, 0, 0.8);
   color: #5d0092;
   box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+}
+
+.badge-calendar-holiday {
+  background: linear-gradient(145deg, #1e3a5f, #2563eb);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  color: #bfdbfe;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.badge-calendar-optional {
+  background: linear-gradient(145deg, #3b2a00, #92400e);
+  border: 1px solid rgba(217, 119, 6, 0.5);
+  color: #fde68a;
+  box-shadow: 0 4px 12px rgba(146, 64, 14, 0.3);
+}
+
+.badge-calendar-event {
+  background: linear-gradient(145deg, #14532d, #15803d);
+  border: 1px solid rgba(21, 128, 61, 0.5);
+  color: #bbf7d0;
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+}
+
+.badge-birthday {
+  background: linear-gradient(145deg, #4a1942, #7c3aed);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  color: #e9d5ff;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
 }
 
 .badge:hover {

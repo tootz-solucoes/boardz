@@ -1,5 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
 import LembrettzBadge from "./Badge";
+import { getAllHolidays, getAllOptionalDays, normalizeDate } from "../Calendar2026/utils";
+import { aniversariantes } from "../CalendarGeral2026/aniversariantesData";
+import { confraternizacoes } from "../CalendarGeral2026/confraternizacoesData";
 
 const SWEET_DAY_SHEET_ID = "1UBZcGXJJDd2FJTZ0AA-m-IM8iQ6YIFmdGAl7AvnPAT4";
 const SWEET_DAY_SHEET_URL = `https://opensheet.elk.sh/${SWEET_DAY_SHEET_ID}/1`;
@@ -9,6 +12,14 @@ function getStartOfWeek(date) {
   d.setDate(d.getDate() - d.getDay());
   d.setHours(0, 0, 0, 0);
   return d;
+}
+
+function getEndOfWeek(date) {
+  const start = getStartOfWeek(date);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  return end;
 }
 
 function getFirstFridayOfMonth(date) {
@@ -39,7 +50,6 @@ function useSweetDay(now) {
     fetch(SWEET_DAY_SHEET_URL)
       .then((res) => res.json())
       .then((data) => {
-        // Domingo: já avança para semana seguinte
         const today = new Date(now);
         today.setHours(0, 0, 0, 0);
         if (today.getDay() === 0) {
@@ -60,10 +70,7 @@ function useSweetDay(now) {
             error: null,
           });
         } else {
-          setSweetDay({
-            names: null,
-            error: null,
-          });
+          setSweetDay({ names: null, error: null });
         }
       })
       .catch(() => {
@@ -75,9 +82,73 @@ function useSweetDay(now) {
   return sweetDay;
 }
 
+function formatShortDate(date) {
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+}
+
+function useWeekCalendarEvents(now) {
+  return useMemo(() => {
+    const year = now.getFullYear();
+    const weekStart = getStartOfWeek(now);
+    const weekEnd = getEndOfWeek(now);
+
+    const inWeek = (date) => {
+      const d = normalizeDate(date);
+      return d >= normalizeDate(weekStart) && d <= normalizeDate(weekEnd);
+    };
+
+    const holidays = getAllHolidays(year).filter((h) => inWeek(h.date));
+    const optionals = getAllOptionalDays(year).filter((h) => inWeek(h.date));
+    const events = confraternizacoes
+      .filter((c) => c.data && inWeek(new Date(c.data + "T12:00:00")))
+      .map((c) => ({
+        date: new Date(c.data + "T12:00:00"),
+        type: "event",
+        name: c.evento,
+      }));
+
+    return [...holidays, ...optionals, ...events].sort(
+      (a, b) => normalizeDate(a.date) - normalizeDate(b.date)
+    );
+  }, [now]);
+}
+
+function useMonthBirthdays(now) {
+  return useMemo(() => {
+    const month = now.getMonth() + 1;
+    return aniversariantes
+      .filter((a) => {
+        const [, m] = a.data.split("-").map(Number);
+        return m === month;
+      })
+      .sort((a, b) => {
+        const dayA = Number(a.data.split("-")[2]);
+        const dayB = Number(b.data.split("-")[2]);
+        return dayA - dayB;
+      });
+  }, [now]);
+}
+
+function calendarEventIcon(type) {
+  if (type === "national" || type === "state" || type === "municipal") return "📅";
+  if (type === "optional") return "📌";
+  if (type === "event") return "🎉";
+  return "📅";
+}
+
+function calendarEventClass(type) {
+  if (type === "national" || type === "state" || type === "municipal")
+    return "badge-calendar-holiday";
+  if (type === "optional") return "badge-calendar-optional";
+  if (type === "event") return "badge-calendar-event";
+  return "";
+}
+
 export default function Lembrettz() {
   const now = useNow(60000);
   const sweetDay = useSweetDay(now);
+  const weekEvents = useWeekCalendarEvents(now);
+  const monthBirthdays = useMonthBirthdays(now);
 
   const isTuesday = now.getDay() === 2;
   const isWednesday = now.getDay() === 3;
@@ -94,7 +165,6 @@ export default function Lembrettz() {
       now.getHours() === 15 ||
       (now.getHours() === 16 && now.getMinutes() <= 30));
 
-  // Cálculo das semanas especiais
   const weekStart = getStartOfWeek(now);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
@@ -111,6 +181,7 @@ export default function Lembrettz() {
         <h2>⏰ lembrettz.</h2>
       </header>
       <div className="reminders">
+        {/* Brigadeiro — comportamento original */}
         <LembrettzBadge
           pulse={tuesdayPulse}
           className={isWednesday ? "badge-highlight-today" : ""}
@@ -123,29 +194,52 @@ export default function Lembrettz() {
           )}
         </LembrettzBadge>
 
-        {/* Só mostra nas sextas */}
+        {/* Coringagem — só nas sextas */}
         {isFriday && (
-          <LembrettzBadge
-            pulse={fridayPulse}
-            className="badge-highlight-today"
-          >
+          <LembrettzBadge pulse={fridayPulse} className="badge-highlight-today">
             <b>Sexta:</b> Coringagem🃏
           </LembrettzBadge>
         )}
 
-        {/* Só mostra na primeira semana do mês */}
+        {/* Sexta da Véia — só na primeira semana do mês */}
         {isFirstWeek && (
           <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
             <b>Sexta da Véia</b>👵🏻
           </LembrettzBadge>
         )}
 
-        {/* Só mostra na semana do último friday */}
+        {/* Happy Hour — só na semana do último friday */}
         {isLastFridayWeek && (
           <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
             <b>Sexta:</b> Happy Hour🎉
           </LembrettzBadge>
         )}
+
+        {/* Eventos da semana atual */}
+        {weekEvents.map((ev, i) => (
+          <LembrettzBadge key={i} className={calendarEventClass(ev.type)}>
+            {calendarEventIcon(ev.type)}{" "}
+            <b>{formatShortDate(ev.date)}</b> {ev.name}
+          </LembrettzBadge>
+        ))}
+
+        {/* Aniversariantes do mês */}
+        {monthBirthdays.map((a) => {
+          const [, , day] = a.data.split("-");
+          const today = now.getDate();
+          const isToday = Number(day) === today;
+          return (
+            <LembrettzBadge
+              key={a.nome}
+              className={isToday ? "badge-highlight-today" : "badge-birthday"}
+            >
+              🎂 <b>{a.nome}</b>{" "}
+              <span style={{ opacity: 0.75 }}>
+                {day}/{String(now.getMonth() + 1).padStart(2, "0")}
+              </span>
+            </LembrettzBadge>
+          );
+        })}
       </div>
     </div>
   );

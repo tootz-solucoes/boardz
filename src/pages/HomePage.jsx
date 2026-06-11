@@ -10,7 +10,7 @@ function HomePage() {
           <SprintProgress />
         </div>
       </div>
-      <div className="row row-widgets row-grow" style={{ flex: "2" }}>
+      <div className="row row-widgets row-grow" style={{ flex: "1" }}>
         <div className="col col-equal">
           <Lembrettz />
         </div>

@@ -1,22 +1,18 @@
-import WeeklyPlanning from "../components/WeeklyPlanning";
+import SprintProgress from "../components/SprintProgress";
 import Lembrettz from "../components/Lembrettz";
-import { AniversariantesMesWidget } from "../components/CalendarGeral2026/AniversarianttzWidget";
 import Betz from "../components/Betz";
 
 function HomePage() {
   return (
     <div className="content">
-      <div className="row">
+      <div className="row row-grow" style={{ flex: "3" }}>
         <div className="col col-fill">
-          <WeeklyPlanning />
+          <SprintProgress />
         </div>
       </div>
-      <div className="row row-widgets">
+      <div className="row row-widgets row-grow" style={{ flex: "2" }}>
         <div className="col col-equal">
           <Lembrettz />
-        </div>
-        <div className="col col-equal">
-          <AniversariantesMesWidget />
         </div>
         <div className="col col-equal">
           <Betz />

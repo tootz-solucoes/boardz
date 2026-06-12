@@ -43,13 +43,18 @@ export default function WeeklyPlanning() {
         })
         .then((data) => {
           const mappedRows = mapSheetRows({ data, matchHeaders: true });
+          if (mappedRows.length === 0) {
+            throw new Error("Planilha vazia");
+          }
           setRows(mappedRows);
           writeSnapshot(SNAPSHOT_KEY, mappedRows);
           setError(null);
         })
         .catch(() => {
           setError("Erro ao carregar dados.");
-          setRows(DEVS.map((dev) => ({ dev, days: ["", "", "", "", ""] })));
+          if (!cached?.value) {
+            setRows(DEVS.map((dev) => ({ dev, days: ["", "", "", "", ""] })));
+          }
         })
         .finally(() => setLoading(false));
     }

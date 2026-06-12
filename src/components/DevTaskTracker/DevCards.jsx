@@ -35,25 +35,17 @@ function getFieldValue(task, fieldName) {
 }
 
 async function fetchMembers() {
-  try {
-    const data = await clickupApi.get("/team");
-    const team = (data.teams || []).find((t) => t.id === CLICKUP_TEAM_ID);
-    return team?.members || [];
-  } catch {
-    return [];
-  }
+  const data = await clickupApi.get("/team");
+  const team = (data.teams || []).find((t) => t.id === CLICKUP_TEAM_ID);
+  return team?.members || [];
 }
 
 async function fetchInProgressTasks(userId, listId) {
-  try {
-    const path = listId
-      ? `/list/${listId}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}&include_closed=true`
-      : `/team/${CLICKUP_TEAM_ID}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}`;
-    const data = await clickupApi.get(path);
-    return data.tasks || [];
-  } catch {
-    return [];
-  }
+  const path = listId
+    ? `/list/${listId}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}&include_closed=true`
+    : `/team/${CLICKUP_TEAM_ID}/task?assignees[]=${userId}&statuses[]=${encodeURIComponent(STATUS_IN_PROGRESS)}`;
+  const data = await clickupApi.get(path);
+  return data.tasks || [];
 }
 
 function DevAvatar({ name, src }) {
@@ -99,45 +91,50 @@ export default function DevCards({ sprintListId }) {
     }
 
     async function load() {
-      const members = await fetchMembers();
-      if (cancelled) return;
+      try {
+        const members = await fetchMembers();
+        if (cancelled || members.length === 0) return;
 
-      const resolved = await Promise.all(
-        DEVELOPERS.map(async (dev) => {
-          const member = members.find(
-            (m) => m.user?.email?.toLowerCase() === dev.email.toLowerCase(),
-          );
-          if (!member) return { name: dev.name, avatar: null, task: null, extraTasks: 0 };
+        const resolved = await Promise.all(
+          DEVELOPERS.map(async (dev) => {
+            const member = members.find(
+              (m) => m.user?.email?.toLowerCase() === dev.email.toLowerCase(),
+            );
+            if (!member) return { name: dev.name, avatar: null, task: null, extraTasks: 0 };
 
-          const userId = member.user.id;
-          const avatar = member.user.profilePicture || null;
-          const tasks = await fetchInProgressTasks(userId, sprintListId);
-          if (cancelled) return { name: dev.name, avatar, task: null, extraTasks: 0 };
-          if (!tasks.length) return { name: dev.name, avatar, task: null, extraTasks: 0 };
+            const userId = member.user.id;
+            const avatar = member.user.profilePicture || null;
+            const tasks = await fetchInProgressTasks(userId, sprintListId);
+            if (cancelled) return { name: dev.name, avatar, task: null, extraTasks: 0 };
+            if (!tasks.length) return { name: dev.name, avatar, task: null, extraTasks: 0 };
 
-          const sorted = [...tasks].sort((a, b) => {
-            const pA = Number(getFieldValue(a, STORY_POINTS_FIELD_NAME)) || 0;
-            const pB = Number(getFieldValue(b, STORY_POINTS_FIELD_NAME)) || 0;
-            return pB - pA;
-          });
-          const primary = sorted[0];
+            const sorted = [...tasks].sort((a, b) => {
+              const pA = Number(getFieldValue(a, STORY_POINTS_FIELD_NAME)) || 0;
+              const pB = Number(getFieldValue(b, STORY_POINTS_FIELD_NAME)) || 0;
+              return pB - pA;
+            });
+            const primary = sorted[0];
 
-          return {
-            name: dev.name,
-            avatar,
-            task: {
-              title: primary.name,
-              cliente: getFieldValue(primary, CLIENTE_FIELD_NAME) || "—",
-              points: getFieldValue(primary, STORY_POINTS_FIELD_NAME),
-            },
-            extraTasks: tasks.length - 1,
-          };
-        }),
-      );
+            return {
+              name: dev.name,
+              avatar,
+              task: {
+                title: primary.name,
+                cliente: getFieldValue(primary, CLIENTE_FIELD_NAME) || "—",
+                points: getFieldValue(primary, STORY_POINTS_FIELD_NAME),
+              },
+              extraTasks: tasks.length - 1,
+            };
+          }),
+        );
 
-      if (!cancelled) {
-        setDevs(resolved);
-        writeSnapshot(snapshotKey, resolved);
+        const hasAnyTask = resolved.some((dev) => dev.task);
+        if (!cancelled && hasAnyTask) {
+          setDevs(resolved);
+          writeSnapshot(snapshotKey, resolved);
+        }
+      } catch {
+        // Keep the last snapshot rendered when refresh fails.
       }
     }
 

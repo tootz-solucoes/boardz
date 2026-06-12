@@ -109,21 +109,17 @@ function getFieldValue(task, fieldName) {
 }
 
 async function fetchCurrentSprintListId(sprintNumber) {
-  try {
-    const foldersData = await clickupApi.get(`/space/${CLICKUP_SPACE_ID}/folder`);
-    const folder = (foldersData.folders || []).find(
-      (f) => f.name?.trim() === CLICKUP_SPRINT_FOLDER_NAME,
-    );
-    if (!folder) return null;
+  const foldersData = await clickupApi.get(`/space/${CLICKUP_SPACE_ID}/folder`);
+  const folder = (foldersData.folders || []).find(
+    (f) => f.name?.trim() === CLICKUP_SPRINT_FOLDER_NAME,
+  );
+  if (!folder) return null;
 
-    const listsData = await clickupApi.get(`/folder/${folder.id}/list`);
-    const lists = listsData.lists || [];
-    const target = `${SPRINT_LIST_NAME_PREFIX} ${sprintNumber}`.toLowerCase();
-    const match = lists.find((l) => l.name?.toLowerCase().startsWith(target));
-    return match?.id || null;
-  } catch {
-    return null;
-  }
+  const listsData = await clickupApi.get(`/folder/${folder.id}/list`);
+  const lists = listsData.lists || [];
+  const target = `${SPRINT_LIST_NAME_PREFIX} ${sprintNumber}`.toLowerCase();
+  const match = lists.find((l) => l.name?.toLowerCase().startsWith(target));
+  return match?.id || null;
 }
 
 async function fetchSprintTasks(listId) {
@@ -131,15 +127,11 @@ async function fetchSprintTasks(listId) {
   let allTasks = [];
   let page = 0;
   while (true) {
-    try {
-      const data = await clickupApi.get(`/list/${listId}/task?include_closed=true&page=${page}`);
-      const tasks = data.tasks || [];
-      allTasks = [...allTasks, ...tasks];
-      if (tasks.length < 100) break;
-      page++;
-    } catch {
-      break;
-    }
+    const data = await clickupApi.get(`/list/${listId}/task?include_closed=true&page=${page}`);
+    const tasks = data.tasks || [];
+    allTasks = [...allTasks, ...tasks];
+    if (tasks.length < 100) break;
+    page++;
   }
   return allTasks;
 }
@@ -215,13 +207,15 @@ export default function SprintProgress() {
         if (cancelled || !listId) return;
         setSprintListId(listId);
         const tasks = await fetchSprintTasks(listId);
-        if (cancelled) return;
+        if (cancelled || tasks.length === 0) return;
         const nextProjectData = computeProjectProgress(tasks);
         setProjectData(nextProjectData);
         writeSnapshot(snapshotKey, {
           sprintListId: listId,
           projectData: nextProjectData,
         });
+      } catch {
+        // Keep the last snapshot rendered when refresh fails.
       } finally {
         if (!cancelled) setLoading(false);
       }

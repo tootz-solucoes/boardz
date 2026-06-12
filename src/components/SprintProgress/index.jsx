@@ -16,6 +16,7 @@ import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
 import {
   getProgressFillWidth,
   getProgressFillClassName,
+  getProgressPctClassName,
 } from "./progressUtils";
 import "./SprintProgress.css";
 
@@ -297,7 +298,7 @@ export default function SprintProgress() {
               />
               <div className="sprint-ref-marker" style={{ left: `${sprintPct}%` }} />
             </div>
-            <span className="sprint-row-pct">{row.pct}%</span>
+            <span className={getProgressPctClassName(row)}>{row.pct}%</span>
             <span className="sprint-row-alert">{row.lagging ? "⚠" : ""}</span>
           </div>
         ))}

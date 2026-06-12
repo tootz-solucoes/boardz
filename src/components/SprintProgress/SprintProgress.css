@@ -91,8 +91,13 @@
   opacity: 0.7;
 }
 
-.sprint-row--lagging .sprint-row-pct {
+.sprint-row-pct--lagging {
   color: #f97316;
+  opacity: 1;
+}
+
+.sprint-row-pct--complete {
+  color: #10b981;
   opacity: 1;
 }
 

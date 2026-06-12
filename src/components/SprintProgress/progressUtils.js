@@ -9,3 +9,11 @@ export function getProgressFillClassName({ pct, lagging }) {
 
   return `sprint-bar-fill${lagging ? " sprint-bar-fill--lagging" : ""}`;
 }
+
+export function getProgressPctClassName({ pct, lagging }) {
+  if (pct >= 100) {
+    return "sprint-row-pct sprint-row-pct--complete";
+  }
+
+  return `sprint-row-pct${lagging ? " sprint-row-pct--lagging" : ""}`;
+}

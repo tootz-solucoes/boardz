@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ChartColumn } from "lucide-react";
 import {
   isWeekend,
   isHoliday,
@@ -420,7 +421,7 @@ function Calendar2026() {
       </div>
 
        <div className="calendar-sprint-details">
-         <h3 className="sprint-details-title">📊 Detalhamento das Sprints</h3>
+         <h3 className="sprint-details-title title-with-icon"><ChartColumn size={18} /> Detalhamento das Sprints</h3>
          <div className="sprint-details-table-wrapper">
            <table className="sprint-details-table">
              <thead>

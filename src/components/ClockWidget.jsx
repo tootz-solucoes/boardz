@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Clock3 } from "lucide-react";
 
 export function ClockWidget() {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -53,7 +54,7 @@ export function ClockWidget() {
   return (
     <div className="widget">
       <header>
-        <h2>🕐 {weekday}</h2>
+        <h2 className="title-with-icon"><Clock3 size={18} /> {weekday}</h2>
       </header>
       <div
         style={{

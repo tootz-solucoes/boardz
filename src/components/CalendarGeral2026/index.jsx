@@ -1,5 +1,15 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import {
+  ArrowUp,
+  CalendarDays,
+  Cake,
+  ChartColumn,
+  Clock3,
+  Flag,
+  PartyPopper,
+  Zap,
+} from "lucide-react";
+import {
   isWeekend,
   isHoliday,
   isOptionalDay,
@@ -319,12 +329,12 @@ function CalendarGeral2026() {
 
     const conf = confraternizacoesPorData.get(dateKey);
     if (conf) {
-      parts.push(`🎉 ${conf.evento}`);
+      parts.push(`Evento: ${conf.evento}`);
     }
 
     const anivNomes = aniversariantesPorData.get(dateKey);
     if (anivNomes && anivNomes.length) {
-      parts.push(`🎂 Aniversário: ${anivNomes.join(", ")}`);
+      parts.push(`Aniversário: ${anivNomes.join(", ")}`);
     }
 
     if (sprintInfo) {
@@ -584,7 +594,7 @@ function CalendarGeral2026() {
         {currentSprintInfo && (
           <div className="dashboard-widget dashboard-widget-sprint">
             <div className="dashboard-widget-header">
-              <span className="dashboard-widget-icon">⚡</span>
+              <span className="dashboard-widget-icon"><Zap size={20} /></span>
               <span className="dashboard-widget-title">Sprint atual</span>
             </div>
             <div className="dashboard-widget-body">
@@ -599,11 +609,11 @@ function CalendarGeral2026() {
               </div>
               <div className="sprint-widget-remaining">
                 {currentSprintInfo.daysRemaining === 0 ? (
-                  <span className="sprint-badge sprint-badge-urgent">🏁 Termina hoje</span>
+                  <span className="sprint-badge sprint-badge-urgent"><Flag size={14} /> Termina hoje</span>
                 ) : currentSprintInfo.daysRemaining === 1 ? (
-                  <span className="sprint-badge sprint-badge-urgent">⏰ Termina amanhã</span>
+                  <span className="sprint-badge sprint-badge-urgent"><Clock3 size={14} /> Termina amanhã</span>
                 ) : (
-                  <span className="sprint-badge">📅 Faltam {currentSprintInfo.daysRemaining} dias</span>
+                  <span className="sprint-badge"><CalendarDays size={14} /> Faltam {currentSprintInfo.daysRemaining} dias</span>
                 )}
               </div>
             </div>
@@ -612,7 +622,7 @@ function CalendarGeral2026() {
 
         <div className={`dashboard-widget dashboard-widget-birthday ${dashboardBirthday.isToday ? "dashboard-widget-birthday-today" : ""}`}>
           <div className="dashboard-widget-header">
-            <span className="dashboard-widget-icon">🎂</span>
+            <span className="dashboard-widget-icon"><Cake size={20} /></span>
             <span className="dashboard-widget-title">
               {dashboardBirthday.isToday ? "Aniversariante de hoje" : "Próximo aniversário"}
             </span>
@@ -641,7 +651,7 @@ function CalendarGeral2026() {
         {dashboardHappyHour && (
           <div className="dashboard-widget dashboard-widget-happyhour">
             <div className="dashboard-widget-header">
-              <span className="dashboard-widget-icon">🎉</span>
+              <span className="dashboard-widget-icon"><PartyPopper size={20} /></span>
               <span className="dashboard-widget-title">Happy hour</span>
             </div>
             <div className="dashboard-widget-body">
@@ -756,14 +766,10 @@ function CalendarGeral2026() {
                           </span>
                         )}
                         {temConfraternizacao && (
-                          <span className="calendar-day-confraternizacao-icon">
-                            🎉
-                          </span>
+                          <span className="calendar-day-confraternizacao-icon"><PartyPopper size={12} /></span>
                         )}
                         {temAniversario && (
-                          <span className="calendar-day-aniversario-icon" title="Aniversário">
-                            🎂
-                          </span>
+                          <span className="calendar-day-aniversario-icon" title="Aniversário"><Cake size={12} /></span>
                         )}
                       </div>
                     );
@@ -773,7 +779,7 @@ function CalendarGeral2026() {
               {confsDoMes.length > 0 && (
                 <div className="calendar-month-confraternizacoes">
                   <div className="confraternizacoes-indicator">
-                    <div className="confraternizacao-indicator-icon">🎉</div>
+                    <div className="confraternizacao-indicator-icon"><PartyPopper size={18} /></div>
                     <div className="confraternizacoes-list">
                       {confsDoMes.map((conf, idx) => (
                         <div key={idx} className="confraternizacao-item">
@@ -800,7 +806,7 @@ function CalendarGeral2026() {
               {isCurrentMonth && currentSprintInfo && (
                 <div className="calendar-month-sprint-info">
                   <div className="sprint-info-content">
-                    <div className="sprint-info-icon">⚡</div>
+                    <div className="sprint-info-icon"><Zap size={24} /></div>
                     <div className="sprint-info-text">
                       <div className="sprint-info-row">
                         <div className="sprint-info-main">
@@ -809,15 +815,15 @@ function CalendarGeral2026() {
                         <div className="sprint-info-days">
                           {currentSprintInfo.daysRemaining === 0 ? (
                             <span className="sprint-info-badge sprint-info-badge-urgent">
-                              🏁 Sprint encerra hoje!
+                              <Flag size={16} /> Sprint encerra hoje!
                             </span>
                           ) : currentSprintInfo.daysRemaining === 1 ? (
                             <span className="sprint-info-badge sprint-info-badge-urgent">
-                              ⏰ Acaba amanhã
+                              <Clock3 size={16} /> Acaba amanhã
                             </span>
                           ) : (
                             <span className="sprint-info-badge">
-                              📅 Faltam {currentSprintInfo.daysRemaining} dias para o término
+                              <CalendarDays size={16} /> Faltam {currentSprintInfo.daysRemaining} dias para o término
                             </span>
                           )}
                         </div>
@@ -832,7 +838,7 @@ function CalendarGeral2026() {
       </div>
 
       <div className="calendar-sprint-details">
-        <h3 className="sprint-details-title">📊 Detalhamento das Sprints</h3>
+        <h3 className="sprint-details-title title-with-icon"><ChartColumn size={18} /> Detalhamento das Sprints</h3>
         <div className="sprint-details-table-wrapper">
           <table className="sprint-details-table">
             <thead>
@@ -934,7 +940,7 @@ function CalendarGeral2026() {
 
       <div className="calendar-confraternizacoes-table">
         <h3 className="confraternizacoes-table-title">
-          🎉 Agenda de Confraternizações dos Colaboradores
+          <span className="title-with-icon"><PartyPopper size={18} /> Agenda de Confraternizações dos Colaboradores</span>
         </h3>
         <div className="confraternizacoes-table-wrapper">
           <table className="confraternizacoes-table-content">
@@ -963,7 +969,7 @@ function CalendarGeral2026() {
       </div>
 
       <div className="calendar-aniversariantes-table">
-        <h3 className="aniversariantes-table-title">🎂 Aniversariantes do Ano</h3>
+        <h3 className="aniversariantes-table-title title-with-icon"><Cake size={18} /> Aniversariantes do Ano</h3>
         <div className="aniversariantes-table-wrapper">
           <table className="aniversariantes-table-content">
             <thead>
@@ -999,7 +1005,7 @@ function CalendarGeral2026() {
           aria-label="Voltar para o mês atual"
           title="Voltar para o mês atual"
         >
-          <span className="back-to-current-month-icon">↑</span>
+          <span className="back-to-current-month-icon"><ArrowUp size={18} /></span>
           <span className="back-to-current-month-text">Mês Atual</span>
         </button>
       )}

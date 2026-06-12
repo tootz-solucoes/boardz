@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { LaptopMinimal } from "lucide-react";
 import {
   CLICKUP_TEAM_ID,
   STORY_POINTS_FIELD_NAME,
@@ -147,7 +148,7 @@ export default function DevTaskTracker() {
   return (
     <div className="widget dev-tracker-widget">
       <header>
-        <h2>👨‍💻 devtz.</h2>
+        <h2 className="title-with-icon"><LaptopMinimal size={18} /> devtz.</h2>
       </header>
       <div className="dev-tracker-grid">
         {devs.map((dev) => (

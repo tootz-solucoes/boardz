@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Bomb, Clover, Dices, Flame, Orbit, PartyPopper, Star, Target, Zap } from "lucide-react";
 import slotSound from "/assets/slot-machine.mp3";
 import winSound from "/assets/win.wav";
 
@@ -13,7 +14,7 @@ const BASE_NAMES = [
 ];
 const GIRL_NAMES = ["Samantha", "Jéssica", "Miriã"];
 const GAMEMIND_NAMES = ["Nathanael", "Mateus"];
-const EMOJIS = ["🍀", "🔥", "🎯", "💥", "⚡️", "🌀", "🌟"];
+const SYMBOLS = [Clover, Flame, Target, Bomb, Zap, Orbit, Star];
 const SPIN_SOUND_URL = slotSound;
 const WIN_SOUND_URL = winSound;
 
@@ -96,7 +97,9 @@ export default function Betz() {
       spinSoundRef.current.loop = true;
       spinSoundRef.current.currentTime = 0;
       spinSoundRef.current.play();
-    } catch {}
+    } catch {
+      // Ignore autoplay failures triggered by the browser.
+    }
 
     // Tempo aleatório entre 6 e 9 segundos
     const totalSpinTime = 6 + Math.random() * 3;
@@ -112,7 +115,9 @@ export default function Betz() {
       try {
         spinSoundRef.current.pause();
         spinSoundRef.current.currentTime = 0;
-      } catch {}
+      } catch {
+        // Ignore audio stop failures when the spin sound is unavailable.
+      }
 
       const chosenWinner = newShuffle[0];
       setWinner(chosenWinner);
@@ -130,7 +135,9 @@ export default function Betz() {
       try {
         winSoundRef.current.currentTime = 0;
         winSoundRef.current.play();
-      } catch {}
+      } catch {
+        // Ignore audio play failures when the win sound is blocked.
+      }
 
       setSpinning(false);
     }, totalSpinTime * 1000);
@@ -141,7 +148,7 @@ export default function Betz() {
   return (
     <div className="widget">
       <header>
-        <h2 style={{ color: "#b388ff", marginBottom: 8 }}>🎲 bettz.</h2>
+        <h2 className="title-with-icon" style={{ color: "#b388ff", marginBottom: 8 }}><Dices size={18} /> bettz.</h2>
         <div style={{ display: "flex", gap: "0.5em" }}>
           <button onClick={toggleGirls} className="btn">
             {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
@@ -182,6 +189,7 @@ export default function Betz() {
         >
           {doubledList.map((name, i) => {
             const isWinner = winner === name && i < shuffledNames.length;
+            const SymbolIcon = SYMBOLS[i % SYMBOLS.length];
             return (
               <div
                 key={i}
@@ -201,8 +209,8 @@ export default function Betz() {
                   transition: "all 0.3s ease",
                 }}
               >
-                {isWinner ? "🎉 " : ""}
-                {name} {EMOJIS[i % EMOJIS.length]}
+                {isWinner ? <PartyPopper size={16} style={{ marginRight: 6 }} /> : null}
+                {name} <SymbolIcon size={16} style={{ marginLeft: 6 }} />
               </div>
             );
           })}

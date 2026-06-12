@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { Cake, CalendarDays, ClipboardList, MapPin, PartyPopper, Popcorn, UserRound } from "lucide-react";
 import LembrettzBadge from "./Badge";
 import { getAllHolidays, getAllOptionalDays, normalizeDate } from "../Calendar2026/utils";
 import { aniversariantes } from "../CalendarGeral2026/aniversariantesData";
@@ -130,10 +131,10 @@ function useMonthBirthdays(now) {
 }
 
 function calendarEventIcon(type) {
-  if (type === "national" || type === "state" || type === "municipal") return "📅";
-  if (type === "optional") return "📌";
-  if (type === "event") return "🎉";
-  return "📅";
+  if (type === "national" || type === "state" || type === "municipal") return <CalendarDays size={14} />;
+  if (type === "optional") return <MapPin size={14} />;
+  if (type === "event") return <PartyPopper size={14} />;
+  return <CalendarDays size={14} />;
 }
 
 function calendarEventClass(type) {
@@ -178,7 +179,7 @@ export default function Lembrettz() {
   return (
     <div className="widget">
       <header>
-        <h2>⏰ lembrettz.</h2>
+        <h2 className="title-with-icon"><ClipboardList size={18} /> lembrettz.</h2>
       </header>
       <div className="reminders">
         {/* Brigadeiro — comportamento original */}
@@ -186,7 +187,7 @@ export default function Lembrettz() {
           pulse={tuesdayPulse}
           className={isWednesday ? "badge-highlight-today" : ""}
         >
-          <b>🧁Brigadeiro:</b>{" "}
+          <span className="inline-icon-text"><Popcorn size={14} /><b>Brigadeiro:</b></span>{" "}
           {sweetDay.error ? (
             <span style={{ color: "red" }}>{sweetDay.error}</span>
           ) : (
@@ -197,30 +198,30 @@ export default function Lembrettz() {
         {/* Coringagem — só nas sextas */}
         {isFriday && (
           <LembrettzBadge pulse={fridayPulse} className="badge-highlight-today">
-            <b>Sexta:</b> Coringagem🃏
+            <span className="inline-icon-text"><PartyPopper size={14} /><b>Sexta:</b> Coringagem</span>
           </LembrettzBadge>
         )}
 
         {/* Sexta da Véia — só na primeira semana do mês */}
         {isFirstWeek && (
           <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
-            <b>Sexta da Véia</b>👵🏻
+            <span className="inline-icon-text"><UserRound size={14} /><b>Sexta da Véia</b></span>
           </LembrettzBadge>
         )}
 
         {/* Happy Hour — só na semana do último friday */}
         {isLastFridayWeek && (
           <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
-            <b>Sexta:</b> Happy Hour🎉
+            <span className="inline-icon-text"><PartyPopper size={14} /><b>Sexta:</b> Happy Hour</span>
           </LembrettzBadge>
         )}
 
         {/* Eventos da semana atual */}
         {weekEvents.map((ev, i) => (
-          <LembrettzBadge key={i} className={calendarEventClass(ev.type)}>
-            {calendarEventIcon(ev.type)}{" "}
-            <b>{formatShortDate(ev.date)}</b> {ev.name}
-          </LembrettzBadge>
+            <LembrettzBadge key={i} className={calendarEventClass(ev.type)}>
+             <span className="inline-icon-text">{calendarEventIcon(ev.type)}</span>{" "}
+             <b>{formatShortDate(ev.date)}</b> {ev.name}
+           </LembrettzBadge>
         ))}
 
         {/* Aniversariantes do mês */}
@@ -233,7 +234,7 @@ export default function Lembrettz() {
               key={a.nome}
               className={isToday ? "badge-highlight-today" : "badge-birthday"}
             >
-              🎂 <b>{a.nome}</b>{" "}
+              <span className="inline-icon-text"><Cake size={14} /><b>{a.nome}</b></span>{" "}
               <span style={{ opacity: 0.75 }}>
                 {day}/{String(now.getMonth() + 1).padStart(2, "0")}
               </span>

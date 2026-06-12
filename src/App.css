@@ -248,6 +248,18 @@ th.editavel:focus {
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
 }
 
+.title-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.inline-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .badge:hover {
   transform: scale(1.05);
 }

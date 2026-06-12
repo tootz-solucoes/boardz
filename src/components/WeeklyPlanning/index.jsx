@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { CalendarDays, CheckeredFlag, ClipboardList, Clock3, Zap } from "lucide-react";
 
 import mapSheetRows from "./mapSheetRows";
 import WeeklyPlanningTable from "./Table";
@@ -118,7 +119,7 @@ export default function WeeklyPlanning() {
   return (
     <div className="widget">
       <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5em", flexWrap: "wrap" }}>
-        <h1>📋 planejamento semanal</h1>
+        <h1 className="title-with-icon"><ClipboardList size={20} /> planejamento semanal</h1>
         {sprintInfo && (
           <div style={{
             display: "flex",
@@ -128,15 +129,21 @@ export default function WeeklyPlanning() {
             color: "#e5d7ff"
           }}>
             <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
               background: "linear-gradient(135deg, #7c5acf 0%, #6b46c1 100%)",
               padding: "0.5rem 0.75rem",
               borderRadius: "8px",
               fontWeight: "600",
               boxShadow: "0 2px 8px rgba(124, 90, 207, 0.3)"
             }}>
-              ⚡ Sprint {sprintInfo.sprint}
+              <Zap size={14} /> Sprint {sprintInfo.sprint}
             </span>
             <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
               background: sprintInfo.daysRemaining <= 1
                 ? "linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 152, 0, 0.2) 100%)"
                 : "rgba(255, 255, 255, 0.05)",
@@ -146,10 +153,10 @@ export default function WeeklyPlanning() {
               color: sprintInfo.daysRemaining <= 1 ? "#ffc107" : "#e5d7ff"
             }}>
               {sprintInfo.daysRemaining === 0 
-                ? "🏁 Encerra hoje"
+                ? <><CheckeredFlag size={14} /> Encerra hoje</>
                 : sprintInfo.daysRemaining === 1
-                ? "⏰ Acaba amanhã"
-                : `📅 Faltam ${sprintInfo.daysRemaining} dias`
+                ? <><Clock3 size={14} /> Acaba amanhã</>
+                : <><CalendarDays size={14} /> Faltam {sprintInfo.daysRemaining} dias</>
               }
             </span>
           </div>

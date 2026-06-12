@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Cake } from "lucide-react";
 import { aniversariantes } from "./aniversariantesData";
 import "./CalendarGeral2026.css";
 import { ClockWidget } from "../ClockWidget";
@@ -48,8 +49,6 @@ export function AniversariantesMesWidget() {
   const today = getTodayInTimeZone();
   const monthIndex = today.getMonth();
   const currentDay = today.getDate();
-  const title = "🎂 aniversarianttz.";
-
   const aniversariantesDoMes = useMemo(() => {
     return aniversariantes
       .map((a) => ({ ...a, dateObj: parseDateUTC3(a.data) }))
@@ -64,7 +63,7 @@ export function AniversariantesMesWidget() {
   return (
     <div className="widget">
       <header>
-        <h2>{title}</h2>
+        <h2 className="title-with-icon"><Cake size={18} /> aniversarianttz.</h2>
       </header>
       <div className="birthday-cards">
         {aniversariantesDoMes.map((a) => {

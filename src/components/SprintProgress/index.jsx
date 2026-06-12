@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Clock3, TriangleAlert, Zap } from "lucide-react";
 import { sprintsData } from "../Calendar2026/sprintsData";
 import DevCards from "../DevTaskTracker/DevCards";
 import {
@@ -255,16 +256,17 @@ export default function SprintProgress() {
     });
   }, [projectData, sprintPct]);
 
-  const sprintTitle = currentSprint
-    ? `⚡ Sprint ${currentSprint.sprint} · ${formatSprintDates(currentSprint)}`
-    : "⚡ sprint progress.";
-
   return (
     <div className="widget sprint-progress-widget">
       <header>
-        <h2>{sprintTitle}</h2>
+        <h2 className="title-with-icon">
+          <Zap size={18} />
+          {currentSprint
+            ? `Sprint ${currentSprint.sprint} · ${formatSprintDates(currentSprint)}`
+            : "sprint progress."}
+        </h2>
         <span className="sprint-clock">
-          🕐 {clockStr} · {dateStr}
+          <Clock3 size={16} /> {clockStr} · {dateStr}
         </span>
       </header>
 
@@ -299,7 +301,9 @@ export default function SprintProgress() {
               <div className="sprint-ref-marker" style={{ left: `${sprintPct}%` }} />
             </div>
             <span className={getProgressPctClassName(row)}>{row.pct}%</span>
-            <span className="sprint-row-alert">{row.lagging ? "⚠" : ""}</span>
+            <span className="sprint-row-alert">
+              {row.lagging ? <TriangleAlert size={14} /> : null}
+            </span>
           </div>
         ))}
       </div>

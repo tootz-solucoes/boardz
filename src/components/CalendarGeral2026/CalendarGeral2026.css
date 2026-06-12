@@ -29,7 +29,9 @@
 }
 
 .dashboard-widget-icon {
-  font-size: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dashboard-widget-title {
@@ -68,7 +70,9 @@
 }
 
 .sprint-widget-remaining .sprint-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   padding: 0.4rem 0.7rem;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -405,7 +409,8 @@
   position: absolute;
   bottom: 2px;
   left: 4px;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
   z-index: 5;
 }
@@ -444,7 +449,8 @@
   position: absolute;
   top: 3px;
   left: 4px;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
   z-index: 5;
 }
@@ -485,7 +491,8 @@
 }
 
 .confraternizacao-indicator-icon {
-  font-size: 1.25rem;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
 }
 
@@ -529,7 +536,8 @@
 }
 
 .sprint-info-icon {
-  font-size: 1.75rem;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   animation: pulse-icon 2s ease-in-out infinite;
@@ -918,7 +926,8 @@
 }
 
 .back-to-current-month-icon {
-  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
   font-weight: 700;
   line-height: 1;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));

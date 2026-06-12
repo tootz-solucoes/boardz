@@ -3,6 +3,9 @@
 }
 
 .sprint-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 1.25em;
   color: #e5d7ff;
   opacity: 0.85;
@@ -104,6 +107,9 @@
 .sprint-row-alert {
   width: 1em;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.85em;
   color: #f97316;
 }

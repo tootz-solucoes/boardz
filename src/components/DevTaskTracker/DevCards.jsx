@@ -7,10 +7,12 @@ import {
   DEVELOPERS,
 } from "../../config/clickupConfig";
 import { clickupApi } from "../../services/clickupApi";
+import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
 import "./DevTaskTracker.css";
 
 const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
-const FETCH_INTERVAL = 30 * 60 * 1000;
+const FETCH_INTERVAL = 1 * 60 * 1000;
+const SNAPSHOT_KEY_PREFIX = "dev-cards";
 
 function getFieldValue(task, fieldName) {
   const fields = task.custom_fields || [];
@@ -89,6 +91,13 @@ export default function DevCards({ sprintListId }) {
     }
 
     let cancelled = false;
+    const snapshotKey = `${SNAPSHOT_KEY_PREFIX}:${sprintListId ?? "all"}`;
+    const cached = readSnapshot(snapshotKey, FETCH_INTERVAL);
+
+    if (cached?.value) {
+      setDevs(cached.value);
+    }
+
     async function load() {
       const members = await fetchMembers();
       if (cancelled) return;
@@ -126,10 +135,16 @@ export default function DevCards({ sprintListId }) {
         }),
       );
 
-      if (!cancelled) setDevs(resolved);
+      if (!cancelled) {
+        setDevs(resolved);
+        writeSnapshot(snapshotKey, resolved);
+      }
     }
 
-    load();
+    if (!cached || cached.isStale) {
+      load();
+    }
+
     const id = setInterval(load, FETCH_INTERVAL);
     return () => {
       cancelled = true;

@@ -12,10 +12,12 @@ import {
   PROJECTS,
 } from "../../config/clickupConfig";
 import { clickupApi } from "../../services/clickupApi";
+import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
 import "./SprintProgress.css";
 
 const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
-const FETCH_INTERVAL = 5 * 60 * 1000;
+const FETCH_INTERVAL = 2 * 60 * 1000;
+const SNAPSHOT_KEY_PREFIX = "sprint-progress";
 
 function useNow(interval = 60000) {
   const [now, setNow] = useState(() => new Date());
@@ -198,6 +200,14 @@ export default function SprintProgress() {
     if (!PROXY_URL || !currentSprint) return;
 
     let cancelled = false;
+    const snapshotKey = `${SNAPSHOT_KEY_PREFIX}:${currentSprint.sprint}`;
+
+    const cached = readSnapshot(snapshotKey, FETCH_INTERVAL);
+    if (cached?.value) {
+      setProjectData(cached.value.projectData || MOCK_PROJECT_DATA);
+      setSprintListId(cached.value.sprintListId || null);
+    }
+
     async function load() {
       setLoading(true);
       try {
@@ -206,13 +216,21 @@ export default function SprintProgress() {
         setSprintListId(listId);
         const tasks = await fetchSprintTasks(listId);
         if (cancelled) return;
-        setProjectData(computeProjectProgress(tasks));
+        const nextProjectData = computeProjectProgress(tasks);
+        setProjectData(nextProjectData);
+        writeSnapshot(snapshotKey, {
+          sprintListId: listId,
+          projectData: nextProjectData,
+        });
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    load();
+    if (!cached || cached.isStale) {
+      load();
+    }
+
     const id = setInterval(load, FETCH_INTERVAL);
     return () => {
       cancelled = true;

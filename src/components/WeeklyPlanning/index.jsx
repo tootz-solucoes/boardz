@@ -4,9 +4,12 @@ import mapSheetRows from "./mapSheetRows";
 import WeeklyPlanningTable from "./Table";
 import { normalizeDate } from "../Calendar2026/utils";
 import { sprintsData } from "../Calendar2026/sprintsData";
+import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
 
 const WEEKLY_PLANNING_SHEET_ID = "19WHC3WpIL4ilNDWFX4HnBanAE6g80lAw1t5Kr7uKnrQ";
 const WEEKLY_PLANNING_SHEET_URL = `https://opensheet.elk.sh/${WEEKLY_PLANNING_SHEET_ID}/1`;
+const FETCH_INTERVAL = 2 * 60 * 1000;
+const SNAPSHOT_KEY = "weekly-planning";
 const DEVS = [  
   "Adelino",
   "Douglas",
@@ -24,22 +27,39 @@ export default function WeeklyPlanning() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    const cached = readSnapshot(SNAPSHOT_KEY, FETCH_INTERVAL);
 
-    fetch(WEEKLY_PLANNING_SHEET_URL)
-      .then((res) => {
-        if (!res.ok) throw new Error("Erro ao buscar dados");
-        return res.json();
-      })
-      .then((data) => {
-        setRows(mapSheetRows({ data, matchHeaders: true }));
-        setError(null);
-      })
-      .catch(() => {
-        setError("Erro ao carregar dados.");
-        setRows(DEVS.map((dev) => ({ dev, days: ["", "", "", "", ""] })));
-      })
-      .finally(() => setLoading(false));
+    if (cached?.value) {
+      setRows(cached.value);
+    }
+
+    function load() {
+      setLoading(true);
+
+      fetch(WEEKLY_PLANNING_SHEET_URL)
+        .then((res) => {
+          if (!res.ok) throw new Error("Erro ao buscar dados");
+          return res.json();
+        })
+        .then((data) => {
+          const mappedRows = mapSheetRows({ data, matchHeaders: true });
+          setRows(mappedRows);
+          writeSnapshot(SNAPSHOT_KEY, mappedRows);
+          setError(null);
+        })
+        .catch(() => {
+          setError("Erro ao carregar dados.");
+          setRows(DEVS.map((dev) => ({ dev, days: ["", "", "", "", ""] })));
+        })
+        .finally(() => setLoading(false));
+    }
+
+    if (!cached || cached.isStale) {
+      load();
+    }
+
+    const id = setInterval(load, FETCH_INTERVAL);
+    return () => clearInterval(id);
   }, []);
 
   // Calcular sprint atual e dias restantes

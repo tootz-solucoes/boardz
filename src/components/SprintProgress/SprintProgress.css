@@ -73,6 +73,10 @@
   background: linear-gradient(90deg, #92310e, #f97316);
 }
 
+.sprint-bar-fill--complete {
+  background: linear-gradient(90deg, #0b7a60, #10b981);
+}
+
 .sprint-row--lagging .sprint-row-label {
   color: #f97316;
   opacity: 1;

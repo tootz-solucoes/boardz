@@ -13,6 +13,10 @@ import {
 } from "../../config/clickupConfig";
 import { clickupApi } from "../../services/clickupApi";
 import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
+import {
+  getProgressFillWidth,
+  getProgressFillClassName,
+} from "./progressUtils";
 import "./SprintProgress.css";
 
 const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
@@ -288,8 +292,8 @@ export default function SprintProgress() {
             <span className="sprint-row-label">{row.name}</span>
             <div className="sprint-bar-track">
               <div
-                className={`sprint-bar-fill${row.lagging ? " sprint-bar-fill--lagging" : ""}`}
-                style={{ width: `${row.pct}%` }}
+                className={getProgressFillClassName(row)}
+                style={{ width: `${getProgressFillWidth(row.pct)}%` }}
               />
               <div className="sprint-ref-marker" style={{ left: `${sprintPct}%` }} />
             </div>

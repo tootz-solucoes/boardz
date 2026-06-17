@@ -33,7 +33,7 @@ export const PROJECTS = [
   {
     name: "Brasil Júnior",
     clienteFieldValue: "Brasil Júnior",
-    sprintPoints: 100,
+    sprintPoints: 140,
   },
   { name: "EVNTTZ.", clienteFieldValue: "EVNTTZ.", sprintPoints: 100 },
   { name: "Migtech", clienteFieldValue: "MigTech", sprintPoints: 100 },

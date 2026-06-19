@@ -165,40 +165,8 @@ function Calendar2026() {
     return normalizedDateValue === startTime || normalizedDateValue === endTime;
   }
 
-  function getDayClassName(date) {
-    const classes = ["calendar-day"];
-
-    if (!date) {
-      classes.push("calendar-day-empty");
-      return classes.join(" ");
-    }
-
-    const sprintNumber = getSprintForDate(date);
-    const isBoundary = isSprintBoundary(date);
-
-    if (isBoundary) {
-      classes.push("calendar-day-sprint-boundary");
-    }
-
-    if (isWeekend(date)) {
-      classes.push("calendar-day-weekend");
-    }
-
-    if (isHoliday(date, 2026)) {
-      const holidayType = getHolidayType(date, 2026);
-      classes.push(`calendar-day-holiday calendar-day-holiday-${holidayType}`);
-    }
-
-    if (isOptionalDay(date, 2026)) {
-      classes.push("calendar-day-optional");
-    }
-
-    if (sprintNumber && isWorkingDay(date, 2026)) {
-      classes.push("calendar-day-sprint");
-    }
-
-    return classes.join(" ");
-  }
+  const DAY_BASE = "aspect-square min-h-[50px] flex flex-col items-center justify-center p-1 border rounded-lg relative transition-all duration-200 cursor-help hover:scale-[1.08] hover:z-10 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4),_0_0_0_1px_rgba(179,136,255,0.2)] hover:border-[rgba(179,136,255,0.3)]";
+  const DAY_EMPTY = "aspect-square min-h-[50px] flex flex-col items-center justify-center p-1 rounded-lg relative bg-transparent border-transparent cursor-default";
 
   function getDayBorderStyle(date) {
     const sprintNumber = getSprintForDate(date);
@@ -332,85 +300,83 @@ function Calendar2026() {
     return parts.join(" - ");
   }
 
+  const LEGEND_COLOR_BASE = "w-6 h-6 rounded-[4px] border border-[rgba(255,255,255,0.2)]";
+  const SPRINT_LABEL = "absolute top-[3px] right-[4px] text-[0.7rem] font-extrabold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9)] bg-[linear-gradient(135deg,rgba(0,0,0,0.6),rgba(0,0,0,0.4))] py-[2px] px-[6px] rounded-[4px] tracking-[0.5px] border border-[rgba(255,255,255,0.1)]";
+
   return (
-    <div className="calendar-2026">
+    <div className="w-full relative">
       {tooltip.show && (
         <div
-          className={`calendar-tooltip calendar-tooltip-${tooltip.position}`}
-          style={{
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y}px`,
-          }}
+          className={`calendar-tooltip-${tooltip.position} fixed bg-[linear-gradient(135deg,#1e1e24,#2a2a2e)] text-white py-2 px-3 rounded-lg text-[0.875rem] font-medium shadow-[0_4px_12px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(179,136,255,0.2)] pointer-events-none z-[10000] border border-[rgba(179,136,255,0.3)] max-w-[300px] break-words text-center`}
+          style={{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }}
         >
           {tooltip.text}
         </div>
       )}
-      <div className="calendar-legend">
-        <div className="legend-item">
-          <div className="legend-color weekend"></div>
+
+      <div className="flex gap-8 mb-8 p-4 bg-bg-surface rounded-xl flex-wrap">
+        <div className="flex items-center gap-2 text-text-soft text-[0.9rem]">
+          <div className={`${LEGEND_COLOR_BASE} bg-[#3a3a3a]`} />
           <span>Finais de Semana</span>
         </div>
-        <div className="legend-item">
-          <div className="legend-color holiday"></div>
+        <div className="flex items-center gap-2 text-text-soft text-[0.9rem]">
+          <div className={`${LEGEND_COLOR_BASE} bg-gradient-to-br from-[#dc2626] to-[#b91c1c] shadow-[0_0_8px_rgba(220,38,38,0.4)]`} />
           <span>Feriados</span>
         </div>
-        <div className="legend-item">
-          <div className="legend-color optional"></div>
+        <div className="flex items-center gap-2 text-text-soft text-[0.9rem]">
+          <div className={`${LEGEND_COLOR_BASE} bg-gradient-to-br from-[#f59e0b] to-[#d97706] shadow-[0_0_8px_rgba(245,158,11,0.4)]`} />
           <span>Pontos Facultativos</span>
         </div>
-        <div className="legend-item">
-          <div className="legend-color sprint"></div>
+        <div className="flex items-center gap-2 text-text-soft text-[0.9rem]">
+          <div className={`${LEGEND_COLOR_BASE} bg-gradient-to-br from-[#3b82f6] to-[#10b981] shadow-[0_0_8px_rgba(59,130,246,0.4)]`} />
           <span>Sprints</span>
         </div>
       </div>
 
-      <div className="calendar-months">
+      <div className="grid grid-cols-2 max-[1200px]:grid-cols-1 gap-8">
         {months.map(({ monthIndex, monthName, days }) => (
-          <div key={monthIndex} className="calendar-month">
-            <h3 className="calendar-month-title">{monthName}</h3>
-            <div className="calendar-grid">
-              <div className="calendar-weekdays">
+          <div key={monthIndex} className="bg-gradient-to-br from-[#1e1e24] to-[#252529] rounded-2xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)]">
+            <h3 className="text-purple-accent [text-shadow:0_0_5px_rgba(200,166,255,0.4)] mb-4 text-[1.5rem] text-center">{monthName}</h3>
+            <div className="w-full">
+              <div className="grid grid-cols-7 gap-1 mb-2">
                 {WEEK_DAYS.map((day) => (
-                  <div key={day} className="calendar-weekday">
-                    {day}
-                  </div>
+                  <div key={day} className="text-center py-2 font-semibold text-purple-accent text-[0.85rem]">{day}</div>
                 ))}
               </div>
-              <div className="calendar-days">
+              <div className="grid grid-cols-7 gap-1">
                 {days.map((date, index) => {
-                  if (!date) {
-                    return (
-                      <div
-                        key={`empty-${index}`}
-                        className="calendar-day calendar-day-empty"
-                      />
-                    );
-                  }
+                  if (!date) return <div key={`empty-${index}`} className={DAY_EMPTY} />;
 
                   const sprintNumber = getSprintForDate(date);
                   const normalizedDate = normalizeDate(date);
-                  const borderStyle = getDayBorderStyle(date);
-                  const combinedStyle = {
-                    ...getDayStyle(date),
-                    ...borderStyle,
-                  };
+                  const isBoundary = isSprintBoundary(date);
+                  const isWeekendDay = isWeekend(date);
+                  const isHolidayDay = isHoliday(date, 2026);
+                  const isOptionalDayDay = isOptionalDay(date, 2026);
+                  const isSprintWorkingDay = sprintNumber && isWorkingDay(date, 2026);
+                  const combinedStyle = { ...getDayStyle(date), ...getDayBorderStyle(date) };
+
+                  let bgBorder;
+                  if (isHolidayDay && isWeekendDay) bgBorder = "bg-gradient-to-br from-[#b91c1c] to-[#991b1b] border-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.3)]";
+                  else if (isHolidayDay) bgBorder = "bg-gradient-to-br from-[#dc2626] to-[#b91c1c] border-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.3)]";
+                  else if (isOptionalDayDay && isWeekendDay) bgBorder = "bg-gradient-to-br from-[#d97706] to-[#b45309] border-[#fbbf24] shadow-[0_0_8px_rgba(245,158,11,0.3)]";
+                  else if (isOptionalDayDay) bgBorder = "bg-gradient-to-br from-[#f59e0b] to-[#d97706] border-[#fbbf24] shadow-[0_0_8px_rgba(245,158,11,0.3)]";
+                  else if (isWeekendDay) bgBorder = "bg-gradient-to-br from-[#3a3a40] to-[#35353a] border-[rgba(255,255,255,0.1)] opacity-80";
+                  else bgBorder = "bg-gradient-to-br from-[#2a2a2e] to-[#252529] border-[rgba(255,255,255,0.1)]";
+
+                  const fontClass = isBoundary ? "font-bold" : isSprintWorkingDay ? "font-semibold" : "";
+                  const dayNumberClass = isHolidayDay ? "text-base text-white font-semibold" : isWeekendDay ? "text-base text-[#bbb] font-medium" : "text-base text-white font-medium";
 
                   return (
                     <div
                       key={normalizedDate.getTime()}
-                      className={getDayClassName(date)}
+                      className={`${DAY_BASE} ${bgBorder} ${fontClass}`.trimEnd()}
                       style={combinedStyle}
                       onMouseEnter={(e) => handleDayMouseEnter(e, date)}
                       onMouseLeave={handleDayMouseLeave}
                     >
-                      <span className="calendar-day-number">
-                        {date.getDate()}
-                      </span>
-                      {sprintNumber && (
-                        <span className="calendar-day-sprint-label">
-                          S{sprintNumber}
-                        </span>
-                      )}
+                      <span className={dayNumberClass}>{date.getDate()}</span>
+                      {sprintNumber && <span className={SPRINT_LABEL}>S{sprintNumber}</span>}
                     </div>
                   );
                 })}
@@ -420,106 +386,68 @@ function Calendar2026() {
         ))}
       </div>
 
-       <div className="calendar-sprint-details">
-         <h3 className="sprint-details-title title-with-icon"><ChartColumn size={18} /> Detalhamento das Sprints</h3>
-         <div className="sprint-details-table-wrapper">
-           <table className="sprint-details-table">
-             <thead>
-               <tr>
-                 <th>Sprint</th>
-                 <th>Início</th>
-                 <th>Dia da Semana</th>
-                 <th>Término</th>
-                 <th>Dia da Semana</th>
-                 <th>Dias Úteis</th>
-                 <th>Dias Corridos</th>
-               </tr>
-             </thead>
-             <tbody>
-               {sprintPeriods.map((period) => {
-                 const workingDaysData = Array.from(
-                   sprintWorkingDaysMap.entries()
-                 )
-                   .filter(
-                     ([, info]) =>
-                       info.sprint === period.sprint && info.workingDay !== null
-                   )
-                   .sort(([a], [b]) => a - b);
+      <div className="mt-12 bg-gradient-to-br from-[#1e1e24] to-[#252529] rounded-2xl p-8 shadow-[0_4px_16px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.08)]">
+        <h3 className="inline-flex items-center gap-[0.45rem] text-purple-accent [text-shadow:0_0_5px_rgba(200,166,255,0.4)] mb-6 text-[1.5rem] text-center w-full justify-center">
+          <ChartColumn size={18} /> Detalhamento das Sprints
+        </h3>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th className="text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]">Sprint</th>
+                <th className="text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]">Início</th>
+                <th className="text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]">Dia da Semana</th>
+                <th className="text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]">Término</th>
+                <th className="text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]">Dia da Semana</th>
+                <th className="text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]">Dias Úteis</th>
+                <th className="text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]">Dias Corridos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sprintPeriods.map((period) => {
+                const workingDaysData = Array.from(sprintWorkingDaysMap.entries())
+                  .filter(([, info]) => info.sprint === period.sprint && info.workingDay !== null)
+                  .sort(([a], [b]) => a - b);
+                const workingDays = workingDaysData.length;
+                const workingStartDate = workingDaysData.length > 0 ? new Date(workingDaysData[0][0]) : period.calendarStart;
+                const workingEndDate = workingDaysData.length > 0 ? new Date(workingDaysData[workingDaysData.length - 1][0]) : period.calendarEnd;
+                const calendarStart = new Date(period.calendarStart);
+                const calendarEnd = new Date(period.calendarEnd);
+                calendarEnd.setHours(23, 59, 59, 999);
+                let calendarDays = 0;
+                const currentDate = new Date(calendarStart);
+                while (currentDate <= calendarEnd) { calendarDays++; currentDate.setDate(currentDate.getDate() + 1); }
 
-                 const workingDays = workingDaysData.length;
-                 const workingStartDate =
-                   workingDaysData.length > 0
-                     ? new Date(workingDaysData[0][0])
-                     : period.calendarStart;
-                 const workingEndDate =
-                   workingDaysData.length > 0
-                     ? new Date(workingDaysData[workingDaysData.length - 1][0])
-                     : period.calendarEnd;
-
-                 const calendarStart = new Date(period.calendarStart);
-                 const calendarEnd = new Date(period.calendarEnd);
-                 calendarEnd.setHours(23, 59, 59, 999);
-
-                 let calendarDays = 0;
-                 const currentDate = new Date(calendarStart);
-                 while (currentDate <= calendarEnd) {
-                   calendarDays++;
-                   currentDate.setDate(currentDate.getDate() + 1);
-                 }
-
-                 return (
-                   <tr key={period.sprint}>
-                     <td className="sprint-number-cell">
-                       <span
-                         className="sprint-number-badge"
-                         style={{
-                           backgroundColor: getSprintColor(period.sprint),
-                         }}
-                       >
-                         {period.sprint}
-                       </span>
-                     </td>
-                     <td>
-                       {formatDate(period.calendarStart)}
-                       {period.calendarStart.getTime() !==
-                         workingStartDate.getTime() && (
-                         <span
-                           style={{
-                             fontSize: "0.8em",
-                             color: "#999",
-                             display: "block",
-                           }}
-                         >
-                           (útil: {formatDate(workingStartDate)})
-                         </span>
-                       )}
-                     </td>
-                     <td>{getWeekDayName(period.calendarStart)}</td>
-                     <td>
-                       {formatDate(period.calendarEnd)}
-                       {period.calendarEnd.getTime() !==
-                         workingEndDate.getTime() && (
-                         <span
-                           style={{
-                             fontSize: "0.8em",
-                             color: "#999",
-                             display: "block",
-                           }}
-                         >
-                           (útil: {formatDate(workingEndDate)})
-                         </span>
-                       )}
-                     </td>
-                     <td>{getWeekDayName(period.calendarEnd)}</td>
-                     <td className="days-cell">{workingDays}</td>
-                     <td className="days-cell">{calendarDays}</td>
-                   </tr>
-                 );
-               })}
-             </tbody>
-           </table>
-         </div>
-       </div>
+                return (
+                  <tr key={period.sprint}>
+                    <td className="text-center p-4 text-text-soft text-[0.9rem]">
+                      <span className="w-8 h-8 rounded-lg text-white font-bold text-[0.95rem] inline-flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.3)]" style={{ backgroundColor: getSprintColor(period.sprint) }}>
+                        {period.sprint}
+                      </span>
+                    </td>
+                    <td className="p-4 text-text-soft text-[0.9rem]">
+                      {formatDate(period.calendarStart)}
+                      {period.calendarStart.getTime() !== workingStartDate.getTime() && (
+                        <span style={{ fontSize: "0.8em", color: "#999", display: "block" }}>(útil: {formatDate(workingStartDate)})</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-text-soft text-[0.9rem]">{getWeekDayName(period.calendarStart)}</td>
+                    <td className="p-4 text-text-soft text-[0.9rem]">
+                      {formatDate(period.calendarEnd)}
+                      {period.calendarEnd.getTime() !== workingEndDate.getTime() && (
+                        <span style={{ fontSize: "0.8em", color: "#999", display: "block" }}>(útil: {formatDate(workingEndDate)})</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-text-soft text-[0.9rem]">{getWeekDayName(period.calendarEnd)}</td>
+                    <td className="text-center p-4 font-semibold text-purple-accent">{workingDays}</td>
+                    <td className="text-center p-4 font-semibold text-purple-accent">{calendarDays}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

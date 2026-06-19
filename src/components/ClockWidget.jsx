@@ -12,7 +12,6 @@ export function ClockWidget() {
     return () => clearInterval(timer);
   }, []);
 
-  // Formatação para o fuso horário de Recife (UTC-3)
   const formatDateTime = (date) => {
     const options = {
       timeZone: "America/Recife",
@@ -52,50 +51,20 @@ export function ClockWidget() {
   const weekday = formatWeekday(currentDateTime);
 
   return (
-    <div className="widget">
-      <header>
-        <h2 className="title-with-icon"><Clock3 size={18} /> {weekday}</h2>
+    <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
+      <header className="flex justify-between items-center mb-2">
+        <h2 className="inline-flex items-center gap-[0.45rem]"><Clock3 size={18} /> {weekday}</h2>
       </header>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "1rem",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "1.1rem",
-            fontWeight: "600",
-            color: "#e5d7ff",
-            letterSpacing: "0.5px",
-          }}
-        >
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="text-[1.1rem] font-semibold text-text-soft tracking-[0.5px]">
           {date}
         </div>
 
-        <div
-          style={{
-            fontSize: "1.8rem",
-            fontWeight: "600",
-            color: "#fff",
-            fontFamily: "monospace",
-            letterSpacing: "2px",
-            textShadow: "0 0 10px rgba(255, 255, 255, 0.3)",
-          }}
-        >
+        <div className="text-[1.8rem] font-semibold text-white font-mono tracking-[2px] [text-shadow:0_0_10px_rgba(255,255,255,0.3)]">
           {time}
         </div>
 
-        <div
-          style={{
-            fontSize: "0.7rem",
-            color: "#888",
-            marginTop: "0.5rem",
-          }}
-        >
+        <div className="text-[0.7rem] text-[#888] mt-2">
           UTC-3
         </div>
       </div>

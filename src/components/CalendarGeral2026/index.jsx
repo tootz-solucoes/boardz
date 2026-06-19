@@ -223,50 +223,10 @@ function CalendarGeral2026() {
     return normalizedDateValue === startTime || normalizedDateValue === endTime;
   }
 
-  function getDayClassName(date) {
-    const classes = ["calendar-day"];
-
-    if (!date) {
-      classes.push("calendar-day-empty");
-      return classes.join(" ");
-    }
-
-    const sprintNumber = getSprintForDate(date);
-    const isBoundary = isSprintBoundary(date);
-
-    if (isBoundary) {
-      classes.push("calendar-day-sprint-boundary");
-    }
-
-    if (isWeekend(date)) {
-      classes.push("calendar-day-weekend");
-    }
-
-    if (isHoliday(date, 2026)) {
-      const holidayType = getHolidayType(date, 2026);
-      classes.push(`calendar-day-holiday calendar-day-holiday-${holidayType}`);
-    }
-
-    if (isOptionalDay(date, 2026)) {
-      classes.push("calendar-day-optional");
-    }
-
-    if (sprintNumber && isWorkingDay(date, 2026)) {
-      classes.push("calendar-day-sprint");
-    }
-
-    const confDateKey = normalizeDate(date).getTime();
-    if (confraternizacoesPorData.has(confDateKey)) {
-      classes.push("calendar-day-confraternizacao");
-    }
-
-    const aniversarioDateKey = normalizeDate(date).getTime();
-    if (aniversariantesPorData.has(aniversarioDateKey)) {
-      classes.push("calendar-day-aniversario");
-    }
-
-    return classes.join(" ");
-  }
+  const DAY_BASE = "aspect-square min-h-[50px] flex flex-col items-center justify-center p-1 border rounded-lg relative transition-all duration-200 cursor-help hover:scale-[1.08] hover:z-10 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4),_0_0_0_1px_rgba(179,136,255,0.2)] hover:border-[rgba(179,136,255,0.3)]";
+  const DAY_EMPTY = "aspect-square min-h-[50px] flex flex-col items-center justify-center p-1 rounded-lg relative bg-transparent border-transparent cursor-default";
+  const SPRINT_LABEL = "absolute top-[3px] right-[4px] text-[0.7rem] font-extrabold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9)] bg-[linear-gradient(135deg,rgba(0,0,0,0.6),rgba(0,0,0,0.4))] py-[2px] px-[6px] rounded-[4px] tracking-[0.5px] border border-[rgba(255,255,255,0.1)]";
+  const LEGEND_COLOR_BASE = "w-6 h-6 rounded-[4px] border border-[rgba(255,255,255,0.2)]";
 
   function getDayBorderStyle(date) {
     const sprintNumber = getSprintForDate(date);
@@ -576,66 +536,73 @@ function CalendarGeral2026() {
     }
   };
 
+  const TABLE_SECTION = "mt-12 bg-gradient-to-br from-[#1e1e24] to-[#252529] rounded-2xl p-8 shadow-[0_4px_16px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.08)]";
+  const TABLE_TITLE = "inline-flex items-center gap-[0.45rem] text-purple-accent [text-shadow:0_0_5px_rgba(200,166,255,0.4)] mb-6 text-[1.5rem] text-center w-full justify-center";
+  const TH = "text-left p-4 font-semibold text-[0.9rem] tracking-[0.5px]";
+  const TD = "p-4 text-text-soft text-[0.9rem]";
+
   return (
-    <div className="calendar-geral-2026">
+    <div className="w-full relative">
       {tooltip.show && (
         <div
-          className={`calendar-tooltip calendar-tooltip-${tooltip.position}`}
-          style={{
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y}px`,
-          }}
+          className={`calendar-tooltip-${tooltip.position} fixed bg-[linear-gradient(135deg,#1e1e24,#2a2a2e)] text-white py-2 px-3 rounded-lg text-[0.875rem] font-medium shadow-[0_4px_12px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(179,136,255,0.2)] pointer-events-none z-[10000] border border-[rgba(179,136,255,0.3)] max-w-[300px] break-words text-center`}
+          style={{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }}
         >
           {tooltip.text}
         </div>
       )}
 
-      <div className="calendar-dashboard">
+      {/* Dashboard widgets */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5 mb-8">
         {currentSprintInfo && (
-          <div className="dashboard-widget dashboard-widget-sprint">
-            <div className="dashboard-widget-header">
-              <span className="dashboard-widget-icon"><Zap size={20} /></span>
-              <span className="dashboard-widget-title">Sprint atual</span>
+          <div className="bg-gradient-to-br from-[#1e1e24] to-[#252529] rounded-[14px] p-5 border-l-4 border-l-purple-medium border border-[rgba(255,255,255,0.08)] shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
+            <div className="flex items-center gap-[0.6rem] mb-3 pb-[0.6rem] border-b border-[rgba(255,255,255,0.1)]">
+              <span className="inline-flex items-center justify-center"><Zap size={20} /></span>
+              <span className="text-[0.85rem] font-semibold text-purple-accent uppercase tracking-[0.5px]">Sprint atual</span>
             </div>
-            <div className="dashboard-widget-body">
-              <div className="sprint-widget-main">
-                <strong>Sprint {currentSprintInfo.sprint}</strong>
+            <div className="text-[0.95rem] text-text-soft">
+              <div className="flex flex-col gap-[0.35rem] mb-3">
+                <strong className="text-white text-[1.15rem]">Sprint {currentSprintInfo.sprint}</strong>
                 {currentSprintInfo.workingDay != null && (
-                  <span className="sprint-widget-days">
+                  <span className="text-[0.85rem] text-text-dim">
                     {currentSprintInfo.workingDay}º dia útil
                     {currentSprintInfo.calendarDay != null && ` · ${currentSprintInfo.calendarDay}º dia corrido`}
                   </span>
                 )}
               </div>
-              <div className="sprint-widget-remaining">
-                {currentSprintInfo.daysRemaining === 0 ? (
-                  <span className="sprint-badge sprint-badge-urgent"><Flag size={14} /> Termina hoje</span>
-                ) : currentSprintInfo.daysRemaining === 1 ? (
-                  <span className="sprint-badge sprint-badge-urgent"><Clock3 size={14} /> Termina amanhã</span>
-                ) : (
-                  <span className="sprint-badge"><CalendarDays size={14} /> Faltam {currentSprintInfo.daysRemaining} dias</span>
-                )}
-              </div>
+              {currentSprintInfo.daysRemaining === 0 ? (
+                <span className="inline-flex items-center gap-[0.4rem] py-[0.4rem] px-[0.7rem] rounded-lg text-[0.85rem] font-semibold bg-[linear-gradient(135deg,rgba(255,193,7,0.25),rgba(255,152,0,0.25))] text-[#ffc107] border border-[rgba(255,193,7,0.5)]">
+                  <Flag size={14} /> Termina hoje
+                </span>
+              ) : currentSprintInfo.daysRemaining === 1 ? (
+                <span className="inline-flex items-center gap-[0.4rem] py-[0.4rem] px-[0.7rem] rounded-lg text-[0.85rem] font-semibold bg-[linear-gradient(135deg,rgba(255,193,7,0.25),rgba(255,152,0,0.25))] text-[#ffc107] border border-[rgba(255,193,7,0.5)]">
+                  <Clock3 size={14} /> Termina amanhã
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-[0.4rem] py-[0.4rem] px-[0.7rem] rounded-lg text-[0.85rem] font-semibold bg-[rgba(124,90,207,0.25)] text-text-soft border border-[rgba(124,90,207,0.4)]">
+                  <CalendarDays size={14} /> Faltam {currentSprintInfo.daysRemaining} dias
+                </span>
+              )}
             </div>
           </div>
         )}
 
-        <div className={`dashboard-widget dashboard-widget-birthday ${dashboardBirthday.isToday ? "dashboard-widget-birthday-today" : ""}`}>
-          <div className="dashboard-widget-header">
-            <span className="dashboard-widget-icon"><Cake size={20} /></span>
-            <span className="dashboard-widget-title">
+        <div className={`bg-gradient-to-br rounded-[14px] p-5 border-l-4 border-l-[#ec4899] border border-[rgba(255,255,255,0.08)] shadow-[0_4px_16px_rgba(0,0,0,0.3)] ${dashboardBirthday.isToday ? "from-[rgba(236,72,153,0.12)] to-[rgba(219,39,119,0.08)] border-[rgba(236,72,153,0.35)] shadow-[0_4px_20px_rgba(236,72,153,0.2)]" : "from-[#1e1e24] to-[#252529]"}`}>
+          <div className="flex items-center gap-[0.6rem] mb-3 pb-[0.6rem] border-b border-[rgba(255,255,255,0.1)]">
+            <span className="inline-flex items-center justify-center"><Cake size={20} /></span>
+            <span className={`text-[0.85rem] font-semibold uppercase tracking-[0.5px] ${dashboardBirthday.isToday ? "text-[#ec4899]" : "text-purple-accent"}`}>
               {dashboardBirthday.isToday ? "Aniversariante de hoje" : "Próximo aniversário"}
             </span>
           </div>
-          <div className="dashboard-widget-body">
+          <div className="text-[0.95rem] text-text-soft">
             {dashboardBirthday.isToday ? (
-              <div className="birthday-widget-today">
+              <div className="text-[1.1rem] font-bold text-white [animation:birthday-pulse_2s_ease-in-out_infinite]">
                 {dashboardBirthday.todayNames.join(", ")}
               </div>
             ) : dashboardBirthday.next ? (
-              <div className="birthday-widget-next">
-                <strong>{dashboardBirthday.next.nome}</strong>
-                <span className="birthday-widget-date">
+              <div>
+                <strong className="text-white block mb-1">{dashboardBirthday.next.nome}</strong>
+                <span className="text-[0.9rem] text-text-dim">
                   {formatDate(dashboardBirthday.next.data)}
                   {dashboardBirthday.next.daysUntil !== null && dashboardBirthday.next.daysUntil > 0 && (
                     <> · em {dashboardBirthday.next.daysUntil} {dashboardBirthday.next.daysUntil === 1 ? "dia" : "dias"}</>
@@ -643,61 +610,50 @@ function CalendarGeral2026() {
                 </span>
               </div>
             ) : (
-              <div className="birthday-widget-empty">Nenhum aniversário no período</div>
+              <div className="text-[#888] italic">Nenhum aniversário no período</div>
             )}
           </div>
         </div>
 
         {dashboardHappyHour && (
-          <div className="dashboard-widget dashboard-widget-happyhour">
-            <div className="dashboard-widget-header">
-              <span className="dashboard-widget-icon"><PartyPopper size={20} /></span>
-              <span className="dashboard-widget-title">Happy hour</span>
+          <div className="bg-[linear-gradient(135deg,rgba(245,158,11,0.08),rgba(217,119,6,0.05))] rounded-[14px] p-5 border-l-4 border-l-[#f59e0b] border border-[rgba(245,158,11,0.25)] shadow-[0_4px_20px_rgba(245,158,11,0.15)]">
+            <div className="flex items-center gap-[0.6rem] mb-3 pb-[0.6rem] border-b border-[rgba(255,255,255,0.1)]">
+              <span className="inline-flex items-center justify-center"><PartyPopper size={20} /></span>
+              <span className="text-[0.85rem] font-semibold text-[#f59e0b] uppercase tracking-[0.5px]">Happy hour</span>
             </div>
-            <div className="dashboard-widget-body">
-              <div className="happyhour-widget-event">{dashboardHappyHour.evento}</div>
-              <div className="happyhour-widget-countdown">
-                {dashboardHappyHour.daysUntil === 0 ? (
-                  <span className="happyhour-badge happyhour-badge-today">É hoje!</span>
-                ) : dashboardHappyHour.daysUntil === 1 ? (
-                  <span className="happyhour-badge">Amanhã!</span>
-                ) : (
-                  <span className="happyhour-badge">Faltam {dashboardHappyHour.daysUntil} dias</span>
-                )}
-              </div>
+            <div className="text-[0.95rem] text-text-soft">
+              <div className="text-[0.9rem] text-text-soft mb-[0.6rem] leading-[1.35]">{dashboardHappyHour.evento}</div>
+              {dashboardHappyHour.daysUntil === 0 ? (
+                <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#22c55e,#16a34a)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_12px_rgba(34,197,94,0.5)] [animation:happyhour-today-pulse_1.5s_ease-in-out_infinite]">É hoje!</span>
+              ) : dashboardHappyHour.daysUntil === 1 ? (
+                <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#f59e0b,#d97706)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_10px_rgba(245,158,11,0.4)]">Amanhã!</span>
+              ) : (
+                <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#f59e0b,#d97706)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_10px_rgba(245,158,11,0.4)]">Faltam {dashboardHappyHour.daysUntil} dias</span>
+              )}
             </div>
           </div>
         )}
       </div>
 
-      <div className="calendar-legend">
-        <div className="legend-item">
-          <div className="legend-color weekend"></div>
-          <span>Finais de Semana</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color holiday"></div>
-          <span>Feriados</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color optional"></div>
-          <span>Pontos Facultativos</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color sprint"></div>
-          <span>Sprints</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color confraternizacao"></div>
-          <span>Confraternizações</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-color aniversario"></div>
-          <span>Aniversariantes</span>
-        </div>
+      {/* Legend */}
+      <div className="flex gap-8 mb-8 p-4 bg-bg-surface rounded-xl flex-wrap">
+        {[
+          { cls: "bg-[#3a3a3a]", label: "Finais de Semana" },
+          { cls: "bg-gradient-to-br from-[#dc2626] to-[#b91c1c] shadow-[0_0_8px_rgba(220,38,38,0.4)]", label: "Feriados" },
+          { cls: "bg-gradient-to-br from-[#f59e0b] to-[#d97706] shadow-[0_0_8px_rgba(245,158,11,0.4)]", label: "Pontos Facultativos" },
+          { cls: "bg-gradient-to-br from-[#3b82f6] to-[#10b981] shadow-[0_0_8px_rgba(59,130,246,0.4)]", label: "Sprints" },
+          { cls: "bg-gradient-to-br from-[#ec4899] to-[#db2777] shadow-[0_0_8px_rgba(236,72,153,0.4)]", label: "Confraternizações" },
+          { cls: "bg-gradient-to-br from-[#f59e0b] to-[#d97706] shadow-[0_0_8px_rgba(245,158,11,0.4)]", label: "Aniversariantes" },
+        ].map(({ cls, label }) => (
+          <div key={label} className="flex items-center gap-2 text-text-soft text-[0.9rem]">
+            <div className={`${LEGEND_COLOR_BASE} ${cls}`} />
+            <span>{label}</span>
+          </div>
+        ))}
       </div>
 
-      <div className="calendar-months">
+      {/* Calendar months grid */}
+      <div className="grid grid-cols-2 max-[1200px]:grid-cols-1 gap-8">
         {months.map(({ monthIndex, monthName, days }) => {
           const confsDoMes = getConfraternizacoesDoMes(monthIndex);
           const isCurrentMonth = currentYear === 2026 && monthIndex === currentMonthIndex;
@@ -705,97 +661,89 @@ function CalendarGeral2026() {
           return (
             <div
               key={monthIndex}
-              className="calendar-month"
-              ref={(el) => {
-                if (isCurrentMonth) {
-                  monthRefs.current[monthIndex] = el;
-                }
-              }}
+              className="bg-gradient-to-br from-[#1e1e24] to-[#252529] rounded-2xl p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5),_0_0_0_1px_rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.08)]"
+              ref={(el) => { if (isCurrentMonth) monthRefs.current[monthIndex] = el; }}
             >
-              <h3 className="calendar-month-title">{monthName}</h3>
-              <div className="calendar-grid">
-                <div className="calendar-weekdays">
+              <h3 className="text-purple-accent [text-shadow:0_0_5px_rgba(200,166,255,0.4)] mb-4 text-[1.5rem] text-center">{monthName}</h3>
+              <div className="w-full">
+                <div className="grid grid-cols-7 gap-1 mb-2">
                   {WEEK_DAYS.map((day) => (
-                    <div key={day} className="calendar-weekday">
-                      {day}
-                    </div>
+                    <div key={day} className="text-center py-2 font-semibold text-purple-accent text-[0.85rem]">{day}</div>
                   ))}
                 </div>
-                <div className="calendar-days">
+                <div className="grid grid-cols-7 gap-1">
                   {days.map((date, index) => {
-                    if (!date) {
-                      return (
-                        <div
-                          key={`empty-${index}`}
-                          className="calendar-day calendar-day-empty"
-                        />
-                      );
-                    }
+                    if (!date) return <div key={`empty-${index}`} className={DAY_EMPTY} />;
 
                     const sprintNumber = getSprintForDate(date);
                     const normalizedDate = normalizeDate(date);
-                    const borderStyle = getDayBorderStyle(date);
-                    const combinedStyle = {
-                      ...getDayStyle(date, sprintNumber),
-                      ...borderStyle,
-                    };
+                    const isBoundary = isSprintBoundary(date);
+                    const isWeekendDay = isWeekend(date);
+                    const isHolidayDay = isHoliday(date, 2026);
+                    const isOptionalDayDay = isOptionalDay(date, 2026);
+                    const isSprintWorkingDay = sprintNumber && isWorkingDay(date, 2026);
                     const confDateKey = normalizedDate.getTime();
                     const temConfraternizacao = confraternizacoesPorData.has(confDateKey);
-                    const temAniversario = aniversariantesPorData.has(normalizedDate.getTime());
-                    const isToday = normalizeDate(date).getTime() === today.getTime() && currentYear === 2026;
+                    const temAniversario = aniversariantesPorData.has(confDateKey);
+                    const isToday = confDateKey === today.getTime() && currentYear === 2026;
+
+                    const combinedStyle = {
+                      ...getDayStyle(date, sprintNumber),
+                      ...getDayBorderStyle(date),
+                      ...(temConfraternizacao ? { borderColor: '#ec4899', borderWidth: '2px', boxShadow: '0 0 8px rgba(236,72,153,0.4)' } : {}),
+                      ...(temAniversario && !temConfraternizacao ? { borderColor: '#f59e0b', borderWidth: '2px', boxShadow: '0 0 8px rgba(245,158,11,0.35)' } : {}),
+                    };
+
+                    let bgBorder;
+                    if (isHolidayDay && isWeekendDay) bgBorder = "bg-gradient-to-br from-[#b91c1c] to-[#991b1b] border-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.3)]";
+                    else if (isHolidayDay) bgBorder = "bg-gradient-to-br from-[#dc2626] to-[#b91c1c] border-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.3)]";
+                    else if (isOptionalDayDay && isWeekendDay) bgBorder = "bg-gradient-to-br from-[#d97706] to-[#b45309] border-[#fbbf24] shadow-[0_0_8px_rgba(245,158,11,0.3)]";
+                    else if (isOptionalDayDay) bgBorder = "bg-gradient-to-br from-[#f59e0b] to-[#d97706] border-[#fbbf24] shadow-[0_0_8px_rgba(245,158,11,0.3)]";
+                    else if (isWeekendDay) bgBorder = "bg-gradient-to-br from-[#3a3a40] to-[#35353a] border-[rgba(255,255,255,0.1)] opacity-80";
+                    else bgBorder = "bg-gradient-to-br from-[#2a2a2e] to-[#252529] border-[rgba(255,255,255,0.1)]";
+
+                    const fontClass = isBoundary ? "font-bold" : isSprintWorkingDay ? "font-semibold" : "";
+                    const dayNumberClass = isHolidayDay ? "text-base text-white font-semibold" : isWeekendDay ? "text-base text-[#bbb] font-medium" : "text-base text-white font-medium";
 
                     return (
                       <div
-                        key={normalizedDate.getTime()}
-                        className={getDayClassName(date)}
+                        key={confDateKey}
+                        className={`${DAY_BASE} ${bgBorder} ${fontClass}`.trimEnd()}
                         style={combinedStyle}
                         onMouseEnter={(e) => handleDayMouseEnter(e, date)}
                         onMouseLeave={handleDayMouseLeave}
                       >
-                        <span className="calendar-day-number">
-                          {date.getDate()}
-                        </span>
+                        <span className={dayNumberClass}>{date.getDate()}</span>
                         {isToday && (
-                          <span className="calendar-day-today-badge">
-                            HOJE
-                          </span>
+                          <span className="absolute bottom-[2px] left-1/2 -translate-x-1/2 text-[0.6rem] font-bold text-white bg-[linear-gradient(135deg,#7c5acf,#6b46c1)] py-[2px] px-[6px] rounded-[4px] tracking-[0.5px] [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] shadow-[0_2px_4px_rgba(124,90,207,0.5)] border border-[rgba(255,255,255,0.2)] z-[6] whitespace-nowrap">HOJE</span>
                         )}
-                        {sprintNumber && (
-                          <span className="calendar-day-sprint-label">
-                            S{sprintNumber}
-                          </span>
-                        )}
+                        {sprintNumber && <span className={SPRINT_LABEL}>S{sprintNumber}</span>}
                         {temConfraternizacao && (
-                          <span className="calendar-day-confraternizacao-icon"><PartyPopper size={12} /></span>
+                          <span className="absolute top-[3px] left-[4px] inline-flex items-center [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.8))] z-[5]"><PartyPopper size={12} /></span>
                         )}
                         {temAniversario && (
-                          <span className="calendar-day-aniversario-icon" title="Aniversário"><Cake size={12} /></span>
+                          <span className="absolute bottom-[2px] left-[4px] inline-flex items-center [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.8))] z-[5]" title="Aniversário"><Cake size={12} /></span>
                         )}
                       </div>
                     );
                   })}
                 </div>
               </div>
+
               {confsDoMes.length > 0 && (
-                <div className="calendar-month-confraternizacoes">
-                  <div className="confraternizacoes-indicator">
-                    <div className="confraternizacao-indicator-icon"><PartyPopper size={18} /></div>
-                    <div className="confraternizacoes-list">
+                <div className="mt-4 pt-4 border-t border-[rgba(255,255,255,0.1)]">
+                  <div className="flex items-start gap-3 p-3 bg-[linear-gradient(135deg,rgba(236,72,153,0.1),rgba(219,39,119,0.1))] rounded-lg border border-[rgba(236,72,153,0.3)]">
+                    <span className="inline-flex items-center shrink-0"><PartyPopper size={18} /></span>
+                    <div className="flex-1 flex flex-col gap-2">
                       {confsDoMes.map((conf, idx) => (
-                        <div key={idx} className="confraternizacao-item">
+                        <div key={idx} className="text-text-soft text-[0.85rem] leading-[1.4]">
                           {conf.data ? (
                             <>
-                              <span className="confraternizacao-date">
-                                {formatDate(parseDateUTC3(conf.data))} ({conf.dia})
-                              </span>
-                              <span className="confraternizacao-event">
-                                - {conf.evento}
-                              </span>
+                              <span className="font-semibold text-[#ec4899]">{formatDate(parseDateUTC3(conf.data))} ({conf.dia})</span>
+                              <span className="text-text-soft"> - {conf.evento}</span>
                             </>
                           ) : (
-                            <span className="confraternizacao-event">
-                              {conf.evento}
-                            </span>
+                            <span className="text-text-soft">{conf.evento}</span>
                           )}
                         </div>
                       ))}
@@ -803,26 +751,27 @@ function CalendarGeral2026() {
                   </div>
                 </div>
               )}
+
               {isCurrentMonth && currentSprintInfo && (
-                <div className="calendar-month-sprint-info">
-                  <div className="sprint-info-content">
-                    <div className="sprint-info-icon"><Zap size={24} /></div>
-                    <div className="sprint-info-text">
-                      <div className="sprint-info-row">
-                        <div className="sprint-info-main">
-                          <strong>Sprint {currentSprintInfo.sprint}</strong>
+                <div className="mt-4 pt-4 border-t-2 border-[rgba(179,136,255,0.3)]">
+                  <div className="flex items-center gap-4 py-[0.875rem] px-5 bg-[linear-gradient(135deg,#7c5acf,#6b46c1)] rounded-xl shadow-[0_4px_16px_rgba(124,90,207,0.4),_0_0_0_1px_rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.2)]">
+                    <span className="inline-flex items-center shrink-0 [filter:drop-shadow(0_2px_4px_rgba(0,0,0,0.3))] [animation:pulse-icon_2s_ease-in-out_infinite]"><Zap size={24} /></span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-4 w-full">
+                        <div className="text-white text-[1.1rem] font-bold [text-shadow:0_2px_4px_rgba(0,0,0,0.3)]">
+                          <strong className="text-[1.25rem] tracking-[0.5px]">Sprint {currentSprintInfo.sprint}</strong>
                         </div>
-                        <div className="sprint-info-days">
+                        <div className="inline-flex items-center shrink-0">
                           {currentSprintInfo.daysRemaining === 0 ? (
-                            <span className="sprint-info-badge sprint-info-badge-urgent">
+                            <span className="inline-flex items-center gap-2 py-2 px-3 bg-[linear-gradient(135deg,rgba(255,193,7,0.9),rgba(255,152,0,0.9))] backdrop-blur-sm rounded-lg text-white text-[0.9rem] font-semibold border border-[rgba(255,255,255,0.4)] shadow-[0_2px_8px_rgba(0,0,0,0.2)] [animation:urgent-pulse_1.5s_ease-in-out_infinite]">
                               <Flag size={16} /> Sprint encerra hoje!
                             </span>
                           ) : currentSprintInfo.daysRemaining === 1 ? (
-                            <span className="sprint-info-badge sprint-info-badge-urgent">
+                            <span className="inline-flex items-center gap-2 py-2 px-3 bg-[linear-gradient(135deg,rgba(255,193,7,0.9),rgba(255,152,0,0.9))] backdrop-blur-sm rounded-lg text-white text-[0.9rem] font-semibold border border-[rgba(255,255,255,0.4)] shadow-[0_2px_8px_rgba(0,0,0,0.2)] [animation:urgent-pulse_1.5s_ease-in-out_infinite]">
                               <Clock3 size={16} /> Acaba amanhã
                             </span>
                           ) : (
-                            <span className="sprint-info-badge">
+                            <span className="inline-flex items-center gap-2 py-2 px-3 bg-[rgba(255,255,255,0.2)] backdrop-blur-sm rounded-lg text-white text-[0.9rem] font-semibold border border-[rgba(255,255,255,0.3)] shadow-[0_2px_8px_rgba(0,0,0,0.2)]">
                               <CalendarDays size={16} /> Faltam {currentSprintInfo.daysRemaining} dias para o término
                             </span>
                           )}
@@ -837,99 +786,42 @@ function CalendarGeral2026() {
         })}
       </div>
 
-      <div className="calendar-sprint-details">
-        <h3 className="sprint-details-title title-with-icon"><ChartColumn size={18} /> Detalhamento das Sprints</h3>
-        <div className="sprint-details-table-wrapper">
-          <table className="sprint-details-table">
+      {/* Sprint details table */}
+      <div className={TABLE_SECTION}>
+        <h3 className={TABLE_TITLE}><ChartColumn size={18} /> Detalhamento das Sprints</h3>
+        <div className="overflow-x-auto">
+          <table>
             <thead>
               <tr>
-                <th>Sprint</th>
-                <th>Início</th>
-                <th>Dia da Semana</th>
-                <th>Término</th>
-                <th>Dia da Semana</th>
-                <th>Dias Úteis</th>
-                <th>Dias Corridos</th>
+                {["Sprint","Início","Dia da Semana","Término","Dia da Semana","Dias Úteis","Dias Corridos"].map(h => <th key={h} className={TH}>{h}</th>)}
               </tr>
             </thead>
             <tbody>
               {sprintPeriods.map((period) => {
-                const workingDaysData = Array.from(
-                  sprintWorkingDaysMap.entries()
-                )
-                  .filter(
-                    ([, info]) =>
-                      info.sprint === period.sprint && info.workingDay !== null
-                  )
+                const workingDaysData = Array.from(sprintWorkingDaysMap.entries())
+                  .filter(([, info]) => info.sprint === period.sprint && info.workingDay !== null)
                   .sort(([a], [b]) => a - b);
-
                 const workingDays = workingDaysData.length;
-                const workingStartDate =
-                  workingDaysData.length > 0
-                    ? new Date(workingDaysData[0][0])
-                    : period.calendarStart;
-                const workingEndDate =
-                  workingDaysData.length > 0
-                    ? new Date(workingDaysData[workingDaysData.length - 1][0])
-                    : period.calendarEnd;
-
+                const workingStartDate = workingDaysData.length > 0 ? new Date(workingDaysData[0][0]) : period.calendarStart;
+                const workingEndDate = workingDaysData.length > 0 ? new Date(workingDaysData[workingDaysData.length - 1][0]) : period.calendarEnd;
                 const calendarStart = new Date(period.calendarStart);
                 const calendarEnd = new Date(period.calendarEnd);
                 calendarEnd.setHours(23, 59, 59, 999);
-
                 let calendarDays = 0;
-                const currentDate = new Date(calendarStart);
-                while (currentDate <= calendarEnd) {
-                  calendarDays++;
-                  currentDate.setDate(currentDate.getDate() + 1);
-                }
+                const cur = new Date(calendarStart);
+                while (cur <= calendarEnd) { calendarDays++; cur.setDate(cur.getDate() + 1); }
 
                 return (
                   <tr key={period.sprint}>
-                    <td className="sprint-number-cell">
-                      <span
-                        className="sprint-number-badge"
-                        style={{
-                          backgroundColor: getSprintColor(period.sprint),
-                        }}
-                      >
-                        {period.sprint}
-                      </span>
+                    <td className="text-center p-4 text-text-soft text-[0.9rem]">
+                      <span className="w-8 h-8 rounded-lg text-white font-bold text-[0.95rem] inline-flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.3)]" style={{ backgroundColor: getSprintColor(period.sprint) }}>{period.sprint}</span>
                     </td>
-                    <td>
-                      {formatDate(period.calendarStart)}
-                      {period.calendarStart.getTime() !==
-                        workingStartDate.getTime() && (
-                        <span
-                          style={{
-                            fontSize: "0.8em",
-                            color: "#999",
-                            display: "block",
-                          }}
-                        >
-                          (útil: {formatDate(workingStartDate)})
-                        </span>
-                      )}
-                    </td>
-                    <td>{getWeekDayName(period.calendarStart)}</td>
-                    <td>
-                      {formatDate(period.calendarEnd)}
-                      {period.calendarEnd.getTime() !==
-                        workingEndDate.getTime() && (
-                        <span
-                          style={{
-                            fontSize: "0.8em",
-                            color: "#999",
-                            display: "block",
-                          }}
-                        >
-                          (útil: {formatDate(workingEndDate)})
-                        </span>
-                      )}
-                    </td>
-                    <td>{getWeekDayName(period.calendarEnd)}</td>
-                    <td className="days-cell">{workingDays}</td>
-                    <td className="days-cell">{calendarDays}</td>
+                    <td className={TD}>{formatDate(period.calendarStart)}{period.calendarStart.getTime() !== workingStartDate.getTime() && <span style={{ fontSize: "0.8em", color: "#999", display: "block" }}>(útil: {formatDate(workingStartDate)})</span>}</td>
+                    <td className={TD}>{getWeekDayName(period.calendarStart)}</td>
+                    <td className={TD}>{formatDate(period.calendarEnd)}{period.calendarEnd.getTime() !== workingEndDate.getTime() && <span style={{ fontSize: "0.8em", color: "#999", display: "block" }}>(útil: {formatDate(workingEndDate)})</span>}</td>
+                    <td className={TD}>{getWeekDayName(period.calendarEnd)}</td>
+                    <td className="text-center p-4 font-semibold text-purple-accent">{workingDays}</td>
+                    <td className="text-center p-4 font-semibold text-purple-accent">{calendarDays}</td>
                   </tr>
                 );
               })}
@@ -938,29 +830,19 @@ function CalendarGeral2026() {
         </div>
       </div>
 
-      <div className="calendar-confraternizacoes-table">
-        <h3 className="confraternizacoes-table-title">
-          <span className="title-with-icon"><PartyPopper size={18} /> Agenda de Confraternizações dos Colaboradores</span>
-        </h3>
-        <div className="confraternizacoes-table-wrapper">
-          <table className="confraternizacoes-table-content">
-            <thead>
-              <tr>
-                <th>Mês</th>
-                <th>Data</th>
-                <th>Dia da Semana</th>
-                <th>Evento</th>
-              </tr>
-            </thead>
+      {/* Confraternizações table */}
+      <div className={TABLE_SECTION}>
+        <h3 className={TABLE_TITLE}><PartyPopper size={18} /> Agenda de Confraternizações dos Colaboradores</h3>
+        <div className="overflow-x-auto">
+          <table>
+            <thead><tr>{["Mês","Data","Dia da Semana","Evento"].map(h => <th key={h} className={TH}>{h}</th>)}</tr></thead>
             <tbody>
               {confraternizacoes.map((conf, index) => (
                 <tr key={index}>
-                  <td>{conf.mes}</td>
-                  <td>
-                    {conf.data ? formatDate(parseDateUTC3(conf.data)) : "Data a definir"}
-                  </td>
-                  <td>{conf.dia || "-"}</td>
-                  <td>{conf.evento}</td>
+                  <td className={TD}>{conf.mes}</td>
+                  <td className={TD}>{conf.data ? formatDate(parseDateUTC3(conf.data)) : "Data a definir"}</td>
+                  <td className={TD}>{conf.dia || "-"}</td>
+                  <td className={TD}>{conf.evento}</td>
                 </tr>
               ))}
             </tbody>
@@ -968,29 +850,21 @@ function CalendarGeral2026() {
         </div>
       </div>
 
-      <div className="calendar-aniversariantes-table">
-        <h3 className="aniversariantes-table-title title-with-icon"><Cake size={18} /> Aniversariantes do Ano</h3>
-        <div className="aniversariantes-table-wrapper">
-          <table className="aniversariantes-table-content">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Data</th>
-                <th>Dia da Semana</th>
-              </tr>
-            </thead>
+      {/* Aniversariantes table */}
+      <div className={TABLE_SECTION}>
+        <h3 className={TABLE_TITLE}><Cake size={18} /> Aniversariantes do Ano</h3>
+        <div className="overflow-x-auto">
+          <table>
+            <thead><tr>{["Nome","Data","Dia da Semana"].map(h => <th key={h} className={TH}>{h}</th>)}</tr></thead>
             <tbody>
               {[...aniversariantes]
-                .map((a) => ({
-                  ...a,
-                  dateObj: parseDateUTC3(a.data),
-                }))
+                .map((a) => ({ ...a, dateObj: parseDateUTC3(a.data) }))
                 .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
                 .map((a, index) => (
                   <tr key={index}>
-                    <td>{a.nome}</td>
-                    <td>{formatDate(a.dateObj)}</td>
-                    <td>{getWeekDayName(a.dateObj)}</td>
+                    <td className={TD}>{a.nome}</td>
+                    <td className={TD}>{formatDate(a.dateObj)}</td>
+                    <td className={TD}>{getWeekDayName(a.dateObj)}</td>
                   </tr>
                 ))}
             </tbody>
@@ -1000,13 +874,13 @@ function CalendarGeral2026() {
 
       {showBackToCurrentMonth && currentYear === 2026 && (
         <button
-          className="back-to-current-month-btn"
+          className="fixed bottom-8 right-8 flex flex-col items-center justify-center gap-2 p-4 px-5 bg-[linear-gradient(135deg,#7c5acf,#6b46c1)] border-2 border-[rgba(255,255,255,0.2)] rounded-2xl text-white font-semibold text-[0.9rem] cursor-pointer shadow-[0_4px_16px_rgba(124,90,207,0.5),_0_0_0_1px_rgba(255,255,255,0.1)] transition-all duration-300 z-[1000] [animation:slideInUp_0.3s_ease-out] hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(124,90,207,0.6),_0_0_0_1px_rgba(255,255,255,0.2)]"
           onClick={scrollToCurrentMonth}
           aria-label="Voltar para o mês atual"
           title="Voltar para o mês atual"
         >
-          <span className="back-to-current-month-icon"><ArrowUp size={18} /></span>
-          <span className="back-to-current-month-text">Mês Atual</span>
+          <span className="inline-flex items-center font-bold [filter:drop-shadow(0_2px_4px_rgba(0,0,0,0.3))] [animation:bounce_2s_ease-in-out_infinite]"><ArrowUp size={18} /></span>
+          <span className="text-[0.75rem] tracking-[0.5px] [text-shadow:0_1px_2px_rgba(0,0,0,0.3)]">Mês Atual</span>
         </button>
       )}
     </div>

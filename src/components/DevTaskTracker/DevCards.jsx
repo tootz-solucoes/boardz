@@ -8,7 +8,6 @@ import {
 } from "../../config/clickupConfig";
 import { clickupApi } from "../../services/clickupApi";
 import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
-import "./DevTaskTracker.css";
 
 const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
 const FETCH_INTERVAL = 1 * 60 * 1000;
@@ -48,6 +47,8 @@ async function fetchInProgressTasks(userId, listId) {
   return data.tasks || [];
 }
 
+const AVATAR_BASE = "w-10 h-10 rounded-full border-2 border-[rgba(179,136,255,0.3)] shrink-0";
+
 function DevAvatar({ name, src }) {
   const initials = name
     .split(" ")
@@ -56,19 +57,25 @@ function DevAvatar({ name, src }) {
     .slice(0, 2)
     .toUpperCase();
   if (src) {
-    return <img className="dev-avatar" src={src} alt={name} />;
+    return <img className={`${AVATAR_BASE} object-cover`} src={src} alt={name} />;
   }
-  return <div className="dev-avatar dev-avatar--initials">{initials}</div>;
+  return (
+    <div className={`${AVATAR_BASE} flex items-center justify-center bg-gradient-to-br from-purple-deep to-purple-dark text-text-soft text-[0.7em] font-semibold`}>
+      {initials}
+    </div>
+  );
 }
+
+const SKELETON_BAR = "rounded-[6px] bg-gradient-to-r from-[rgba(255,255,255,0.05)] via-[rgba(255,255,255,0.1)] to-[rgba(255,255,255,0.05)] bg-[length:200%_100%] [animation:skeleton-loading_1.4s_infinite_linear]";
 
 function DevCardSkeleton() {
   return (
-    <div className="dev-card dev-card--skeleton">
-      <div className="dev-skeleton dev-skeleton--avatar" />
-      <div className="dev-skeleton dev-skeleton--name" />
-      <div className="dev-skeleton dev-skeleton--title" />
-      <div className="dev-skeleton dev-skeleton--title dev-skeleton--title-short" />
-      <div className="dev-skeleton dev-skeleton--meta" />
+    <div className="flex-[1_1_0] min-w-0 flex flex-col items-center gap-3 bg-[rgba(255,255,255,0.04)] border border-[rgba(179,136,255,0.1)] rounded-xl p-3 opacity-50">
+      <div className={`${SKELETON_BAR} w-[52px] h-[52px] rounded-full shrink-0`} />
+      <div className={`${SKELETON_BAR} w-[60%] h-[0.7em]`} />
+      <div className={`${SKELETON_BAR} w-[90%] h-[0.55em]`} />
+      <div className={`${SKELETON_BAR} w-[65%] h-[0.55em]`} />
+      <div className={`${SKELETON_BAR} w-[40%] h-[0.5em]`} />
     </div>
   );
 }
@@ -151,7 +158,7 @@ export default function DevCards({ sprintListId }) {
 
   if (devs === null) {
     return (
-      <div className="dev-tracker-grid">
+      <div className="flex gap-3 mt-7">
         {DEVELOPERS.map((d) => (
           <DevCardSkeleton key={d.name} />
         ))}
@@ -160,33 +167,41 @@ export default function DevCards({ sprintListId }) {
   }
 
   return (
-    <div className="dev-tracker-grid">
+    <div className="flex gap-3 mt-7">
       {devs.map((dev) => (
         <div
           key={dev.name}
-          className={`dev-card${!dev.task ? " dev-card--idle" : ""}`}
+          className="flex-[1_1_0] min-w-0 flex flex-col items-center gap-3 bg-[rgba(255,255,255,0.04)] border border-[rgba(179,136,255,0.1)] rounded-xl p-3"
         >
-          <div className="dev-card-main-info">
+          <div className="flex items-center gap-2 w-full">
             <DevAvatar name={dev.name} src={dev.avatar} />
-            <div className="dev-card-name">{dev.name}</div>
+            <div className="text-[1em] font-semibold text-purple-accent whitespace-nowrap overflow-hidden text-ellipsis w-full">
+              {dev.name}
+            </div>
             {dev.extraTasks > 0 && (
-              <span className="dev-card-extra">+{dev.extraTasks}</span>
+              <span className="shrink-0 ml-auto text-[0.6em] font-bold text-purple-accent bg-[rgba(179,136,255,0.15)] border border-[rgba(179,136,255,0.3)] rounded-[20px] py-[0.1em] px-[0.45em] whitespace-nowrap">
+                +{dev.extraTasks}
+              </span>
             )}
           </div>
           {dev.task ? (
             <>
-              <div className="dev-card-title" title={dev.task.title}>
+              <div className="text-[0.75em] text-text-soft leading-[1.3] line-clamp-2 w-full opacity-90" title={dev.task.title}>
                 {dev.task.title}
               </div>
-              <div className="dev-card-meta">
-                <span className="dev-card-cliente">{dev.task.cliente}</span>
+              <div className="flex justify-between items-center w-full">
+                <span className="text-[0.9em] text-purple-accent opacity-70 whitespace-nowrap overflow-hidden text-ellipsis">
+                  {dev.task.cliente}
+                </span>
                 {dev.task.points != null && (
-                  <span className="dev-card-points">{dev.task.points} pts</span>
+                  <span className="text-[0.85em] text-emerald-400 font-semibold">
+                    {dev.task.points} pts
+                  </span>
                 )}
               </div>
             </>
           ) : (
-            <div className="dev-card-idle"></div>
+            <div className="text-[1em] text-[#555] mt-auto"></div>
           )}
         </div>
       ))}

@@ -13,10 +13,12 @@
     "deploy:worker": "wrangler deploy --config worker/wrangler.toml"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.1",
     "lucide-react": "^1.18.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.10.1"
+    "react-router-dom": "^7.10.1",
+    "tailwindcss": "^4.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

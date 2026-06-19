@@ -53,9 +53,7 @@ function useSweetDay(now) {
       .then((data) => {
         const today = new Date(now);
         today.setHours(0, 0, 0, 0);
-        if (today.getDay() === 0) {
-          today.setDate(today.getDate() + 1);
-        }
+        if (today.getDay() === 0) today.setDate(today.getDate() + 1);
         const current = data.find((row) => {
           const rowDate = new Date(row["Data"]);
           rowDate.setDate(rowDate.getDate() - 2);
@@ -65,19 +63,12 @@ function useSweetDay(now) {
           return rowDate <= today && today <= endOfWeek;
         });
         if (cancelled) return;
-        if (current) {
-          setSweetDay({
-            names: (current["Pagantes"] || "").replace("&", "e").trim(),
-            error: null,
-          });
-        } else {
-          setSweetDay({ names: null, error: null });
-        }
+        setSweetDay(current
+          ? { names: (current["Pagantes"] || "").replace("&", "e").trim(), error: null }
+          : { names: null, error: null }
+        );
       })
-      .catch(() => {
-        if (!cancelled)
-          setSweetDay({ names: null, error: "Erro ao carregar dupla." });
-      });
+      .catch(() => { if (!cancelled) setSweetDay({ names: null, error: "Erro ao carregar dupla." }); });
     return () => (cancelled = true);
   }, [now]);
   return sweetDay;
@@ -92,22 +83,15 @@ function useWeekCalendarEvents(now) {
     const year = now.getFullYear();
     const weekStart = getStartOfWeek(now);
     const weekEnd = getEndOfWeek(now);
-
     const inWeek = (date) => {
       const d = normalizeDate(date);
       return d >= normalizeDate(weekStart) && d <= normalizeDate(weekEnd);
     };
-
     const holidays = getAllHolidays(year).filter((h) => inWeek(h.date));
     const optionals = getAllOptionalDays(year).filter((h) => inWeek(h.date));
     const events = confraternizacoes
       .filter((c) => c.data && inWeek(new Date(c.data + "T12:00:00")))
-      .map((c) => ({
-        date: new Date(c.data + "T12:00:00"),
-        type: "event",
-        name: c.evento,
-      }));
-
+      .map((c) => ({ date: new Date(c.data + "T12:00:00"), type: "event", name: c.evento }));
     return [...holidays, ...optionals, ...events].sort(
       (a, b) => normalizeDate(a.date) - normalizeDate(b.date)
     );
@@ -118,15 +102,8 @@ function useMonthBirthdays(now) {
   return useMemo(() => {
     const month = now.getMonth() + 1;
     return aniversariantes
-      .filter((a) => {
-        const [, m] = a.data.split("-").map(Number);
-        return m === month;
-      })
-      .sort((a, b) => {
-        const dayA = Number(a.data.split("-")[2]);
-        const dayB = Number(b.data.split("-")[2]);
-        return dayA - dayB;
-      });
+      .filter((a) => { const [, m] = a.data.split("-").map(Number); return m === month; })
+      .sort((a, b) => Number(a.data.split("-")[2]) - Number(b.data.split("-")[2]));
   }, [now]);
 }
 
@@ -137,9 +114,8 @@ function calendarEventIcon(type) {
   return <CalendarDays size={14} />;
 }
 
-function calendarEventClass(type) {
-  if (type === "national" || type === "state" || type === "municipal")
-    return "badge-calendar-holiday";
+function calendarEventBadgeClass(type) {
+  if (type === "national" || type === "state" || type === "municipal") return "badge-calendar-holiday";
   if (type === "optional") return "badge-calendar-optional";
   if (type === "event") return "badge-calendar-event";
   return "";
@@ -156,85 +132,66 @@ export default function Lembrettz() {
   const isFriday = now.getDay() === 5;
 
   const tuesdayPulse =
-    isTuesday && now.getHours() === 12 && now.getMinutes() >= 30
-      ? true
-      : isTuesday && now.getHours() === 13 && now.getMinutes() <= 30;
+    (isTuesday && now.getHours() === 12 && now.getMinutes() >= 30) ||
+    (isTuesday && now.getHours() === 13 && now.getMinutes() <= 30);
 
   const fridayPulse =
     isFriday &&
-    (now.getHours() === 14 ||
-      now.getHours() === 15 ||
-      (now.getHours() === 16 && now.getMinutes() <= 30));
+    (now.getHours() === 14 || now.getHours() === 15 || (now.getHours() === 16 && now.getMinutes() <= 30));
 
   const weekStart = getStartOfWeek(now);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
-
   const firstFriday = getFirstFridayOfMonth(now);
   const lastFriday = getLastFridayOfMonth(now);
-
   const isFirstWeek = weekStart <= firstFriday && firstFriday <= weekEnd;
   const isLastFridayWeek = weekStart <= lastFriday && lastFriday <= weekEnd;
 
   return (
-    <div className="widget">
-      <header>
-        <h2 className="title-with-icon"><ClipboardList size={18} /> lembrettz.</h2>
+    <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
+      <header className="flex justify-between items-center mb-2">
+        <h2 className="inline-flex items-center gap-[0.45rem]"><ClipboardList size={18} /> lembrettz.</h2>
       </header>
-      <div className="reminders">
-        {/* Brigadeiro — comportamento original */}
-        <LembrettzBadge
-          pulse={tuesdayPulse}
-          className={isWednesday ? "badge-highlight-today" : ""}
-        >
-          <span className="inline-icon-text"><Popcorn size={14} /><b>Brigadeiro:</b></span>{" "}
-          {sweetDay.error ? (
-            <span style={{ color: "red" }}>{sweetDay.error}</span>
-          ) : (
-            sweetDay.names || <span style={{ color: "#bbb" }}>Sem info</span>
-          )}
+      <div className="flex flex-wrap gap-[1em]">
+        <LembrettzBadge pulse={tuesdayPulse} className={isWednesday ? "badge-highlight-today" : ""}>
+          <span className="inline-flex items-center gap-[0.35rem]"><Popcorn size={14} /><b>Brigadeiro:</b></span>{" "}
+          {sweetDay.error
+            ? <span style={{ color: "red" }}>{sweetDay.error}</span>
+            : sweetDay.names || <span style={{ color: "#bbb" }}>Sem info</span>
+          }
         </LembrettzBadge>
 
-        {/* Coringagem — só nas sextas */}
         {isFriday && (
           <LembrettzBadge pulse={fridayPulse} className="badge-highlight-today">
-            <span className="inline-icon-text"><PartyPopper size={14} /><b>Sexta:</b> Coringagem</span>
+            <span className="inline-flex items-center gap-[0.35rem]"><PartyPopper size={14} /><b>Sexta:</b> Coringagem</span>
           </LembrettzBadge>
         )}
 
-        {/* Sexta da Véia — só na primeira semana do mês */}
         {isFirstWeek && (
           <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
-            <span className="inline-icon-text"><UserRound size={14} /><b>Sexta da Véia</b></span>
+            <span className="inline-flex items-center gap-[0.35rem]"><UserRound size={14} /><b>Sexta da Véia</b></span>
           </LembrettzBadge>
         )}
 
-        {/* Happy Hour — só na semana do último friday */}
         {isLastFridayWeek && (
           <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
-            <span className="inline-icon-text"><PartyPopper size={14} /><b>Sexta:</b> Happy Hour</span>
+            <span className="inline-flex items-center gap-[0.35rem]"><PartyPopper size={14} /><b>Sexta:</b> Happy Hour</span>
           </LembrettzBadge>
         )}
 
-        {/* Eventos da semana atual */}
         {weekEvents.map((ev, i) => (
-            <LembrettzBadge key={i} className={calendarEventClass(ev.type)}>
-             <span className="inline-icon-text">{calendarEventIcon(ev.type)}</span>{" "}
-             <b>{formatShortDate(ev.date)}</b> {ev.name}
-           </LembrettzBadge>
+          <LembrettzBadge key={i} className={calendarEventBadgeClass(ev.type)}>
+            <span className="inline-flex items-center gap-[0.35rem]">{calendarEventIcon(ev.type)}</span>{" "}
+            <b>{formatShortDate(ev.date)}</b> {ev.name}
+          </LembrettzBadge>
         ))}
 
-        {/* Aniversariantes do mês */}
         {monthBirthdays.map((a) => {
           const [, , day] = a.data.split("-");
-          const today = now.getDate();
-          const isToday = Number(day) === today;
+          const isToday = Number(day) === now.getDate();
           return (
-            <LembrettzBadge
-              key={a.nome}
-              className={isToday ? "badge-highlight-today" : "badge-birthday"}
-            >
-              <span className="inline-icon-text"><Cake size={14} /><b>{a.nome}</b></span>{" "}
+            <LembrettzBadge key={a.nome} className={isToday ? "badge-highlight-today" : "badge-birthday"}>
+              <span className="inline-flex items-center gap-[0.35rem]"><Cake size={14} /><b>{a.nome}</b></span>{" "}
               <span style={{ opacity: 0.75 }}>
                 {day}/{String(now.getMonth() + 1).padStart(2, "0")}
               </span>

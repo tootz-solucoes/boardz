@@ -101,16 +101,13 @@ export default function Betz() {
       // Ignore autoplay failures triggered by the browser.
     }
 
-    // Tempo aleatório entre 6 e 9 segundos
     const totalSpinTime = 6 + Math.random() * 3;
 
-    // Reseta scroll e animação
     if (scrollListRef.current) {
       scrollListRef.current.style.transition = "none";
       scrollListRef.current.style.transform = "translateY(0)";
     }
 
-    // Após o tempo, parar o spin e mostrar vencedor
     setTimeout(() => {
       try {
         spinSoundRef.current.pause();
@@ -127,7 +124,6 @@ export default function Betz() {
         const index = newShuffle.indexOf(chosenWinner);
         const scrollPosition = index * itemHeight;
 
-        // Parar animação e mover para o vencedor com transição rápida (0.5s)
         scrollListRef.current.style.transition = "transform 0.5s ease-out";
         scrollListRef.current.style.transform = `translateY(-${scrollPosition}px)`;
       }
@@ -146,21 +142,26 @@ export default function Betz() {
   const doubledList = [...shuffledNames, ...shuffledNames];
 
   return (
-    <div className="widget">
-      <header>
-        <h2 className="title-with-icon" style={{ color: "#b388ff", marginBottom: 8 }}><Dices size={18} /> bettz.</h2>
+    <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
+      <header className="flex justify-between items-center mb-2">
+        <h2 className="inline-flex items-center gap-[0.45rem]" style={{ color: "#b388ff", marginBottom: 8 }}><Dices size={18} /> bettz.</h2>
         <div style={{ display: "flex", gap: "0.5em" }}>
-          <button onClick={toggleGirls} className="btn">
+          <button
+            onClick={toggleGirls}
+            className="py-3 px-4 bg-[rgba(255,255,255,0.05)] text-[#d7c1ff] font-mono text-[0.8rem] border-none rounded-[10px] cursor-pointer hover:bg-bg-hover"
+          >
             {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
           </button>
-          <button onClick={toggleGamemind} className="btn">
+          <button
+            onClick={toggleGamemind}
+            className="py-3 px-4 bg-[rgba(255,255,255,0.05)] text-[#d7c1ff] font-mono text-[0.8rem] border-none rounded-[10px] cursor-pointer hover:bg-bg-hover"
+          >
             {window.CAN_GAMEMIND ? "GM ON" : "GM OFF"}
           </button>
         </div>
       </header>
 
       <div
-        className="scroll-container"
         style={{
           height: 42,
           overflow: "hidden",
@@ -179,12 +180,10 @@ export default function Betz() {
       >
         <div
           ref={scrollListRef}
-          className="scroll-list"
           style={{
             display: "flex",
             flexDirection: "column",
             animation: spinning ? `scrollUp 1.5s linear infinite` : "none",
-            // animação constante, rápida, só durante spinning
           }}
         >
           {doubledList.map((name, i) => {
@@ -193,7 +192,6 @@ export default function Betz() {
             return (
               <div
                 key={i}
-                className="scroll-item"
                 style={{
                   height: 42,
                   display: "flex",
@@ -245,12 +243,8 @@ export default function Betz() {
 
       <style>{`
         @keyframes scrollUp {
-          0% {
-            transform: translateY(0);
-          }
-          100% {
-            transform: translateY(-50%);
-          }
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
         }
       `}</style>
     </div>

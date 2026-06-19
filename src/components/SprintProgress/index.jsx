@@ -257,58 +257,60 @@ export default function SprintProgress() {
   }, [projectData, sprintPct]);
 
   return (
-    <div className="widget sprint-progress-widget">
-      <header>
-        <h2 className="title-with-icon">
+    <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] h-full box-border overflow-y-auto shadow-[0_0_30px_rgba(0,0,0,0.4)]">
+      <header className="flex justify-between items-center mb-4">
+        <h2 className="inline-flex items-center gap-[0.45rem]">
           <Zap size={18} />
           {currentSprint
             ? `Sprint ${currentSprint.sprint} · ${formatSprintDates(currentSprint)}`
             : "sprint progress."}
         </h2>
-        <span className="sprint-clock">
+        <span className="inline-flex items-center gap-[0.35rem] text-[1.25em] text-text-soft opacity-[0.85] whitespace-nowrap">
           <Clock3 size={16} /> {clockStr} · {dateStr}
         </span>
       </header>
 
-      <div className="sprint-progress-rows">
+      <div className="flex flex-col gap-4">
         {/* Linha da sprint (régua) */}
-        <div className="sprint-row sprint-row--timeline">
-          <span className="sprint-row-label">
+        <div className="flex items-center gap-3">
+          <span className="w-28 shrink-0 text-[0.8em] text-purple-accent text-right font-semibold">
             {currentSprint ? `Sprint ${currentSprint.sprint}` : "Sprint"}
           </span>
-          <div className="sprint-bar-track">
+          <div className="flex-1 h-[22px] bg-[rgba(255,255,255,0.06)] rounded-lg overflow-visible border border-[rgba(179,136,255,0.15)] relative">
             <div
-              className="sprint-bar-fill sprint-bar-fill--timeline"
+              className="h-full rounded-lg bg-gradient-to-r from-purple-dark to-[#7c4fc4] opacity-60 transition-[width] duration-[800ms] ease-in"
               style={{ width: `${sprintPct}%` }}
             />
           </div>
-          <span className="sprint-row-pct">{sprintPct}%</span>
-          <span className="sprint-row-alert" />
+          <span className="w-[2.8em] shrink-0 text-[0.75em] text-text-soft text-right opacity-70">{sprintPct}%</span>
+          <span className="w-[1em] shrink-0" />
         </div>
 
         {/* Linhas dos projetos */}
         {rows.map((row) => (
-          <div
-            key={row.name}
-            className={`sprint-row${row.lagging ? " sprint-row--lagging" : ""}`}
-          >
-            <span className="sprint-row-label">{row.name}</span>
-            <div className="sprint-bar-track">
+          <div key={row.name} className="flex items-center gap-3">
+            <span className={`w-28 shrink-0 text-[0.8em] text-right opacity-[0.85] ${row.lagging ? "text-orange-400 !opacity-100" : "text-text-soft"}`}>
+              {row.name}
+            </span>
+            <div className="flex-1 h-[22px] bg-[rgba(255,255,255,0.06)] rounded-lg overflow-visible border border-[rgba(179,136,255,0.15)] relative">
               <div
                 className={getProgressFillClassName(row)}
                 style={{ width: `${getProgressFillWidth(row.pct)}%` }}
               />
-              <div className="sprint-ref-marker" style={{ left: `${sprintPct}%` }} />
+              <div
+                className="absolute top-[-5px] bottom-[-5px] w-0 border-l-2 border-dashed border-[rgba(255,255,255,0.3)] pointer-events-none z-[2] -translate-x-px"
+                style={{ left: `${sprintPct}%` }}
+              />
             </div>
             <span className={getProgressPctClassName(row)}>{row.pct}%</span>
-            <span className="sprint-row-alert">
+            <span className="w-[1em] shrink-0 inline-flex items-center justify-center text-[0.85em] text-orange-500">
               {row.lagging ? <TriangleAlert size={14} /> : null}
             </span>
           </div>
         ))}
       </div>
 
-      {loading && <div className="sprint-loading">atualizando...</div>}
+      {loading && <div className="mt-2 text-[0.5em] text-purple-accent opacity-50 text-right">atualizando...</div>}
 
       <DevCards sprintListId={sprintListId} />
     </div>

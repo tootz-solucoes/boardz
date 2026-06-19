@@ -19,12 +19,14 @@ const SPIN_SOUND_URL = slotSound;
 const WIN_SOUND_URL = winSound;
 
 if (typeof window !== "undefined") {
-  if (window.CAN_GIRLS === undefined) window.CAN_GIRLS = false;
-  if (window.CAN_GAMEMIND === undefined) window.CAN_GAMEMIND = false;
+  if (window.CAN_TTZ === undefined) window.CAN_TTZ = true;
+  if (window.CAN_GIRLS === undefined) window.CAN_GIRLS = true;
+  if (window.CAN_GAMEMIND === undefined) window.CAN_GAMEMIND = true;
 }
 
 function getNames() {
-  let names = [...BASE_NAMES];
+  let names = [];
+  if (window.CAN_TTZ) names = names.concat(BASE_NAMES);
   if (window.CAN_GIRLS) names = names.concat(GIRL_NAMES);
   if (window.CAN_GAMEMIND) names = names.concat(GAMEMIND_NAMES);
   return names;
@@ -50,6 +52,11 @@ export default function Betz() {
   const winSoundRef = useRef(null);
 
   const updateNames = () => setNames(getNames());
+
+  function toggleTtz() {
+    window.CAN_TTZ = !window.CAN_TTZ;
+    updateNames();
+  }
 
   function toggleGirls() {
     window.CAN_GIRLS = !window.CAN_GIRLS;
@@ -142,25 +149,44 @@ export default function Betz() {
   const doubledList = [...shuffledNames, ...shuffledNames];
 
   return (
-    <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
+    <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)] flex flex-col">
       <header className="flex justify-between items-center mb-2">
-        <h2 className="inline-flex items-center gap-[0.45rem]" style={{ color: "#b388ff", marginBottom: 8 }}><Dices size={18} /> bettz.</h2>
-        <div style={{ display: "flex", gap: "0.5em" }}>
+        <h2 className="inline-flex items-center gap-[0.45rem]" style={{ color: "#b388ff", marginBottom: 8 }}><Dices size={28} /> bettz.</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={toggleTtz}
+            className={`py-1 px-3 font-mono text-[0.75rem] rounded-lg cursor-pointer border transition-all duration-150 ${
+              window.CAN_TTZ
+                ? "bg-[rgba(179,136,255,0.18)] text-purple-accent border-[rgba(179,136,255,0.45)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.35)]"
+                : "bg-[rgba(255,255,255,0.04)] text-[#666] border-[rgba(255,255,255,0.07)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            }`}
+          >
+            TTZ.
+          </button>
           <button
             onClick={toggleGirls}
-            className="py-3 px-4 bg-[rgba(255,255,255,0.05)] text-[#d7c1ff] font-mono text-[0.8rem] border-none rounded-[10px] cursor-pointer hover:bg-bg-hover"
+            className={`py-1 px-3 font-mono text-[0.75rem] rounded-lg cursor-pointer border transition-all duration-150 ${
+              window.CAN_GIRLS
+                ? "bg-[rgba(179,136,255,0.18)] text-purple-accent border-[rgba(179,136,255,0.45)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.35)]"
+                : "bg-[rgba(255,255,255,0.04)] text-[#666] border-[rgba(255,255,255,0.07)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            }`}
           >
-            {window.CAN_GIRLS ? "Girls ON" : "Girls OFF"}
+            Girls
           </button>
           <button
             onClick={toggleGamemind}
-            className="py-3 px-4 bg-[rgba(255,255,255,0.05)] text-[#d7c1ff] font-mono text-[0.8rem] border-none rounded-[10px] cursor-pointer hover:bg-bg-hover"
+            className={`py-1 px-3 font-mono text-[0.75rem] rounded-lg cursor-pointer border transition-all duration-150 ${
+              window.CAN_GAMEMIND
+                ? "bg-[rgba(179,136,255,0.18)] text-purple-accent border-[rgba(179,136,255,0.45)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.35)]"
+                : "bg-[rgba(255,255,255,0.04)] text-[#666] border-[rgba(255,255,255,0.07)] shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            }`}
           >
-            {window.CAN_GAMEMIND ? "GM ON" : "GM OFF"}
+            GM
           </button>
         </div>
       </header>
 
+      <div className="flex-1 flex flex-col justify-center gap-4">
       <div
         style={{
           height: 42,
@@ -169,7 +195,6 @@ export default function Betz() {
           border: "1.5px solid #b388ff44",
           boxShadow: "0 0 0 1.5px #b388ffcc, 0 3px 18px #20185c60",
           position: "relative",
-          marginBottom: 16,
           backgroundColor: "#1F1F23",
           color: "#eee",
           fontWeight: 500,
@@ -207,8 +232,8 @@ export default function Betz() {
                   transition: "all 0.3s ease",
                 }}
               >
-                {isWinner ? <PartyPopper size={16} style={{ marginRight: 6 }} /> : null}
-                {name} <SymbolIcon size={16} style={{ marginLeft: 6 }} />
+                {isWinner ? <PartyPopper size={22} style={{ marginRight: 8 }} /> : null}
+                {name} <SymbolIcon size={22} style={{ marginLeft: 8 }} />
               </div>
             );
           })}
@@ -240,6 +265,7 @@ export default function Betz() {
       >
         {spinning ? "Girando..." : "Girar a roleta!"}
       </button>
+      </div>
 
       <style>{`
         @keyframes scrollUp {

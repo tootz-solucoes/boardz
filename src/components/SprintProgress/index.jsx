@@ -260,7 +260,7 @@ export default function SprintProgress() {
     <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] h-full box-border overflow-y-auto shadow-[0_0_30px_rgba(0,0,0,0.4)]">
       <header className="flex justify-between items-center mb-4">
         <h2 className="inline-flex items-center gap-[0.45rem]">
-          <Zap size={18} />
+          <Zap size={28} />
           {currentSprint
             ? `Sprint ${currentSprint.sprint} · ${formatSprintDates(currentSprint)}`
             : "sprint progress."}

@@ -53,7 +53,7 @@ export function ClockWidget() {
   return (
     <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
       <header className="flex justify-between items-center mb-2">
-        <h2 className="inline-flex items-center gap-[0.45rem]"><Clock3 size={18} /> {weekday}</h2>
+        <h2 className="inline-flex items-center gap-[0.45rem]"><Clock3 size={28} /> {weekday}</h2>
       </header>
       <div className="flex flex-col items-center gap-4 text-center">
         <div className="text-[1.1rem] font-semibold text-text-soft tracking-[0.5px]">

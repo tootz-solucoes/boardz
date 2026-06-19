@@ -150,9 +150,9 @@ export default function Lembrettz() {
   return (
     <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
       <header className="flex justify-between items-center mb-2">
-        <h2 className="inline-flex items-center gap-[0.45rem]"><ClipboardList size={18} /> lembrettz.</h2>
+        <h2 className="inline-flex items-center gap-[0.45rem]"><ClipboardList size={28} /> lembrettz.</h2>
       </header>
-      <div className="flex flex-wrap gap-[1em]">
+      <div className="flex flex-col gap-[0.75em]">
         <LembrettzBadge pulse={tuesdayPulse} className={isWednesday ? "badge-highlight-today" : ""}>
           <span className="inline-flex items-center gap-[0.35rem]"><Popcorn size={14} /><b>Brigadeiro:</b></span>{" "}
           {sweetDay.error

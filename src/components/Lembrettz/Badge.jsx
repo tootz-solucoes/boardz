@@ -1,4 +1,4 @@
-const BASE = "whitespace-nowrap inline-block py-2 px-4 [font-size:1em] text-[#f1d8ff] rounded-[7px] bg-gradient-to-br from-[#502f8d] to-[#47326e] shadow-[0_0_10px_rgba(98,70,142,0.5)] transition-transform duration-200 hover:scale-105";
+const BASE = "block w-full py-2 px-4 [font-size:1em] text-[#f1d8ff] rounded-[7px] bg-gradient-to-br from-[#502f8d] to-[#47326e] shadow-[0_0_10px_rgba(98,70,142,0.5)] transition-transform duration-200 hover:scale-[1.02]";
 
 const VARIANTS = {
   "badge-highlight-today": "!bg-gradient-to-br !from-[#fbbf24] !to-[#f59e0b] border border-[rgba(255,200,0,0.8)] !text-[#5d0092] shadow-[0_6px_18px_rgba(245,158,11,0.45)]",

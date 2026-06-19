@@ -158,7 +158,7 @@ export default function DevCards({ sprintListId }) {
 
   if (devs === null) {
     return (
-      <div className="flex gap-3 mt-7">
+      <div className="grid grid-cols-3 gap-3 mt-7">
         {DEVELOPERS.map((d) => (
           <DevCardSkeleton key={d.name} />
         ))}
@@ -167,11 +167,11 @@ export default function DevCards({ sprintListId }) {
   }
 
   return (
-    <div className="flex gap-3 mt-7">
+    <div className="grid grid-cols-3 gap-3 mt-7">
       {devs.map((dev) => (
         <div
           key={dev.name}
-          className="flex-[1_1_0] min-w-0 flex flex-col items-center gap-3 bg-[rgba(255,255,255,0.04)] border border-[rgba(179,136,255,0.1)] rounded-xl p-3"
+          className="min-w-0 flex flex-col items-center gap-3 bg-[rgba(255,255,255,0.04)] border border-[rgba(179,136,255,0.1)] rounded-xl p-3"
         >
           <div className="flex items-center gap-2 w-full">
             <DevAvatar name={dev.name} src={dev.avatar} />

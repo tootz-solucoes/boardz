@@ -150,8 +150,14 @@ export default function Betz() {
 
   return (
     <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)] flex flex-col">
-      <header className="flex justify-between items-center mb-2">
-        <h2 className="inline-flex items-center gap-[0.45rem]" style={{ color: "#b388ff", marginBottom: 8 }}><Dices size={28} /> bettz.</h2>
+      <header className="flex justify-between items-center mb-5">
+        <div className="flex items-center gap-3">
+          <Dices size={22} className="text-purple-accent shrink-0" />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[1.26rem] font-bold text-white leading-none tracking-tight [filter:drop-shadow(0_0_6px_rgba(179,136,255,0.6))]">bettz.</span>
+            <span className="text-[0.84rem] text-text-soft opacity-60 font-medium tracking-wide leading-none">sorteio de responsável</span>
+          </div>
+        </div>
         <div className="flex gap-2">
           <button
             onClick={toggleTtz}

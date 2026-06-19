@@ -75,22 +75,27 @@ function getSprintProgress(sprint) {
 
 function formatSprintDates(sprint) {
   if (!sprint) return "";
-  const start = new Date(
-    sprint.calendarStart.year,
-    sprint.calendarStart.month,
-    sprint.calendarStart.day,
-  );
-  const end = new Date(
-    sprint.calendarEnd.year,
-    sprint.calendarEnd.month,
-    sprint.calendarEnd.day,
-  );
-  const fmt = (d) =>
-    d
-      .toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
-      .replace(".", "");
+  const start = new Date(sprint.calendarStart.year, sprint.calendarStart.month, sprint.calendarStart.day);
+  const end = new Date(sprint.calendarEnd.year, sprint.calendarEnd.month, sprint.calendarEnd.day);
+  const fmt = (d) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }).replace(".", "");
   return `${fmt(start)} → ${fmt(end)}`;
 }
+
+function getSprintEnd(sprint) {
+  if (!sprint) return null;
+  return new Date(sprint.calendarEnd.year, sprint.calendarEnd.month, sprint.calendarEnd.day);
+}
+
+
+function getSprintDaysLeft(sprint, now) {
+  if (!sprint) return null;
+  const end = getSprintEnd(sprint);
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+  return Math.ceil((end - today) / (1000 * 60 * 60 * 24));
+}
+
 
 function getFieldValue(task, fieldName) {
   // Tenta custom_fields primeiro
@@ -258,56 +263,90 @@ export default function SprintProgress() {
 
   return (
     <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] h-full box-border overflow-y-auto shadow-[0_0_30px_rgba(0,0,0,0.4)]">
-      <header className="flex justify-between items-center mb-4">
-        <h2 className="inline-flex items-center gap-[0.45rem]">
-          <Zap size={28} />
-          {currentSprint
-            ? `Sprint ${currentSprint.sprint} · ${formatSprintDates(currentSprint)}`
-            : "sprint progress."}
-        </h2>
-        <span className="inline-flex items-center gap-[0.35rem] text-[1.25em] text-text-soft opacity-[0.85] whitespace-nowrap">
-          <Clock3 size={16} /> {clockStr} · {dateStr}
-        </span>
+      <header className="flex justify-between items-center mb-5">
+        <div className="flex items-center gap-3">
+          <Zap size={22} className="text-purple-accent shrink-0" />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[1.26rem] font-bold text-white leading-none tracking-tight [filter:drop-shadow(0_0_6px_rgba(179,136,255,0.6))]">
+              {currentSprint ? `Sprint ${currentSprint.sprint}` : "sprint progress."}
+            </span>
+            {currentSprint && (() => {
+              const daysLeft = getSprintDaysLeft(currentSprint, now);
+              const isToday = daysLeft === 0;
+              return (
+                <span className="inline-flex items-center gap-1.5 text-[0.84rem] font-medium tracking-wide leading-none">
+                  <span className="text-text-soft opacity-60">{formatSprintDates(currentSprint)}</span>
+                  {isToday ? (
+                    <span className="px-1.5 py-0.5 rounded text-[0.85em] font-semibold bg-[rgba(251,191,36,0.15)] text-[#fbbf24] border border-[rgba(251,191,36,0.3)] leading-none">
+                      Até hoje!
+                    </span>
+                  ) : daysLeft > 0 ? (
+                    <span className="px-1.5 py-0.5 rounded text-[0.85em] font-semibold bg-[rgba(179,136,255,0.12)] text-purple-accent border border-[rgba(179,136,255,0.25)] leading-none">
+                      Faltam {daysLeft}d
+                    </span>
+                  ) : null}
+                </span>
+              );
+            })()}
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 text-[0.86rem] text-text-soft opacity-60 tabular-nums whitespace-nowrap">
+          <Clock3 size={12} />
+          <span className="font-semibold">{clockStr}</span>
+          <span className="opacity-50">·</span>
+          <span>{dateStr}</span>
+        </div>
       </header>
 
-      <div className="flex flex-col gap-4">
-        {/* Linha da sprint (régua) */}
-        <div className="flex items-center gap-3">
-          <span className="w-28 shrink-0 text-[0.8em] text-purple-accent text-right font-semibold">
-            {currentSprint ? `Sprint ${currentSprint.sprint}` : "Sprint"}
-          </span>
-          <div className="flex-1 h-[22px] bg-[rgba(255,255,255,0.06)] rounded-lg overflow-visible border border-[rgba(179,136,255,0.15)] relative">
-            <div
-              className="h-full rounded-lg bg-gradient-to-r from-purple-dark to-[#7c4fc4] opacity-60 transition-[width] duration-[800ms] ease-in"
-              style={{ width: `${sprintPct}%` }}
-            />
-          </div>
-          <span className="w-[2.8em] shrink-0 text-[0.75em] text-text-soft text-right opacity-70">{sprintPct}%</span>
-          <span className="w-[1em] shrink-0" />
-        </div>
-
-        {/* Linhas dos projetos */}
-        {rows.map((row) => (
-          <div key={row.name} className="flex items-center gap-3">
-            <span className={`w-28 shrink-0 text-[0.8em] text-right opacity-[0.85] ${row.lagging ? "text-orange-400 !opacity-100" : "text-text-soft"}`}>
+      <div className="flex gap-3 items-stretch">
+        {/* Coluna de labels */}
+        <div className="w-28 shrink-0 flex flex-col gap-4 pt-4">
+          {rows.map((row) => (
+            <span key={row.name} className={`h-[22px] flex items-center justify-end text-[0.8em] opacity-[0.85] ${row.lagging ? "text-orange-400 !opacity-100" : "text-text-soft"}`}>
               {row.name}
             </span>
-            <div className="flex-1 h-[22px] bg-[rgba(255,255,255,0.06)] rounded-lg overflow-visible border border-[rgba(179,136,255,0.15)] relative">
+          ))}
+        </div>
+
+        {/* Coluna das barras com linha contínua */}
+        <div className="flex-1 flex flex-col gap-4 relative pt-4">
+          {rows.map((row) => (
+            <div key={row.name} className="h-[22px] bg-[rgba(255,255,255,0.06)] rounded-lg overflow-hidden border border-[rgba(179,136,255,0.15)]">
               <div
                 className={getProgressFillClassName(row)}
                 style={{ width: `${getProgressFillWidth(row.pct)}%` }}
               />
-              <div
-                className="absolute top-[-5px] bottom-[-5px] w-0 border-l-2 border-dashed border-[rgba(255,255,255,0.3)] pointer-events-none z-[2] -translate-x-px"
-                style={{ left: `${sprintPct}%` }}
-              />
             </div>
-            <span className={getProgressPctClassName(row)}>{row.pct}%</span>
-            <span className="w-[1em] shrink-0 inline-flex items-center justify-center text-[0.85em] text-orange-500">
+          ))}
+          {/* Linha vertical contínua com marcador */}
+          <div
+            className="absolute top-2 bottom-[-8px] pointer-events-none z-10"
+            style={{ left: `${sprintPct}%` }}
+          >
+            {/* Marcador circular */}
+            <div className="absolute left-0 -translate-x-1/2 -top-[1.65rem] w-[1.65rem] h-[1.65rem] rounded-full border-2 border-white/40 bg-[rgba(255,255,255,0.08)] flex items-center justify-center text-[0.55rem] font-bold text-white/80 leading-none">
+              {sprintPct}%
+            </div>
+            {/* Linha tracejada */}
+            <div className="absolute top-0 bottom-0 left-0 w-0 border-l-2 border-dashed border-white/40" />
+          </div>
+        </div>
+
+        {/* Coluna de percentuais */}
+        <div className="flex flex-col gap-4 pt-4">
+          {rows.map((row) => (
+            <span key={row.name} className={`h-[22px] flex items-center w-[2.8em] ${getProgressPctClassName(row)}`}>{row.pct}%</span>
+          ))}
+        </div>
+
+        {/* Coluna de ícones */}
+        <div className="flex flex-col gap-4 pt-4">
+          {rows.map((row) => (
+            <span key={row.name} className="h-[22px] w-[1em] flex items-center justify-center text-[0.85em] text-orange-500">
               {row.lagging ? <TriangleAlert size={14} /> : null}
             </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {loading && <div className="mt-2 text-[0.5em] text-purple-accent opacity-50 text-right">atualizando...</div>}

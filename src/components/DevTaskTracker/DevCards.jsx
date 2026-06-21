@@ -31,17 +31,11 @@ const IDLE_QUOTES = [
 ];
 
 function assignIdleQuotes(devs) {
-  const idleDevs = devs.filter((d) => !d.task);
-  const halfCount = Math.ceil(idleDevs.length / 2);
   const shuffledQuotes = [...IDLE_QUOTES].sort(() => Math.random() - 0.5);
-  // Only the first half of idle devs (shuffled order) get a quote
-  const idleWithQuote = new Set(
-    [...idleDevs].sort(() => Math.random() - 0.5).slice(0, halfCount).map((d) => d.name)
-  );
   let quoteIndex = 0;
   return devs.map((dev) => ({
     ...dev,
-    idleQuote: !dev.task && idleWithQuote.has(dev.name) ? shuffledQuotes[quoteIndex++] ?? null : null,
+    idleQuote: dev.task ? null : shuffledQuotes[quoteIndex++] ?? null,
   }));
 }
 

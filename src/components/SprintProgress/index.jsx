@@ -349,7 +349,19 @@ export default function SprintProgress() {
         </div>
       </div>
 
-      {loading && <div className="mt-2 text-[0.5em] text-purple-accent opacity-50 text-right">atualizando...</div>}
+      <div style={{ position: "relative", height: 0 }}>
+        {loading && (
+          <div className="text-purple-accent opacity-50" style={{ position: "absolute", top: 6, right: 0 }}>
+            <svg
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ animation: "spinIcon 0.8s linear infinite" }}
+            >
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
+          </div>
+        )}
+      </div>
 
       <DevCards sprintListId={sprintListId} />
     </div>

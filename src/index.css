@@ -22,6 +22,11 @@
   --color-text-dim: #b8a0d4;
 }
 
+@keyframes spinIcon {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 @layer base {
   :root {
     font-family: "IBM Plex Mono", monospace;

@@ -497,11 +497,7 @@ export default function Betz() {
           0% { opacity: 0.4; }
           100% { opacity: 1; }
         }
-        @keyframes spinIcon {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes dotBounce {
+@keyframes dotBounce {
           0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
           40% { opacity: 1; transform: translateY(-3px); }
         }

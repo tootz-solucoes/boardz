@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   CLICKUP_TEAM_ID,
   STORY_POINTS_FIELD_NAME,
@@ -8,6 +8,42 @@ import {
 } from "../../config/clickupConfig";
 import { clickupApi } from "../../services/clickupApi";
 import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
+
+const IDLE_QUOTES = [
+  "O ócio bem vivido alimenta a criatividade",
+  "Descansar também é uma forma de produzir",
+  "Grandes ideias costumam nascer em momentos de pausa",
+  "O silêncio do ócio fortalece a clareza da mente",
+  "Quem sabe parar aprende a recomeçar melhor",
+  "O ócio consciente renova as energias para agir",
+  "A mente floresce quando não está sempre ocupada",
+  "O descanso dá profundidade ao trabalho",
+  "O ócio é um espaço onde a reflexão encontra tempo para existir",
+  "No ócio, a mente respira",
+  "Parar é parte do progresso",
+  "O descanso também constrói caminhos",
+  "O ócio abre espaço para o novo",
+  "Ficar em pausa também é avançar por dentro",
+  "A calma do ócio organiza pensamentos",
+  "Sem pausa, não há equilíbrio",
+  "O ócio revela o que a pressa esconde",
+  "Tempo livre é terreno fértil para ideias",
+];
+
+function assignIdleQuotes(devs) {
+  const idleDevs = devs.filter((d) => !d.task);
+  const halfCount = Math.ceil(idleDevs.length / 2);
+  const shuffledQuotes = [...IDLE_QUOTES].sort(() => Math.random() - 0.5);
+  // Only the first half of idle devs (shuffled order) get a quote
+  const idleWithQuote = new Set(
+    [...idleDevs].sort(() => Math.random() - 0.5).slice(0, halfCount).map((d) => d.name)
+  );
+  let quoteIndex = 0;
+  return devs.map((dev) => ({
+    ...dev,
+    idleQuote: !dev.task && idleWithQuote.has(dev.name) ? shuffledQuotes[quoteIndex++] ?? null : null,
+  }));
+}
 
 const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
 const FETCH_INTERVAL = 1 * 60 * 1000;
@@ -85,7 +121,7 @@ export default function DevCards({ sprintListId }) {
 
   useEffect(() => {
     if (!PROXY_URL) {
-      setDevs(DEVELOPERS.map((d) => ({ name: d.name, avatar: null, task: null, extraTasks: 0 })));
+      setDevs(assignIdleQuotes(DEVELOPERS.map((d) => ({ name: d.name, avatar: null, task: null, extraTasks: 0 }))));
       return;
     }
 
@@ -94,7 +130,7 @@ export default function DevCards({ sprintListId }) {
     const cached = readSnapshot(snapshotKey, FETCH_INTERVAL);
 
     if (cached?.value) {
-      setDevs(cached.value);
+      setDevs(assignIdleQuotes(cached.value));
     }
 
     async function load() {
@@ -137,7 +173,7 @@ export default function DevCards({ sprintListId }) {
 
         const hasAnyTask = resolved.some((dev) => dev.task);
         if (!cancelled && hasAnyTask) {
-          setDevs(resolved);
+          setDevs(assignIdleQuotes(resolved));
           writeSnapshot(snapshotKey, resolved);
         }
       } catch {
@@ -200,9 +236,13 @@ export default function DevCards({ sprintListId }) {
                 )}
               </div>
             </>
-          ) : (
-            <div className="text-[1em] text-[#555] mt-auto"></div>
-          )}
+          ) : dev.idleQuote ? (
+            <div className="flex-1 flex items-center justify-center px-1">
+              <p className="text-[0.68em] text-[#555] italic leading-[1.45] text-center">
+                &ldquo;{dev.idleQuote}&rdquo;
+              </p>
+            </div>
+          ) : null}
         </div>
       ))}
     </div>

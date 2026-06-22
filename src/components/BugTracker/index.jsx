@@ -1,54 +1,85 @@
 import { useState, useEffect } from "react";
 import { Bug, Calendar, CheckCircle2 } from "lucide-react";
+import { CLIENTE_FIELD_NAME } from "../../config/clickupConfig";
+import { clickupApi } from "../../services/clickupApi";
+import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
 
-const MOCK_BUGS = [
-  {
-    id: 1,
-    title: "Login OAuth falha em mobile Safari ao redirecionar para callback",
-    priority: "critical",
-    status: "em_execucao",
-    dueDate: "2026-06-23",
-    assignee: "Eliaquim",
-    project: "EVNTTZ.",
-  },
-  {
-    id: 2,
-    title: "Export PDF gera arquivo corrompido quando há imagens no relatório",
-    priority: "high",
-    status: "disponivel",
-    dueDate: "2026-06-24",
-    assignee: "Douglas",
-    project: "Brasil Júnior",
-  },
-  {
-    id: 3,
-    title: "Campo de busca não sanitiza caracteres especiais corretamente",
-    priority: "medium",
-    status: "disponivel",
-    dueDate: "2026-06-24",
-    assignee: null,
-    project: "Migtech",
-  },
-  {
-    id: 4,
-    title: "Notificações duplicadas aparecem ao recarregar a página",
-    priority: "low",
-    status: "em_execucao",
-    dueDate: "2026-06-23",
-    assignee: "Henrique",
-    project: "Maestria",
-  },
-];
+const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
+const FETCH_INTERVAL = 2 * 60 * 1000;
+const SNAPSHOT_KEY_PREFIX = "bug-tracker";
 
+const BUG_SHOW_STATUSES = ["a fazer", "em desenvolvimento", "aguardando equipe", "aguardando cliente"];
 
-function formatDate(dateStr) {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  return `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}`;
+function getFieldValue(task, fieldName) {
+  const fields = task.custom_fields || [];
+  const field = fields.find((f) => f.name?.toLowerCase() === fieldName.toLowerCase());
+  if (field) {
+    if (field.value === null || field.value === undefined) return null;
+    if (field.type === "drop_down") {
+      const options = field.type_config?.options || [];
+      const option = options.find((o) => o.orderindex === field.value);
+      return option?.name ?? null;
+    }
+    return field.value;
+  }
+  return null;
 }
 
-function BugAvatar({ name }) {
-  if (!name) return null;
-  const initials = name
+function formatDueDate(dueDateMs) {
+  if (!dueDateMs) return null;
+  const d = new Date(Number(dueDateMs));
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  return `${day}/${month}`;
+}
+
+function mapTaskToBug(task) {
+  const status = task.status?.status?.toLowerCase() ?? "";
+  const isRunning = status !== "a fazer";
+  const assignee = task.assignees?.[0] ?? null;
+
+  return {
+    id: task.id,
+    title: task.name,
+    status: isRunning ? "em_execucao" : "disponivel",
+    dueDate: formatDueDate(task.due_date),
+    assignee: assignee ? { name: assignee.username, avatar: assignee.profilePicture } : null,
+    project: getFieldValue(task, CLIENTE_FIELD_NAME) ?? "—",
+  };
+}
+
+async function fetchBugs(sprintListId) {
+  let allTasks = [];
+  let page = 0;
+  while (true) {
+    const data = await clickupApi.get(
+      `/list/${sprintListId}/task?include_closed=false&tags[]=bug&page=${page}`
+    );
+    const tasks = data.tasks || [];
+    allTasks = [...allTasks, ...tasks];
+    if (tasks.length < 100) break;
+    page++;
+  }
+  return allTasks
+    .filter((t) => {
+      const status = t.status?.status?.toLowerCase() ?? "";
+      return BUG_SHOW_STATUSES.includes(status);
+    })
+    .map(mapTaskToBug);
+}
+
+function BugAvatar({ assignee }) {
+  if (!assignee) return null;
+  if (assignee.avatar) {
+    return (
+      <img
+        src={assignee.avatar}
+        alt={assignee.name}
+        className="w-9 h-9 rounded-full border border-[rgba(179,136,255,0.3)] shrink-0 object-cover"
+      />
+    );
+  }
+  const initials = assignee.name
     .split(" ")
     .map((w) => w[0])
     .join("")
@@ -98,16 +129,20 @@ function BugCard({ bug }) {
           {bug.title}
         </p>
         <span className="flex items-center gap-1.5 text-[0.715em] text-text-dim opacity-70">
-          <Calendar size={10} className="shrink-0" />
-          {formatDate(bug.dueDate)}
-          <span className="opacity-40">·</span>
+          {bug.dueDate && (
+            <>
+              <Calendar size={10} className="shrink-0" />
+              {bug.dueDate}
+              <span className="opacity-40">·</span>
+            </>
+          )}
           {isRunning ? "em execução" : "disponível"}
         </span>
       </div>
 
       <div className="shrink-0">
         {bug.assignee ? (
-          <BugAvatar name={bug.assignee} />
+          <BugAvatar assignee={bug.assignee} />
         ) : (
           <div className="w-9 h-9 rounded-full border border-orange-500/60 bg-orange-950/60 flex items-center justify-center">
             <span className="text-orange-400 text-[0.55em] font-bold leading-none">?</span>
@@ -118,13 +153,41 @@ function BugCard({ bug }) {
   );
 }
 
-export default function BugTracker() {
+export default function BugTracker({ sprintListId }) {
   const [bugs, setBugs] = useState(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setBugs(MOCK_BUGS), 800);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!PROXY_URL || !sprintListId) return;
+
+    let cancelled = false;
+    const snapshotKey = `${SNAPSHOT_KEY_PREFIX}:${sprintListId}`;
+    const cached = readSnapshot(snapshotKey, FETCH_INTERVAL);
+
+    if (cached?.value) {
+      setBugs(cached.value);
+    }
+
+    async function load() {
+      try {
+        const result = await fetchBugs(sprintListId);
+        if (cancelled) return;
+        setBugs(result);
+        writeSnapshot(snapshotKey, result);
+      } catch {
+        // Keep last snapshot on failure
+      }
+    }
+
+    if (!cached || cached.isStale) {
+      load();
+    }
+
+    const id = setInterval(load, FETCH_INTERVAL);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [sprintListId]);
 
   const isLoading = bugs === null;
   const isEmpty = bugs !== null && bugs.length === 0;
@@ -143,8 +206,7 @@ export default function BugTracker() {
               className="text-[1.26rem] font-bold text-white leading-tight"
               style={{ textShadow: "0 0 18px rgba(179,136,255,0.35)" }}
             >
-              bugs 
-              <span className="text-amber-400">(MOCKADO - CONCEITO)</span>
+              Bug Tracker
             </h2>
             <p className="text-[0.84rem] text-text-soft opacity-60 leading-tight mt-0.5">
               bugs disponíveis e em execução
@@ -161,7 +223,7 @@ export default function BugTracker() {
 
       <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">
         {isLoading ? (
-          MOCK_BUGS.map((_, i) => <BugCardSkeleton key={i} />)
+          Array.from({ length: 3 }).map((_, i) => <BugCardSkeleton key={i} />)
         ) : isEmpty ? (
           <div className="flex flex-col items-center justify-center gap-2 py-10 opacity-50">
             <CheckCircle2 size={28} className="text-emerald-400" />

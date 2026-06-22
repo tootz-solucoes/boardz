@@ -170,7 +170,7 @@ const MOCK_PROJECT_DATA = Object.fromEntries(
   PROJECTS.map((p) => [p.name, { donePts: 0, totalPts: p.sprintPoints }]),
 );
 
-export default function SprintProgress() {
+export default function SprintProgress({ onSprintListId }) {
   const now = useNow(60000);
   const [projectData, setProjectData] = useState(MOCK_PROJECT_DATA);
   const [sprintListId, setSprintListId] = useState(null);
@@ -208,7 +208,9 @@ export default function SprintProgress() {
     const cached = readSnapshot(snapshotKey, FETCH_INTERVAL);
     if (cached?.value) {
       setProjectData(cached.value.projectData || MOCK_PROJECT_DATA);
-      setSprintListId(cached.value.sprintListId || null);
+      const cachedListId = cached.value.sprintListId || null;
+      setSprintListId(cachedListId);
+      if (cachedListId) onSprintListId?.(cachedListId);
     }
 
     async function load() {
@@ -217,6 +219,7 @@ export default function SprintProgress() {
         const listId = await fetchCurrentSprintListId(currentSprint.sprint);
         if (cancelled || !listId) return;
         setSprintListId(listId);
+        onSprintListId?.(listId);
         const tasks = await fetchSprintTasks(listId);
         if (cancelled || tasks.length === 0) return;
         const nextProjectData = computeProjectProgress(tasks);

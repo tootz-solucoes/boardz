@@ -232,7 +232,7 @@ export default function DevCards({ sprintListId }) {
             </>
           ) : dev.idleQuote ? (
             <div className="flex-1 flex items-center justify-center px-1">
-              <p className="text-[0.68em] text-[#555] italic leading-[1.45] text-center">
+              <p className="text-[0.748em] text-white/80 italic leading-[1.45] text-center">
                 &ldquo;{dev.idleQuote}&rdquo;
               </p>
             </div>

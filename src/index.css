@@ -61,7 +61,11 @@
   }
 
   html.font-1rem body {
-    font-size: 1rem;
+    font-size: 1.1rem;
+  }
+
+  html.font-2x body {
+    font-size: 2.2rem;
   }
 
   h1 {

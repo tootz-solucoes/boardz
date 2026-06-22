@@ -29,6 +29,7 @@ const isSafari =
 const useOneRem = isChrome || isFirefox || isEdge || isSafari;
 
 document.documentElement.classList.toggle("font-1rem", useOneRem);
+document.documentElement.classList.toggle("font-2x", !useOneRem);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

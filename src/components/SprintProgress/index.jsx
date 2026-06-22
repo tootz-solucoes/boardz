@@ -300,16 +300,16 @@ export default function SprintProgress() {
 
       <div className="flex gap-3 items-stretch">
         {/* Coluna de labels */}
-        <div className="w-28 shrink-0 flex flex-col gap-4 pt-4">
+        <div className="shrink-0 flex flex-col gap-4 pt-10">
           {rows.map((row) => (
-            <span key={row.name} className={`h-[22px] flex items-center justify-end text-[0.8em] opacity-[0.85] ${row.lagging ? "text-orange-400 !opacity-100" : "text-text-soft"}`}>
+            <span key={row.name} className={`h-[22px] flex items-center justify-end whitespace-nowrap text-[0.8em] opacity-[0.85] ${row.lagging ? "text-orange-400 opacity-100!" : "text-text-soft"}`}>
               {row.name}
             </span>
           ))}
         </div>
 
         {/* Coluna das barras com linha contínua */}
-        <div className="flex-1 flex flex-col gap-4 relative pt-4">
+        <div className="flex-1 flex flex-col gap-4 relative pt-10">
           {rows.map((row) => (
             <div key={row.name} className="h-[22px] bg-[rgba(255,255,255,0.06)] rounded-lg overflow-hidden border border-[rgba(179,136,255,0.15)]">
               <div
@@ -320,11 +320,11 @@ export default function SprintProgress() {
           ))}
           {/* Linha vertical contínua com marcador */}
           <div
-            className="absolute top-2 bottom-[-8px] pointer-events-none z-10"
+            className="absolute top-8 -bottom-2 pointer-events-none z-10"
             style={{ left: `${sprintPct}%` }}
           >
             {/* Marcador circular */}
-            <div className="absolute left-0 -translate-x-1/2 -top-[1.65rem] w-[1.65rem] h-[1.65rem] rounded-full border-2 border-white/40 bg-[rgba(255,255,255,0.08)] flex items-center justify-center text-[0.55rem] font-bold text-white/80 leading-none">
+            <div className="absolute left-0 -translate-x-1/2 top-[-2.2rem] w-[2.2rem] h-[2.2rem] rounded-full border-2 border-white/40 bg-[rgba(255,255,255,0.08)] flex items-center justify-center text-[0.72rem] font-bold text-white/80 leading-none">
               {sprintPct}%
             </div>
             {/* Linha tracejada */}
@@ -333,14 +333,14 @@ export default function SprintProgress() {
         </div>
 
         {/* Coluna de percentuais */}
-        <div className="flex flex-col gap-4 pt-4">
+        <div className="flex flex-col gap-4 pt-10">
           {rows.map((row) => (
             <span key={row.name} className={`h-[22px] flex items-center w-[2.8em] ${getProgressPctClassName(row)}`}>{row.pct}%</span>
           ))}
         </div>
 
         {/* Coluna de ícones */}
-        <div className="flex flex-col gap-4 pt-4">
+        <div className="flex flex-col gap-4 pt-10">
           {rows.map((row) => (
             <span key={row.name} className="h-[22px] w-[1em] flex items-center justify-center text-[0.85em] text-orange-500">
               {row.lagging ? <TriangleAlert size={14} /> : null}

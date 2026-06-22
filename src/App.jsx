@@ -4,10 +4,14 @@ import "./App.css";
 import HomePage from "./pages/HomePage";
 import CalendarPage from "./pages/CalendarPage";
 import CalendarGeralPage from "./pages/CalendarGeralPage";
+import DebugOverlay from "./components/DebugOverlay";
+
+const isDebug = new URLSearchParams(window.location.search).has("debug");
 
 function App() {
   return (
     <>
+      {isDebug && <DebugOverlay />}
       {/* <nav style={{ padding: "1rem", textAlign: "center" }}>
         <Link
           to="/"

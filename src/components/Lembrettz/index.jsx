@@ -149,7 +149,6 @@ export default function Lembrettz() {
           <ClipboardList size={22} className="text-purple-accent shrink-0" />
           <div className="flex flex-col gap-0.5">
             <span className="text-[1.26rem] font-bold text-white leading-none tracking-tight [filter:drop-shadow(0_0_6px_rgba(179,136,255,0.6))]">lembrettz.</span>
-            <span className="text-[0.84rem] text-text-soft opacity-60 font-medium tracking-wide leading-none">eventos & avisos da semana</span>
           </div>
         </div>
       </header>

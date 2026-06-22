@@ -159,6 +159,7 @@ export default function DevCards({ sprintListId }) {
                 title: primary.name,
                 cliente: getFieldValue(primary, CLIENTE_FIELD_NAME) || "—",
                 points: getFieldValue(primary, STORY_POINTS_FIELD_NAME),
+                isBug: (primary.tags || []).some((t) => t.name === "bug"),
               },
               extraTasks: tasks.length - 1,
             };
@@ -223,11 +224,18 @@ export default function DevCards({ sprintListId }) {
                 <span className="text-[0.9em] text-purple-accent opacity-70 whitespace-nowrap overflow-hidden text-ellipsis">
                   {dev.task.cliente}
                 </span>
-                {dev.task.points != null && (
-                  <span className="text-[0.85em] text-emerald-400 font-semibold">
-                    {dev.task.points} pts
-                  </span>
-                )}
+                <span className="flex items-center gap-1.5 shrink-0">
+                  {dev.task.isBug && (
+                    <span className="text-[0.55em] font-bold text-red-300 bg-red-500/20 border border-red-500/50 rounded-full px-[0.5em] py-[0.15em] leading-none">
+                      bug
+                    </span>
+                  )}
+                  {dev.task.points != null && (
+                    <span className="text-[0.85em] text-emerald-400 font-semibold">
+                      {dev.task.points} pts
+                    </span>
+                  )}
+                </span>
               </div>
             </>
           ) : dev.idleQuote ? (

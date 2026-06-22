@@ -260,12 +260,14 @@ export default function Betz() {
             >
               bettz.
             </span>
-            <span
-              className="text-[0.84rem] font-medium tracking-wide leading-none"
-              style={casinoMode ? { color: "#f5c842aa" } : { color: "var(--color-text-soft)", opacity: 0.6 }}
-            >
-              {casinoMode ? "boa sorte!" : "sorteio de responsável"}
-            </span>
+            {!collapsed && (
+              <span
+                className="text-[0.84rem] font-medium tracking-wide leading-none"
+                style={casinoMode ? { color: "#f5c842aa" } : { color: "var(--color-text-soft)", opacity: 0.6 }}
+              >
+                {casinoMode ? "boa sorte!" : "sorteio de responsável"}
+              </span>
+            )}
           </div>
         </div>
 

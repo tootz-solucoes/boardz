@@ -8,7 +8,7 @@ const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
 const FETCH_INTERVAL = 2 * 60 * 1000;
 const SNAPSHOT_KEY_PREFIX = "bug-tracker";
 
-const BUG_SHOW_STATUSES = ["a fazer", "em desenvolvimento", "aguardando equipe", "aguardando cliente"];
+const BUG_SHOW_STATUSES = ["a fazer"];
 
 function getFieldValue(task, fieldName) {
   const fields = task.custom_fields || [];
@@ -206,11 +206,8 @@ export default function BugTracker({ sprintListId }) {
               className="text-[1.26rem] font-bold text-white leading-tight"
               style={{ textShadow: "0 0 18px rgba(179,136,255,0.35)" }}
             >
-              Bug Tracker
+              bugs
             </h2>
-            <p className="text-[0.84rem] text-text-soft opacity-60 leading-tight mt-0.5">
-              bugs disponíveis e em execução
-            </p>
           </div>
         </div>
 

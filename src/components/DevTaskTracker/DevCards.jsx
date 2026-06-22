@@ -217,10 +217,10 @@ export default function DevCards({ sprintListId }) {
           </div>
           {dev.task ? (
             <>
-              <div className="text-[0.75em] text-text-soft leading-[1.3] line-clamp-2 w-full opacity-90" title={dev.task.title}>
+              <div className="text-[0.75em] text-text-soft leading-[1.3] line-clamp-2 w-full opacity-90 flex-1" title={dev.task.title}>
                 {dev.task.title}
               </div>
-              <div className="flex justify-between items-center w-full">
+              <div className="flex justify-between items-center w-full mt-auto">
                 <span className="text-[0.9em] text-purple-accent opacity-70 whitespace-nowrap overflow-hidden text-ellipsis">
                   {dev.task.cliente}
                 </span>

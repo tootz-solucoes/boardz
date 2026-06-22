@@ -226,7 +226,7 @@ export default function DevCards({ sprintListId }) {
                 </span>
                 <span className="flex items-center gap-1.5 shrink-0">
                   {dev.task.isBug && (
-                    <span className="text-[0.55em] font-bold text-red-300 bg-red-500/20 border border-red-500/50 rounded-full px-[0.5em] py-[0.15em] leading-none">
+                    <span className="text-[0.75em] font-bold text-red-300 bg-red-500/20 border border-red-500/50 rounded-full px-[0.55em] py-[0.2em] leading-none">
                       bug
                     </span>
                   )}

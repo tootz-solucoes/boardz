@@ -136,7 +136,7 @@ function BugCard({ bug }) {
               <span className="opacity-40">·</span>
             </>
           )}
-          {isRunning ? "em execução" : "disponível"}
+          {isRunning ? "em execução" : "a fazer"}
         </span>
       </div>
 

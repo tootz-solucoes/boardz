@@ -29,7 +29,9 @@ const isSafari =
 const useOneRem = isChrome || isFirefox || isEdge || isSafari;
 
 document.documentElement.classList.toggle("font-1rem", useOneRem);
-document.documentElement.classList.toggle("font-2x", !useOneRem);
+
+const isTV = new URLSearchParams(window.location.search).has("tv");
+document.documentElement.classList.toggle("tv", isTV);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

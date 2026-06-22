@@ -64,8 +64,20 @@
     font-size: 1.1rem;
   }
 
-  html.font-2x body {
-    font-size: 2.2rem;
+  html.tv {
+    font-size: 26px;
+  }
+
+  html.tv body {
+    font-size: 1rem;
+    place-items: start;
+    justify-content: flex-start;
+  }
+
+  html.tv .content {
+    max-width: 100% !important;
+    width: 100%;
+    height: 100vh;
   }
 
   h1 {

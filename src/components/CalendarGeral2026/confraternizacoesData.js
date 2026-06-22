@@ -18,6 +18,13 @@ export const confraternizacoes = [
     evento: "Jogo da Copa do Mundo no Seaway"
   },
   {
+    mes: "Junho",
+    data: "2026-06-24",
+    dia: "Quarta-feira",
+    evento: "Brasil na Copa do Mundo",
+    tipo: "copa"
+  },
+  {
     mes: "Julho",
     data: "2026-07-03",
     dia: "Sexta-feira",

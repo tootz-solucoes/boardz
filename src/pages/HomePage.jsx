@@ -1,6 +1,7 @@
 import SprintProgress from "../components/SprintProgress";
 import Lembrettz from "../components/Lembrettz";
 import Betz from "../components/Betz";
+import BugTracker from "../components/BugTracker";
 
 function HomePage() {
   return (
@@ -9,11 +10,10 @@ function HomePage() {
         <SprintProgress />
       </div>
       <div className="flex-1 min-h-0 flex flex-col gap-[1.2rem]">
+        <Lembrettz />
+        <Betz />
         <div className="flex-1 min-h-0 flex">
-          <Lembrettz />
-        </div>
-        <div className="flex-1 min-h-0 flex">
-          <Betz />
+          <BugTracker />
         </div>
       </div>
     </div>

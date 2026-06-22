@@ -72,6 +72,7 @@ function CasinoConfetti({ particles }) {
 const ITEM_HEIGHT = 42;
 
 export default function Betz() {
+  const [collapsed, setCollapsed] = useState(true);
   const [spinning, setSpinning] = useState(false);
   const [names, setNames] = useState(() => getNames());
   const [shuffledNames, setShuffledNames] = useState(() => shuffle(names));
@@ -120,6 +121,15 @@ export default function Betz() {
       if (slowdownTimerRef.current) clearTimeout(slowdownTimerRef.current);
     };
   }, []);
+
+  function handleButtonClick() {
+    if (collapsed) {
+      setCollapsed(false);
+      setTimeout(() => startSpin(), 50);
+      return;
+    }
+    startSpin();
+  }
 
   function startSpin() {
     if (spinning) return;
@@ -185,6 +195,7 @@ export default function Betz() {
         setCasinoMode(false);
         setCelebrating(false);
         setWinner(null);
+        setCollapsed(true);
         if (scrollListRef.current) {
           scrollListRef.current.style.transition = "none";
           scrollListRef.current.style.transform = "translateY(0)";
@@ -213,12 +224,12 @@ export default function Betz() {
 
   return (
     <div
-      className="rounded-2xl grow p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)] flex flex-col bg-bg-widget"
+      className="rounded-2xl p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)] flex flex-col bg-bg-widget"
       style={{ position: "relative", transition: "background 0.4s ease, border 0.4s ease, box-shadow 0.4s ease", ...containerStyle }}
     >
       {celebrating && <CasinoConfetti particles={confettiParticles} />}
 
-      {/* Header */}
+      {/* Header — always visible */}
       <header className="flex justify-between items-center mb-4" style={{ position: "relative", zIndex: 2 }}>
         <div className="flex items-center gap-3">
           <Dices
@@ -297,192 +308,199 @@ export default function Betz() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col justify-center gap-3" style={{ position: "relative", zIndex: 2 }}>
-
-        {/* "Vencedor!" label */}
-        {celebrating && winner && (
-          <div
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-              animation: "winnerPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards",
-              color: "#f5c842",
-              filter: "drop-shadow(0 0 8px #f5c84288)",
-            }}
-          >
-            <Trophy size={14} />
-            <span style={{ fontSize: "0.78rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" }}>
-              Vencedor!
-            </span>
-            <Trophy size={14} />
-          </div>
-        )}
-
-        {/* Marquee lights above slot */}
-        {casinoMode && (
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "0 4px" }}>
-            {MARQUEE_COLORS.map((color, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 9, height: 9, borderRadius: "50%",
-                  backgroundColor: color,
-                  boxShadow: `0 0 7px ${color}, 0 0 14px ${color}66`,
-                  animation: `casinoBlink 0.5s ease-in-out infinite alternate`,
-                  animationDelay: `${i * 0.07}s`,
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Slot machine panel */}
-        <div
-          style={{
-            height: casinoMode ? 84 : 42,
-            overflow: "hidden",
-            borderRadius: 14,
-            border: casinoMode ? "1.5px solid #f5c84299" : "1.5px solid #b388ff44",
-            position: "relative",
-            backgroundColor: casinoMode ? "#110800" : "#1F1F23",
-            color: "#eee",
-            fontWeight: 500,
-            fontSize: "1.2em",
-            letterSpacing: ".04em",
-            userSelect: "none",
-            transition: "height 0.4s ease, background-color 0.4s ease, border 0.4s ease",
-            ...slotBorderStyle,
-          }}
-        >
-          {/* Fade gradients top/bottom */}
-          {casinoMode && (
-            <>
-              <div style={{
-                position: "absolute", top: 0, left: 0, right: 0, height: 36, zIndex: 3, pointerEvents: "none",
-                background: "linear-gradient(to bottom, #110800ee 0%, transparent 100%)",
-              }} />
-              <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0, height: 36, zIndex: 3, pointerEvents: "none",
-                background: "linear-gradient(to top, #110800ee 0%, transparent 100%)",
-              }} />
-              {/* Center selection lines */}
-              <div style={{
-                position: "absolute", top: 21, left: 0, right: 0, height: 1, zIndex: 4, pointerEvents: "none",
-                background: "linear-gradient(90deg, transparent 0%, #f5c842 20%, #f5c842 80%, transparent 100%)",
-                opacity: 0.25,
-              }} />
-              <div style={{
-                position: "absolute", top: 63, left: 0, right: 0, height: 1, zIndex: 4, pointerEvents: "none",
-                background: "linear-gradient(90deg, transparent 0%, #f5c842 20%, #f5c842 80%, transparent 100%)",
-                opacity: 0.25,
-              }} />
-            </>
-          )}
-
-          <div
-            ref={scrollListRef}
-            style={{ display: "flex", flexDirection: "column" }}
-          >
-            {tripleList.map((name, i) => {
-              const isWinner = winner === name && i >= shuffledNames.length && i < shuffledNames.length * 2;
-              const SymbolIcon = SYMBOLS[i % SYMBOLS.length];
-              return (
+      {/* Expandable section — slot machine only */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateRows: collapsed ? "0fr" : "1fr",
+          transition: "grid-template-rows 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <div style={{ overflow: "hidden", minHeight: 0 }}>
+          <div className="pb-3" style={{ position: "relative", zIndex: 2 }}>
+            {/* Slot content */}
+            <div className="flex flex-col gap-3">
+              {/* "Vencedor!" label */}
+              {celebrating && winner && (
                 <div
-                  key={i}
                   style={{
-                    height: ITEM_HEIGHT,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: isWinner ? 800 : 500,
-                    fontSize: isWinner ? "1.4em" : "1.2em",
-                    color: isWinner ? (casinoMode ? "#f5c842" : "#b388ff") : "#eee",
-                    textShadow: isWinner
-                      ? casinoMode ? "0 3px 18px #f5c84266, 0 1px 1px #fff2" : "0 3px 18px #b388ff44, 0 1px 1px #fff2"
-                      : "0 1px 1px #23213680",
-                    filter: isWinner
-                      ? casinoMode ? "drop-shadow(0 0 8px #f5c84299)" : "drop-shadow(0 0 8px #b388ff99)"
-                      : "none",
-                    animation: isWinner && casinoMode ? "casinoTitleFlicker 0.5s ease-in-out infinite" : "none",
-                    transition: "all 0.3s ease",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    animation: "winnerPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards",
+                    color: "#f5c842",
+                    filter: "drop-shadow(0 0 8px #f5c84288)",
                   }}
                 >
-                  {isWinner ? <PartyPopper size={22} style={{ marginRight: 8 }} /> : null}
-                  {name} <SymbolIcon size={22} style={{ marginLeft: 8 }} />
+                  <Trophy size={14} />
+                  <span style={{ fontSize: "0.78rem", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                    Vencedor!
+                  </span>
+                  <Trophy size={14} />
                 </div>
-              );
-            })}
+              )}
+
+              {/* Marquee lights above slot */}
+              {casinoMode && (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "0 4px" }}>
+                  {MARQUEE_COLORS.map((color, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: 9, height: 9, borderRadius: "50%",
+                        backgroundColor: color,
+                        boxShadow: `0 0 7px ${color}, 0 0 14px ${color}66`,
+                        animation: `casinoBlink 0.5s ease-in-out infinite alternate`,
+                        animationDelay: `${i * 0.07}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Slot machine panel */}
+              <div
+                style={{
+                  height: casinoMode ? 84 : 42,
+                  overflow: "hidden",
+                  borderRadius: 14,
+                  border: casinoMode ? "1.5px solid #f5c84299" : "1.5px solid #b388ff44",
+                  position: "relative",
+                  backgroundColor: casinoMode ? "#110800" : "#1F1F23",
+                  color: "#eee",
+                  fontWeight: 500,
+                  fontSize: "1.2em",
+                  letterSpacing: ".04em",
+                  userSelect: "none",
+                  transition: "height 0.4s ease, background-color 0.4s ease, border 0.4s ease",
+                  ...slotBorderStyle,
+                }}
+              >
+                {casinoMode && (
+                  <>
+                    <div style={{
+                      position: "absolute", top: 0, left: 0, right: 0, height: 36, zIndex: 3, pointerEvents: "none",
+                      background: "linear-gradient(to bottom, #110800ee 0%, transparent 100%)",
+                    }} />
+                    <div style={{
+                      position: "absolute", bottom: 0, left: 0, right: 0, height: 36, zIndex: 3, pointerEvents: "none",
+                      background: "linear-gradient(to top, #110800ee 0%, transparent 100%)",
+                    }} />
+                    <div style={{
+                      position: "absolute", top: 21, left: 0, right: 0, height: 1, zIndex: 4, pointerEvents: "none",
+                      background: "linear-gradient(90deg, transparent 0%, #f5c842 20%, #f5c842 80%, transparent 100%)",
+                      opacity: 0.25,
+                    }} />
+                    <div style={{
+                      position: "absolute", top: 63, left: 0, right: 0, height: 1, zIndex: 4, pointerEvents: "none",
+                      background: "linear-gradient(90deg, transparent 0%, #f5c842 20%, #f5c842 80%, transparent 100%)",
+                      opacity: 0.25,
+                    }} />
+                  </>
+                )}
+                <div ref={scrollListRef} style={{ display: "flex", flexDirection: "column" }}>
+                  {tripleList.map((name, i) => {
+                    const isWinner = winner === name && i >= shuffledNames.length && i < shuffledNames.length * 2;
+                    const SymbolIcon = SYMBOLS[i % SYMBOLS.length];
+                    return (
+                      <div
+                        key={i}
+                        style={{
+                          height: ITEM_HEIGHT,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: isWinner ? 800 : 500,
+                          fontSize: isWinner ? "1.4em" : "1.2em",
+                          color: isWinner ? (casinoMode ? "#f5c842" : "#b388ff") : "#eee",
+                          textShadow: isWinner
+                            ? casinoMode ? "0 3px 18px #f5c84266, 0 1px 1px #fff2" : "0 3px 18px #b388ff44, 0 1px 1px #fff2"
+                            : "0 1px 1px #23213680",
+                          filter: isWinner
+                            ? casinoMode ? "drop-shadow(0 0 8px #f5c84299)" : "drop-shadow(0 0 8px #b388ff99)"
+                            : "none",
+                          animation: isWinner && casinoMode ? "casinoTitleFlicker 0.5s ease-in-out infinite" : "none",
+                          transition: "all 0.3s ease",
+                        }}
+                      >
+                        {isWinner ? <PartyPopper size={22} style={{ marginRight: 8 }} /> : null}
+                        {name} <SymbolIcon size={22} style={{ marginLeft: 8 }} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Marquee lights below slot */}
+              {casinoMode && (
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "0 4px" }}>
+                  {[...MARQUEE_COLORS].reverse().map((color, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: 9, height: 9, borderRadius: "50%",
+                        backgroundColor: color,
+                        boxShadow: `0 0 7px ${color}, 0 0 14px ${color}66`,
+                        animation: `casinoBlink 0.5s ease-in-out infinite alternate`,
+                        animationDelay: `${i * 0.07 + 0.035}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Marquee lights below slot */}
-        {casinoMode && (
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "0 4px" }}>
-            {[...MARQUEE_COLORS].reverse().map((color, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 9, height: 9, borderRadius: "50%",
-                  backgroundColor: color,
-                  boxShadow: `0 0 7px ${color}, 0 0 14px ${color}66`,
-                  animation: `casinoBlink 0.5s ease-in-out infinite alternate`,
-                  animationDelay: `${i * 0.07 + 0.035}s`,
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Spin button */}
-        <button
-          id="btn-bettz"
-          onClick={startSpin}
-          disabled={spinning}
-          style={{
-            width: "100%",
-            opacity: spinning ? 0.7 : 1,
-            pointerEvents: spinning ? "none" : "auto",
-            background: spinning
-              ? "linear-gradient(270deg, #c53030, #f6ad55, #c53030)"
-              : casinoMode
-              ? "linear-gradient(90deg, #e53e3e 0%, #f6ad55 100%)"
-              : "linear-gradient(90deg, #b388ff 0%, #5b21b6 100%)",
-            backgroundSize: spinning ? "200% 200%" : "100% 100%",
-            color: "#fff",
-            fontWeight: 800,
-            fontSize: "1.08rem",
-            border: casinoMode ? "1px solid #f5c84266" : "none",
-            borderRadius: 10,
-            boxShadow: casinoMode
-              ? spinning ? "0 2px 8px #c5303044" : "0 2px 16px #e53e3e66, 0 0 30px #f6ad5533"
-              : "0 2px 8px #18102266",
-            padding: "12px 0",
-            letterSpacing: ".04em",
-            transition: "all .13s",
-            cursor: spinning ? "not-allowed" : "pointer",
-            animation: spinning
-              ? "casinoButtonSpin 1s ease-in-out infinite"
-              : casinoMode
-              ? "casinoButtonPulse 1.2s ease-in-out infinite"
-              : "none",
-          }}
-        >
-          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            {spinning
-              ? <>
-                  <Loader2 size={16} style={{ animation: "spinIcon 0.8s linear infinite" }} />
-                  Girando
-                  <span style={{ display: "inline-flex", gap: 2 }}>
-                    {[0, 1, 2].map(i => (
-                      <span key={i} style={{ animation: `dotBounce 1s ease-in-out infinite`, animationDelay: `${i * 0.2}s` }}>.</span>
-                    ))}
-                  </span>
-                </>
-              : casinoMode
-              ? <><Dices size={16} /> Girar!</>
-              : "Girar a roleta!"}
-          </span>
-        </button>
       </div>
+
+      {/* Spin button — always visible */}
+      <button
+        id="btn-bettz"
+        onClick={handleButtonClick}
+        disabled={spinning}
+        style={{
+          width: "100%",
+          opacity: spinning ? 0.7 : 1,
+          pointerEvents: spinning ? "none" : "auto",
+          background: spinning
+            ? "linear-gradient(270deg, #c53030, #f6ad55, #c53030)"
+            : casinoMode
+            ? "linear-gradient(90deg, #e53e3e 0%, #f6ad55 100%)"
+            : "linear-gradient(90deg, #b388ff 0%, #5b21b6 100%)",
+          backgroundSize: spinning ? "200% 200%" : "100% 100%",
+          color: "#fff",
+          fontWeight: 800,
+          fontSize: "1.08rem",
+          border: casinoMode ? "1px solid #f5c84266" : "none",
+          borderRadius: 10,
+          boxShadow: casinoMode
+            ? spinning ? "0 2px 8px #c5303044" : "0 2px 16px #e53e3e66, 0 0 30px #f6ad5533"
+            : "0 2px 8px #18102266",
+          padding: "12px 0",
+          letterSpacing: ".04em",
+          transition: "all .13s",
+          cursor: spinning ? "not-allowed" : "pointer",
+          animation: spinning
+            ? "casinoButtonSpin 1s ease-in-out infinite"
+            : casinoMode
+            ? "casinoButtonPulse 1.2s ease-in-out infinite"
+            : "none",
+        }}
+      >
+        <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          {spinning
+            ? <>
+                <Loader2 size={16} style={{ animation: "spinIcon 0.8s linear infinite" }} />
+                Girando
+                <span style={{ display: "inline-flex", gap: 2 }}>
+                  {[0, 1, 2].map(i => (
+                    <span key={i} style={{ animation: `dotBounce 1s ease-in-out infinite`, animationDelay: `${i * 0.2}s` }}>.</span>
+                  ))}
+                </span>
+              </>
+            : casinoMode
+            ? <><Dices size={16} /> Girar!</>
+            : "Girar a roleta!"}
+        </span>
+      </button>
 
       <style>{`
         @keyframes scrollUp {
@@ -497,7 +515,7 @@ export default function Betz() {
           0% { opacity: 0.4; }
           100% { opacity: 1; }
         }
-@keyframes dotBounce {
+        @keyframes dotBounce {
           0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
           40% { opacity: 1; transform: translateY(-3px); }
         }

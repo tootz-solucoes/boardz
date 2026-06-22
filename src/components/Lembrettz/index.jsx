@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Cake, CalendarDays, ClipboardList, MapPin, PartyPopper, Popcorn, UserRound } from "lucide-react";
+import { Cake, CalendarDays, ClipboardList, Flag, MapPin, PartyPopper, Popcorn, UserRound } from "lucide-react";
 import LembrettzBadge from "./Badge";
 import { getAllHolidays, getAllOptionalDays, normalizeDate } from "../Calendar2026/utils";
 import { aniversariantes } from "../CalendarGeral2026/aniversariantesData";
@@ -29,11 +29,6 @@ function getFirstFridayOfMonth(date) {
   return first;
 }
 
-function getLastFridayOfMonth(date) {
-  const last = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  while (last.getDay() !== 5) last.setDate(last.getDate() - 1);
-  return last;
-}
 
 function useNow(interval = 60000) {
   const [now, setNow] = useState(() => new Date());
@@ -91,7 +86,7 @@ function useWeekCalendarEvents(now) {
     const optionals = getAllOptionalDays(year).filter((h) => inWeek(h.date));
     const events = confraternizacoes
       .filter((c) => c.data && inWeek(new Date(c.data + "T12:00:00")))
-      .map((c) => ({ date: new Date(c.data + "T12:00:00"), type: "event", name: c.evento }));
+      .map((c) => ({ date: new Date(c.data + "T12:00:00"), type: c.tipo ?? "event", name: c.evento }));
     return [...holidays, ...optionals, ...events].sort(
       (a, b) => normalizeDate(a.date) - normalizeDate(b.date)
     );
@@ -110,6 +105,7 @@ function useMonthBirthdays(now) {
 function calendarEventIcon(type) {
   if (type === "national" || type === "state" || type === "municipal") return <CalendarDays size={14} />;
   if (type === "optional") return <MapPin size={14} />;
+  if (type === "copa") return <Flag size={14} />;
   if (type === "event") return <PartyPopper size={14} />;
   return <CalendarDays size={14} />;
 }
@@ -117,6 +113,7 @@ function calendarEventIcon(type) {
 function calendarEventBadgeClass(type) {
   if (type === "national" || type === "state" || type === "municipal") return "badge-calendar-holiday";
   if (type === "optional") return "badge-calendar-optional";
+  if (type === "copa") return "badge-copa-brasil";
   if (type === "event") return "badge-calendar-event";
   return "";
 }
@@ -143,12 +140,10 @@ export default function Lembrettz() {
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
   const firstFriday = getFirstFridayOfMonth(now);
-  const lastFriday = getLastFridayOfMonth(now);
   const isFirstWeek = weekStart <= firstFriday && firstFriday <= weekEnd;
-  const isLastFridayWeek = weekStart <= lastFriday && lastFriday <= weekEnd;
 
   return (
-    <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
+    <div className="rounded-2xl bg-bg-widget p-[1.2rem] shadow-[0_0_30px_rgba(0,0,0,0.4)]">
       <header className="flex justify-between items-center mb-5">
         <div className="flex items-center gap-3">
           <ClipboardList size={22} className="text-purple-accent shrink-0" />
@@ -176,12 +171,6 @@ export default function Lembrettz() {
         {isFirstWeek && (
           <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
             <span className="inline-flex items-center gap-[0.35rem]"><UserRound size={14} /><b>Sexta da Véia</b></span>
-          </LembrettzBadge>
-        )}
-
-        {isLastFridayWeek && (
-          <LembrettzBadge className={isFriday ? "badge-highlight-today" : ""}>
-            <span className="inline-flex items-center gap-[0.35rem]"><PartyPopper size={14} /><b>Sexta:</b> Happy Hour</span>
           </LembrettzBadge>
         )}
 

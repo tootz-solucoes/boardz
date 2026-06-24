@@ -264,6 +264,8 @@ export default function SprintProgress({ onSprintListId }) {
     });
   }, [projectData, sprintPct]);
 
+  const allDone = rows.length > 0 && rows.every((r) => r.pct >= 100);
+
   return (
     <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] h-full box-border overflow-y-auto shadow-[0_0_30px_rgba(0,0,0,0.4)]">
       <header className="flex justify-between items-center mb-5">
@@ -329,19 +331,19 @@ export default function SprintProgress({ onSprintListId }) {
             {/* Marcador chip */}
             <div
               className="absolute left-0 -translate-x-1/2"
-              style={{ top: -27, left: 1, filter: "drop-shadow(0 2px 8px rgba(179,136,255,0.65))" }}
+              style={{ top: -27, left: 1, filter: allDone ? "drop-shadow(0 2px 8px rgba(52,211,153,0.65))" : "drop-shadow(0 2px 8px rgba(179,136,255,0.65))" }}
             >
               <svg width="32" height="28" viewBox="0 0 32 28" fill="none">
                 <defs>
                   <linearGradient id="mkGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#b388ff" stopOpacity="0.32" />
-                    <stop offset="100%" stopColor="#b388ff" stopOpacity="0.1" />
+                    <stop offset="0%" stopColor={allDone ? "#0b7a60" : "#b388ff"} stopOpacity="0.5" />
+                    <stop offset="100%" stopColor={allDone ? "#34d399" : "#b388ff"} stopOpacity="0.15" />
                   </linearGradient>
                 </defs>
                 <path
                   d="M4 1H28Q31 1 31 4V16L16 27L1 16V4Q1 1 4 1Z"
                   fill="url(#mkGrad)"
-                  stroke="rgba(179,136,255,0.85)"
+                  stroke={allDone ? "rgba(52,211,153,0.85)" : "rgba(179,136,255,0.85)"}
                   strokeWidth="1.3"
                   strokeLinejoin="round"
                 />
@@ -349,7 +351,7 @@ export default function SprintProgress({ onSprintListId }) {
                   x="16" y="10"
                   textAnchor="middle"
                   dominantBaseline="central"
-                  fill="#d4b8ff"
+                  fill={allDone ? "#6ee7b7" : "#d4b8ff"}
                   fontSize="10"
                   fontWeight="800"
                   fontFamily="system-ui,-apple-system,sans-serif"

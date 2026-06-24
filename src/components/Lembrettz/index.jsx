@@ -4,9 +4,12 @@ import LembrettzBadge from "./Badge";
 import { getAllHolidays, getAllOptionalDays, normalizeDate } from "../Calendar2026/utils";
 import { aniversariantes } from "../CalendarGeral2026/aniversariantesData";
 import { confraternizacoes } from "../CalendarGeral2026/confraternizacoesData";
+import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
 
 const SWEET_DAY_SHEET_ID = "1UBZcGXJJDd2FJTZ0AA-m-IM8iQ6YIFmdGAl7AvnPAT4";
 const SWEET_DAY_SHEET_URL = `https://opensheet.elk.sh/${SWEET_DAY_SHEET_ID}/1`;
+const FETCH_INTERVAL = 30 * 60 * 1000;
+const SNAPSHOT_KEY = "sweet-day";
 
 function getStartOfWeek(date) {
   const d = new Date(date);
@@ -40,33 +43,48 @@ function useNow(interval = 60000) {
 }
 
 function useSweetDay(now) {
-  const [sweetDay, setSweetDay] = useState({ names: null, error: null });
+  const [rawData, setRawData] = useState(() => readSnapshot(SNAPSHOT_KEY, FETCH_INTERVAL)?.value ?? null);
+
   useEffect(() => {
     let cancelled = false;
-    fetch(SWEET_DAY_SHEET_URL)
-      .then((res) => res.json())
-      .then((data) => {
-        const today = new Date(now);
-        today.setHours(0, 0, 0, 0);
-        if (today.getDay() === 0) today.setDate(today.getDate() + 1);
-        const current = data.find((row) => {
-          const rowDate = new Date(row["Data"]);
-          rowDate.setDate(rowDate.getDate() - 2);
-          rowDate.setHours(0, 0, 0, 0);
-          const endOfWeek = new Date(rowDate);
-          endOfWeek.setDate(rowDate.getDate() + 7);
-          return rowDate <= today && today <= endOfWeek;
-        });
+    const cached = readSnapshot(SNAPSHOT_KEY, FETCH_INTERVAL);
+
+    async function load() {
+      try {
+        const res = await fetch(SWEET_DAY_SHEET_URL);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
         if (cancelled) return;
-        setSweetDay(current
-          ? { names: (current["Pagantes"] || "").replace("&", "e").trim(), error: null }
-          : { names: null, error: null }
-        );
-      })
-      .catch(() => { if (!cancelled) setSweetDay({ names: null, error: "Erro ao carregar dupla." }); });
-    return () => (cancelled = true);
-  }, [now]);
-  return sweetDay;
+        setRawData(data);
+        writeSnapshot(SNAPSHOT_KEY, data);
+      } catch {
+        // Keep last snapshot on failure
+      }
+    }
+
+    if (!cached || cached.isStale) load();
+
+    const id = setInterval(load, FETCH_INTERVAL);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
+  return useMemo(() => {
+    if (!rawData) return { names: null };
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    if (today.getDay() === 0) today.setDate(today.getDate() + 1);
+    const current = rawData.find((row) => {
+      const rowDate = new Date(row["Data"]);
+      rowDate.setDate(rowDate.getDate() - 2);
+      rowDate.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(rowDate);
+      endOfWeek.setDate(rowDate.getDate() + 7);
+      return rowDate <= today && today <= endOfWeek;
+    });
+    return current
+      ? { names: (current["Pagantes"] || "").replace("&", "e").trim() }
+      : { names: null };
+  }, [rawData, now]);
 }
 
 function formatShortDate(date) {
@@ -155,10 +173,7 @@ export default function Lembrettz() {
       <div className="flex flex-col gap-[0.75em]">
         <LembrettzBadge pulse={tuesdayPulse} className={isWednesday ? "badge-highlight-today" : ""}>
           <span className="inline-flex items-center gap-[0.35rem]"><Popcorn size={14} /><b>Brigadeiro:</b></span>{" "}
-          {sweetDay.error
-            ? <span style={{ color: "red" }}>{sweetDay.error}</span>
-            : sweetDay.names || <span style={{ color: "#bbb" }}>Sem info</span>
-          }
+          {sweetDay.names || <span style={{ color: "#bbb" }}>Sem info</span>}
         </LembrettzBadge>
 
         {isFriday && (

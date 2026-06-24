@@ -137,6 +137,12 @@ function BugCard({ bug }) {
             </>
           )}
           {isRunning ? "em execução" : "a fazer"}
+          {bug.project && bug.project !== "—" && (
+            <>
+              <span className="opacity-40">·</span>
+              <span className="text-purple-accent opacity-80">{bug.project}</span>
+            </>
+          )}
         </span>
       </div>
 

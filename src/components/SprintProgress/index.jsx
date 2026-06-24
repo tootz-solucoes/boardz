@@ -303,7 +303,7 @@ export default function SprintProgress({ onSprintListId }) {
 
       <div className="flex gap-3 items-stretch">
         {/* Coluna de labels */}
-        <div className="shrink-0 flex flex-col gap-4 pt-10">
+        <div className="shrink-0 flex flex-col gap-4 pt-7">
           {rows.map((row) => (
             <span key={row.name} className={`h-[22px] flex items-center justify-end whitespace-nowrap text-[0.8em] opacity-[0.85] ${row.lagging ? "text-orange-400 opacity-100!" : "text-text-soft"}`}>
               {row.name}
@@ -312,7 +312,7 @@ export default function SprintProgress({ onSprintListId }) {
         </div>
 
         {/* Coluna das barras com linha contínua */}
-        <div className="flex-1 flex flex-col gap-4 relative pt-10">
+        <div className="flex-1 flex flex-col gap-4 relative pt-7">
           {rows.map((row) => (
             <div key={row.name} className="h-[22px] bg-[rgba(255,255,255,0.06)] rounded-lg overflow-hidden border border-[rgba(179,136,255,0.15)]">
               <div
@@ -323,12 +323,41 @@ export default function SprintProgress({ onSprintListId }) {
           ))}
           {/* Linha vertical contínua com marcador */}
           <div
-            className="absolute top-8 -bottom-2 pointer-events-none z-10"
+            className="absolute top-5 -bottom-2 pointer-events-none z-10"
             style={{ left: `${sprintPct}%` }}
           >
-            {/* Marcador circular */}
-            <div className="absolute left-0 -translate-x-1/2 top-[-2.2rem] w-[2.2rem] h-[2.2rem] rounded-full border-2 border-white/40 bg-[rgba(255,255,255,0.08)] flex items-center justify-center text-[0.72rem] font-bold text-white/80 leading-none">
-              {sprintPct}%
+            {/* Marcador chip */}
+            <div
+              className="absolute left-0 -translate-x-1/2"
+              style={{ top: -27, left: 1, filter: "drop-shadow(0 2px 8px rgba(179,136,255,0.65))" }}
+            >
+              <svg width="32" height="28" viewBox="0 0 32 28" fill="none">
+                <defs>
+                  <linearGradient id="mkGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#b388ff" stopOpacity="0.32" />
+                    <stop offset="100%" stopColor="#b388ff" stopOpacity="0.1" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M4 1H28Q31 1 31 4V16L16 27L1 16V4Q1 1 4 1Z"
+                  fill="url(#mkGrad)"
+                  stroke="rgba(179,136,255,0.85)"
+                  strokeWidth="1.3"
+                  strokeLinejoin="round"
+                />
+                <text
+                  x="16" y="10"
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fill="#d4b8ff"
+                  fontSize="10"
+                  fontWeight="800"
+                  fontFamily="system-ui,-apple-system,sans-serif"
+                  letterSpacing="-0.3"
+                >
+                  {sprintPct}%
+                </text>
+              </svg>
             </div>
             {/* Linha tracejada */}
             <div className="absolute top-0 bottom-0 left-0 w-0 border-l-2 border-dashed border-white/40" />
@@ -336,14 +365,14 @@ export default function SprintProgress({ onSprintListId }) {
         </div>
 
         {/* Coluna de percentuais */}
-        <div className="flex flex-col gap-4 pt-10">
+        <div className="flex flex-col gap-4 pt-7">
           {rows.map((row) => (
             <span key={row.name} className={`h-[22px] flex items-center w-[2.8em] ${getProgressPctClassName(row)}`}>{row.pct}%</span>
           ))}
         </div>
 
         {/* Coluna de ícones */}
-        <div className="flex flex-col gap-4 pt-10">
+        <div className="flex flex-col gap-4 pt-7">
           {rows.map((row) => (
             <span key={row.name} className="h-[22px] w-[1em] flex items-center justify-center text-[0.85em] text-orange-500">
               {row.lagging ? <TriangleAlert size={14} /> : null}

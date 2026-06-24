@@ -54,7 +54,7 @@ function getCurrentSprint(date) {
   );
 }
 
-function getSprintProgress(sprint) {
+function getSprintProgress(sprint, now) {
   if (!sprint) return 0;
   const start = new Date(
     sprint.calendarStart.year,
@@ -65,11 +65,11 @@ function getSprintProgress(sprint) {
     sprint.calendarEnd.year,
     sprint.calendarEnd.month,
     sprint.calendarEnd.day,
+    23, 59, 59, 999,
   );
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const current = now ? new Date(now) : new Date();
   const total = end - start;
-  const elapsed = Math.min(Math.max(today - start, 0), total);
+  const elapsed = Math.min(Math.max(current - start, 0), total);
   return Math.round((elapsed / total) * 100);
 }
 
@@ -178,8 +178,8 @@ export default function SprintProgress({ onSprintListId }) {
 
   const currentSprint = useMemo(() => getCurrentSprint(now), [now]);
   const sprintPct = useMemo(
-    () => getSprintProgress(currentSprint),
-    [currentSprint],
+    () => getSprintProgress(currentSprint, now),
+    [currentSprint, now],
   );
 
   const clockStr = useMemo(() => {

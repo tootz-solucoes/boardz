@@ -283,7 +283,7 @@ export default function SprintProgress({ onSprintListId }) {
                   <span className="text-text-soft opacity-60">{formatSprintDates(currentSprint)}</span>
                   {isToday ? (
                     <span className="px-1.5 py-0.5 rounded text-[0.85em] font-semibold bg-[rgba(251,191,36,0.15)] text-[#fbbf24] border border-[rgba(251,191,36,0.3)] leading-none">
-                      Até hoje!
+                      finaliza hoje!
                     </span>
                   ) : daysLeft > 0 ? (
                     <span className="px-1.5 py-0.5 rounded text-[0.85em] font-semibold bg-[rgba(179,136,255,0.12)] text-purple-accent border border-[rgba(179,136,255,0.25)] leading-none">

@@ -54,23 +54,56 @@ function getCurrentSprint(date) {
   );
 }
 
+const WORK_START_H = 9;
+const WORK_END_H = 17;
+const WORK_MS = (WORK_END_H - WORK_START_H) * 60 * 60 * 1000;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 function getSprintProgress(sprint, now) {
   if (!sprint) return 0;
-  const start = new Date(
+
+  const sprintStart = new Date(
     sprint.calendarStart.year,
     sprint.calendarStart.month,
     sprint.calendarStart.day,
   );
-  const end = new Date(
+  const sprintEnd = new Date(
     sprint.calendarEnd.year,
     sprint.calendarEnd.month,
     sprint.calendarEnd.day,
-    23, 59, 59, 999,
   );
+
   const current = now ? new Date(now) : new Date();
-  const total = end - start;
-  const elapsed = Math.min(Math.max(current - start, 0), total);
-  return Math.round((elapsed / total) * 100);
+
+  const totalDays = Math.round((sprintEnd - sprintStart) / MS_PER_DAY) + 1;
+  const totalWorkMs = totalDays * WORK_MS;
+
+  const today = new Date(current);
+  today.setHours(0, 0, 0, 0);
+
+  const startDay = new Date(sprintStart);
+  startDay.setHours(0, 0, 0, 0);
+
+  const completedDays = Math.min(
+    Math.max(Math.round((today - startDay) / MS_PER_DAY), 0),
+    totalDays,
+  );
+  let elapsedWorkMs = completedDays * WORK_MS;
+
+  if (today >= startDay && today <= sprintEnd) {
+    const workStart = new Date(today);
+    workStart.setHours(WORK_START_H, 0, 0, 0);
+    const workEnd = new Date(today);
+    workEnd.setHours(WORK_END_H, 0, 0, 0);
+
+    if (current >= workEnd) {
+      elapsedWorkMs += WORK_MS;
+    } else if (current > workStart) {
+      elapsedWorkMs += current - workStart;
+    }
+  }
+
+  return Math.round((Math.min(elapsedWorkMs, totalWorkMs) / totalWorkMs) * 100);
 }
 
 function formatSprintDates(sprint) {

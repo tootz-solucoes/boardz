@@ -3,8 +3,20 @@ import { Bug, Calendar, CheckCircle2 } from "lucide-react";
 import { CLIENTE_FIELD_NAME } from "../../config/clickupConfig";
 import { clickupApi } from "../../services/clickupApi";
 import { readSnapshot, writeSnapshot } from "../../utils/snapshotCache";
+import { announceNewBugs, speakBug } from "../../hooks/useBugAnnouncer";
 
 const PROXY_URL = import.meta.env.VITE_CLICKUP_PROXY_URL;
+const IS_DEV = import.meta.env.DEV;
+const IS_DEBUG = new URLSearchParams(window.location.search).has("debug");
+
+const MOCK_BUG = {
+  id: "mock-001",
+  title: "Botão de pagamento não responde no Safari",
+  status: "disponivel",
+  dueDate: "30/06",
+  assignee: { name: "Eliaquim Santos", avatar: null },
+  project: "Vivalá",
+};
 const FETCH_INTERVAL = 2 * 60 * 1000;
 const SNAPSHOT_KEY_PREFIX = "bug-tracker";
 
@@ -160,7 +172,12 @@ function BugCard({ bug }) {
 }
 
 export default function BugTracker({ sprintListId }) {
-  const [bugs, setBugs] = useState(null);
+  const [bugs, setBugs] = useState(IS_DEBUG ? [MOCK_BUG] : null);
+
+  useEffect(() => {
+    if (!IS_DEBUG) return;
+    speakBug(MOCK_BUG);
+  }, []);
 
   useEffect(() => {
     if (!PROXY_URL || !sprintListId) return;
@@ -179,6 +196,7 @@ export default function BugTracker({ sprintListId }) {
         if (cancelled) return;
         setBugs(result);
         writeSnapshot(snapshotKey, result);
+        announceNewBugs(result);
       } catch {
         // Keep last snapshot on failure
       }
@@ -217,11 +235,22 @@ export default function BugTracker({ sprintListId }) {
           </div>
         </div>
 
-        {!isLoading && !isEmpty && (
-          <span className="shrink-0 text-[0.65em] font-bold text-purple-accent bg-[rgba(179,136,255,0.12)] border border-[rgba(179,136,255,0.25)] rounded-full px-[0.6em] py-[0.3em] mt-1">
-            {bugs.length}
-          </span>
-        )}
+        <div className="flex items-center gap-2 mt-1">
+          {!isLoading && !isEmpty && (
+            <span className="shrink-0 text-[0.65em] font-bold text-purple-accent bg-[rgba(179,136,255,0.12)] border border-[rgba(179,136,255,0.25)] rounded-full px-[0.6em] py-[0.3em]">
+              {bugs.length}
+            </span>
+          )}
+          {IS_DEV && (
+            <button
+              onClick={() => announceNewBugs([{ ...MOCK_BUG, id: `mock-${Date.now()}` }])}
+              className="text-[0.6em] text-orange-400 border border-orange-500/40 rounded-full px-[0.7em] py-[0.3em] hover:bg-orange-950/40 transition-colors"
+              title="Testar narração"
+            >
+              test
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 min-h-0">

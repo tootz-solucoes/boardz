@@ -14,11 +14,18 @@ function getInfo() {
 
 export default function DebugOverlay() {
   const [info, setInfo] = useState(getInfo);
+  const [lastKey, setLastKey] = useState("—");
 
   useEffect(() => {
     const update = () => setInfo(getInfo());
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e) => setLastKey(e.key);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   return (
@@ -32,6 +39,10 @@ export default function DebugOverlay() {
               <td className={`text-white/80 ${key === "userAgent" ? "max-w-[30ch] truncate block" : "whitespace-nowrap"}`}>{String(val)}</td>
             </tr>
           ))}
+          <tr>
+            <td className="pr-3 text-text-dim opacity-60 whitespace-nowrap">key</td>
+            <td className="text-white/80 whitespace-nowrap">{lastKey}</td>
+          </tr>
         </tbody>
       </table>
     </div>

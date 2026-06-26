@@ -1,0 +1,6 @@
+name = "voicerss-proxy"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# Secrets (nunca vão pro git) — configurar via:
+# pnpm wrangler secret put VOICERSS_API_KEY --config worker-tts/wrangler.toml

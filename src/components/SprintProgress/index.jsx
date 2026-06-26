@@ -266,6 +266,11 @@ export default function SprintProgress({ onSprintListId }) {
 
   const allDone = rows.length > 0 && rows.every((r) => r.pct >= 100);
 
+  const isTv = new URLSearchParams(window.location.search).has("tv");
+  const chip = isTv
+    ? { w: 64, h: 56, vb: "0 0 64 56", path: "M8 2H56Q62 2 62 8V32L32 54L2 32V8Q2 2 8 2Z", tx: 32, ty: 20, fs: 20, sw: 1.8, ls: "-0.6", top: -55, shadow: 14 }
+    : { w: 35, h: 31, vb: "0 0 35 31", path: "M4.4 1.1H30.8Q34.1 1.1 34.1 4.4V17.6L17.6 29.7L1.1 17.6V4.4Q1.1 1.1 4.4 1.1Z", tx: 17.5, ty: 11, fs: 11, sw: 1.4, ls: "-0.3", top: -30, shadow: 8 };
+
   return (
     <div className="rounded-2xl grow bg-bg-widget p-[1.2rem] h-full box-border overflow-y-auto shadow-[0_0_30px_rgba(0,0,0,0.4)]">
       <header className="flex justify-between items-center mb-5">
@@ -331,9 +336,9 @@ export default function SprintProgress({ onSprintListId }) {
             {/* Marcador chip */}
             <div
               className="absolute left-0 -translate-x-1/2"
-              style={{ top: -27, left: 1, filter: allDone ? "drop-shadow(0 2px 8px rgba(52,211,153,0.65))" : "drop-shadow(0 2px 8px rgba(179,136,255,0.65))" }}
+              style={{ top: chip.top, left: 1, filter: allDone ? `drop-shadow(0 4px ${chip.shadow}px rgba(52,211,153,0.65))` : `drop-shadow(0 4px ${chip.shadow}px rgba(179,136,255,0.65))` }}
             >
-              <svg width="32" height="28" viewBox="0 0 32 28" fill="none">
+              <svg width={chip.w} height={chip.h} viewBox={chip.vb} fill="none">
                 <defs>
                   <linearGradient id="mkGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={allDone ? "#0b7a60" : "#b388ff"} stopOpacity="0.5" />
@@ -341,21 +346,21 @@ export default function SprintProgress({ onSprintListId }) {
                   </linearGradient>
                 </defs>
                 <path
-                  d="M4 1H28Q31 1 31 4V16L16 27L1 16V4Q1 1 4 1Z"
+                  d={chip.path}
                   fill="url(#mkGrad)"
                   stroke={allDone ? "rgba(52,211,153,0.85)" : "rgba(179,136,255,0.85)"}
-                  strokeWidth="1.3"
+                  strokeWidth={chip.sw}
                   strokeLinejoin="round"
                 />
                 <text
-                  x="16" y="10"
+                  x={chip.tx} y={chip.ty}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fill={allDone ? "#6ee7b7" : "#d4b8ff"}
-                  fontSize="10"
+                  fontSize={chip.fs}
                   fontWeight="800"
                   fontFamily="system-ui,-apple-system,sans-serif"
-                  letterSpacing="-0.3"
+                  letterSpacing={chip.ls}
                 >
                   {sprintPct}%
                 </text>

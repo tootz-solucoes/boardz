@@ -1,0 +1,6 @@
+name = "voicerss-proxy"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# VOICERSS_API_KEY é configurado como secret (nunca vai pro git):
+# pnpm wrangler secret put VOICERSS_API_KEY --config worker/voicerss/wrangler.toml

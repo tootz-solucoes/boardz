@@ -3,4 +3,4 @@ main = "index.js"
 compatibility_date = "2024-01-01"
 
 # CLICKUP_TOKEN é configurado como secret (nunca vai pro git):
-# pnpm wrangler secret put CLICKUP_TOKEN --config worker/wrangler.toml
+# pnpm wrangler secret put CLICKUP_TOKEN --config worker/clickup/wrangler.toml

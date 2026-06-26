@@ -94,16 +94,16 @@ function formatShortDate(date) {
 function useWeekCalendarEvents(now) {
   return useMemo(() => {
     const year = now.getFullYear();
-    const weekStart = getStartOfWeek(now);
+    const today = normalizeDate(now);
     const weekEnd = getEndOfWeek(now);
-    const inWeek = (date) => {
+    const fromTodayToWeekEnd = (date) => {
       const d = normalizeDate(date);
-      return d >= normalizeDate(weekStart) && d <= normalizeDate(weekEnd);
+      return d >= today && d <= normalizeDate(weekEnd);
     };
-    const holidays = getAllHolidays(year).filter((h) => inWeek(h.date));
-    const optionals = getAllOptionalDays(year).filter((h) => inWeek(h.date));
+    const holidays = getAllHolidays(year).filter((h) => fromTodayToWeekEnd(h.date));
+    const optionals = getAllOptionalDays(year).filter((h) => fromTodayToWeekEnd(h.date));
     const events = confraternizacoes
-      .filter((c) => c.data && inWeek(new Date(c.data + "T12:00:00")))
+      .filter((c) => c.data && fromTodayToWeekEnd(new Date(c.data + "T12:00:00")))
       .map((c) => ({ date: new Date(c.data + "T12:00:00"), type: c.tipo ?? "event", name: c.evento }));
     return [...holidays, ...optionals, ...events].sort(
       (a, b) => normalizeDate(a.date) - normalizeDate(b.date)
@@ -114,8 +114,12 @@ function useWeekCalendarEvents(now) {
 function useMonthBirthdays(now) {
   return useMemo(() => {
     const month = now.getMonth() + 1;
+    const todayDay = now.getDate();
     return aniversariantes
-      .filter((a) => { const [, m] = a.data.split("-").map(Number); return m === month; })
+      .filter((a) => {
+        const [, m, d] = a.data.split("-").map(Number);
+        return m === month && d >= todayDay;
+      })
       .sort((a, b) => Number(a.data.split("-")[2]) - Number(b.data.split("-")[2]));
   }, [now]);
 }

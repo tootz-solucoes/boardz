@@ -26,6 +26,7 @@ import {
 import { sprintsData } from "../Calendar2026/sprintsData";
 import { confraternizacoes } from "./confraternizacoesData";
 import { aniversariantes } from "./aniversariantesData";
+import { jogosDoBrasil } from "./jogosDoBrasilData";
 import "./CalendarGeral2026.css";
 
 const MONTH_NAMES = [
@@ -481,6 +482,23 @@ function CalendarGeral2026() {
     return next;
   }, [today, currentYear, currentMonthIndex]);
 
+  // Próximo jogo do Brasil na Copa 2026
+  const dashboardJogoBrasil = useMemo(() => {
+    const refTime = today.getTime();
+    const jogosOrdenados = [...jogosDoBrasil]
+      .map((j) => ({ ...j, date: parseDateUTC3(j.data), time: normalizeDate(parseDateUTC3(j.data)).getTime() }))
+      .sort((a, b) => a.time - b.time);
+
+    const isToday = jogosOrdenados.find((j) => j.time === refTime);
+    if (isToday) return { jogo: isToday, daysUntil: 0 };
+
+    const next = jogosOrdenados.find((j) => j.time > refTime);
+    if (!next) return null;
+
+    const daysUntil = Math.floor((next.time - refTime) / (1000 * 60 * 60 * 24));
+    return { jogo: next, daysUntil };
+  }, [today]);
+
   // Scroll para o mês atual ao carregar
   useEffect(() => {
     if (currentYear === 2026 && monthRefs.current[currentMonthIndex]) {
@@ -629,6 +647,32 @@ function CalendarGeral2026() {
                 <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#f59e0b,#d97706)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_10px_rgba(245,158,11,0.4)]">Amanhã!</span>
               ) : (
                 <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#f59e0b,#d97706)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_10px_rgba(245,158,11,0.4)]">Faltam {dashboardHappyHour.daysUntil} dias</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {dashboardJogoBrasil && (
+          <div className={`bg-gradient-to-br rounded-[14px] p-5 border-l-4 border-l-[#22c55e] border border-[rgba(255,255,255,0.08)] shadow-[0_4px_16px_rgba(0,0,0,0.3)] ${dashboardJogoBrasil.daysUntil === 0 ? "from-[rgba(34,197,94,0.12)] to-[rgba(21,128,61,0.08)] border-[rgba(34,197,94,0.35)] shadow-[0_4px_20px_rgba(34,197,94,0.2)]" : "from-[#1e1e24] to-[#252529]"}`}>
+            <div className="flex items-center gap-[0.6rem] mb-3 pb-[0.6rem] border-b border-[rgba(255,255,255,0.1)]">
+              <span className="inline-flex items-center justify-center text-[1.1rem]">🇧🇷</span>
+              <span className={`text-[0.85rem] font-semibold uppercase tracking-[0.5px] ${dashboardJogoBrasil.daysUntil === 0 ? "text-[#22c55e]" : "text-purple-accent"}`}>
+                {dashboardJogoBrasil.daysUntil === 0 ? "Brasil joga hoje!" : "Próximo jogo do Brasil"}
+              </span>
+            </div>
+            <div className="text-[0.95rem] text-text-soft">
+              <strong className="text-white block mb-1 text-[1.05rem]">
+                {dashboardJogoBrasil.jogo.dia}: Brasil x {dashboardJogoBrasil.jogo.adversario}
+              </strong>
+              <span className="text-[0.85rem] text-text-dim block mb-3">
+                {dashboardJogoBrasil.jogo.fase} · {dashboardJogoBrasil.jogo.hora}h · {dashboardJogoBrasil.jogo.local}
+              </span>
+              {dashboardJogoBrasil.daysUntil === 0 ? (
+                <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#22c55e,#16a34a)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_12px_rgba(34,197,94,0.5)] [animation:happyhour-today-pulse_1.5s_ease-in-out_infinite]">É hoje!</span>
+              ) : dashboardJogoBrasil.daysUntil === 1 ? (
+                <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#22c55e,#16a34a)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_10px_rgba(34,197,94,0.4)]">Amanhã!</span>
+              ) : (
+                <span className="inline-block py-2 px-[0.9rem] rounded-[10px] text-[0.95rem] font-bold bg-[linear-gradient(135deg,#15803d,#166534)] text-white border border-[rgba(255,255,255,0.2)] shadow-[0_2px_10px_rgba(34,197,94,0.3)]">Faltam {dashboardJogoBrasil.daysUntil} dias</span>
               )}
             </div>
           </div>
